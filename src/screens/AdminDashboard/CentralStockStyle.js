@@ -1,228 +1,146 @@
 import { StyleSheet } from "react-native";
 
- const styles = StyleSheet.create({
+export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F4F5F7",
+    backgroundColor: "#F5F5F5",
   },
 
-  /* HEADER */
-  header: {
+  tabs: {
+    flexDirection: "row",
+    backgroundColor: "#FFF",
+  },
+
+  tab: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+
+  activeTab: {
+    borderBottomWidth: 2,
+    borderBottomColor: "#D32F2F",
+  },
+
+  tabText: {
+    fontSize: 13,
+    color: "#777",
+    fontWeight: "600",
+  },
+
+  activeTabText: {
+    color: "#D32F2F",
+  },
+
+  totalCard: {
     backgroundColor: "#D32F2F",
-    padding: 16,
+    margin: 16,
+    padding: 20,
+    borderRadius: 16,
+    alignItems: "center",
   },
 
-  headerTitle: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "800",
+  totalValue: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#FFF",
   },
 
-  headerSub: {
-    color: "#FFEBEE",
+  totalLabel: {
     fontSize: 12,
+    color: "#FFECEC",
     marginTop: 4,
   },
 
-  /* SUMMARY */
-  summaryBar: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    backgroundColor: "#FFFFFF",
-    margin: 16,
-    borderRadius: 16,
-    paddingVertical: 14,
-    elevation: 3,
+  list: {
+    paddingTop:16,
+    paddingHorizontal: 16,
+    paddingBottom: 20,
   },
 
-  summaryValue: {
-    fontSize: 22,
-    fontWeight: "900",
-    color: "#D32F2F",
-    textAlign: "center",
-  },
-
-  summaryLabel: {
-    fontSize: 12,
-    color: "#616161",
-    textAlign: "center",
-    marginTop: 2,
-  },
-
-  /* CARD */
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FFF",
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 14,
-    borderLeftWidth: 4,
-    borderLeftColor: "#D32F2F",
-    elevation: 3,
+    padding: 14,
+    marginBottom: 12,
+    elevation: 2,
+  },
+
+  historyCard: {
+    backgroundColor: "#FFF",
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 12,
+    elevation: 2,
   },
 
   row: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  iconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#FDECEA",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
   },
 
   name: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "700",
     color: "#212121",
   },
 
-  qty: {
-    fontSize: 22,
-    fontWeight: "900",
-    color: "#D32F2F",
+  sku: {
+    fontSize: 11,
+    color: "#777",
+    marginTop: 2,
   },
 
-  sku: {
+  divider: {
+    height: 1,
+    backgroundColor: "#EEE",
+    marginVertical: 10,
+  },
+
+  valueRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 6,
+  },
+
+  label: {
     fontSize: 12,
-    color: "#757575",
-    marginTop: 4,
+    color: "#777",
+  },
+
+  bold: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#212121",
   },
 
   date: {
     fontSize: 11,
-    color: "#9E9E9E",
+    color: "#777",
     marginTop: 2,
   },
 
-  /* ACTIONS */
-  actionsRow: {
-    flexDirection: "row",
-    marginTop: 14,
-    justifyContent: "space-between",
-  },
-
-  inwardBtn: {
-    backgroundColor: "#388E3C",
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-
-  outwardBtn: {
-    backgroundColor: "#F57C00",
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-
-  editBtn: {
-    backgroundColor: "#212121",
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-
-  btnText: {
-    color: "#FFFFFF",
-    fontSize: 12,
+  qty: {
+    fontSize: 13,
     fontWeight: "700",
   },
 
-  /* MODAL */
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
+  inward: {
+    color: "#2E7D32",
   },
 
-  modalCard: {
-    width: "85%",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 18,
-    padding: 18,
+  outward: {
+    color: "#D32F2F",
   },
-
-  modalTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-  },
-
-  modalProduct: {
-    fontSize: 14,
-    fontWeight: "600",
-    marginVertical: 10,
-  },
-
-  input: {
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-    borderRadius: 10,
-    padding: 10,
-    fontSize: 14,
-  },
-
-  modalActions: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap:8,
-    marginTop: 16,
-  },
-
-  cancelText: {
-    color: "#000000",
-    textAlign:'center',
-    fontWeight: "700",
-  },
-
-    CancelBtn: {
-    flex:1,
-    backgroundColor: "#dbdbdb",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-
-  saveBtn: {
-    flex:1,
-    backgroundColor: "#D32F2F",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-
-  saveText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-    textAlign:'center'
-  },
-
-  topRow: {
-  flexDirection: "row",
-  alignItems: "center",
-},
-
-productImage: {
-  width: 64,
-  height: 64,
-  borderRadius: 10,
-  backgroundColor: "#F5F5F5",
-},
-
-info: {
-  flex: 1,
-  marginLeft: 12,
-},
-
-qtyBox: {
-  alignItems: "center",
-  justifyContent: "center",
-  backgroundColor: "#FDECEA",
-  borderRadius: 10,
-  paddingHorizontal: 12,
-  paddingVertical: 6,
-},
-
-qtyLabel: {
-  fontSize: 11,
-  color: "#757575",
-},
-
 });
 
-export default styles;

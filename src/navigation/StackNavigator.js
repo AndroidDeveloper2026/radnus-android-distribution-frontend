@@ -27,6 +27,7 @@ import ProfileSettings from '../screens/Common/ProfileSettings';
 import EditProfile from '../screens/Common/EditProfile';
 import RetailerOnboarding from '../screens/Retailer/RetailerOnboarding';
 import EndDaySummary from '../screens/FieldSalesExecutive/EndDaySummary';
+import StockVisibility from '../screens/Retailer/StockVisibility';
 //-- checking --
 import AdminDashboardScreen from '../screens/AdminDashboard/AdminDashboardScreen';
 
@@ -180,6 +181,12 @@ const StackNavigator = () => {
       <Stack.Screen
         name="EndDaySummary"
         component={EndDaySummary}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="StockVisibility"
+        component={StockVisibility}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

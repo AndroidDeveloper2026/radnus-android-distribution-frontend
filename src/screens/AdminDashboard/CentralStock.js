@@ -1,230 +1,152 @@
-import React, { useState } from 'react';
+
+import React, { useState } from "react";
 import {
   View,
   Text,
-  SafeAreaView,
-  FlatList,
   TouchableOpacity,
-  Modal,
-  TextInput,
-  Image,
-} from 'react-native';
-import styles from './CentralStockStyle';
-import Header from '../../components/Header';
+  FlatList,
+} from "react-native";
+import styles from "./CentralStockStyle";
+import Header from "../../components/Header";
+import {
+  Package,
+  TrendingUp,
+  TrendingDown,
+} from "lucide-react-native";
+
+const OVERVIEW_DATA = [
+  { id: "1", name: "Product A", sku: "RDN001", qty: 500, value: 42500 },
+  { id: "2", name: "Product B", sku: "RDN002", qty: 500, value: 65000 },
+  { id: "3", name: "Product C", sku: "RDN003", qty: 500, value: 85000 },
+];
+
+const INWARD_DATA = [
+  { id: "1", name: "Product A", date: "30 Jan 2026", qty: 200 },
+];
+
+const OUTWARD_DATA = [
+  { id: "1", name: "Product B - To Distributor", date: "29 Jan 2026", qty: 50 },
+];
 
 const CentralStock = () => {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [mode, setMode] = useState(''); // INWARD | OUTWARD | EDIT
-  const [qty, setQty] = useState('');
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [tab, setTab] = useState("OVERVIEW");
 
-  const [stock, setStock] = useState([
-    {
-      id: 'P01',
-      name: 'Fast Charger 20W',
-      sku: 'FC20W',
-      availableQty: 520,
-      lastUpdated: '02 Feb 2026',
-      image: "https://www.portronics.com/cdn/shop/files/Portronics_Adapto_100_Multiport_100w_Charger.png?v=1738651493",
-    },
-    {
-      id: 'P02',
-      name: 'Type-C Cable',
-      sku: 'TC100',
-      availableQty: 1240,
-      lastUpdated: '01 Feb 2026',
-      image: "https://www.portronics.com/cdn/shop/files/Portronics_Adapto_100_Multiport_100w_Charger.png?v=1738651493",
-    },
+  const renderOverview = ({ item }) => (
+    <View style={styles.card}>
+      <View style={styles.row}>
+        <View style={styles.iconCircle}>
+          <Package size={18} color="#D32F2F" />
+        </View>
 
-        {
-      id: 'P03',
-      name: 'Type-C Cable',
-      sku: 'TC100',
-      availableQty: 1240,
-      lastUpdated: '01 Feb 2026',
-      image: "https://www.portronics.com/cdn/shop/files/Portronics_Adapto_100_Multiport_100w_Charger.png?v=1738651493",
-    },
+        <View style={{ flex: 1 }}>
+          <Text style={styles.name}>{item.name}</Text>
+          <Text style={styles.sku}>SKU: {item.sku}</Text>
+        </View>
+      </View>
 
-        {
-      id: 'P04',
-      name: 'Type-C Cable',
-      sku: 'TC100',
-      availableQty: 1240,
-      lastUpdated: '01 Feb 2026',
-      image: "https://www.portronics.com/cdn/shop/files/Portronics_Adapto_100_Multiport_100w_Charger.png?v=1738651493",
-    },
+      <View style={styles.divider} />
 
-        {
-      id: 'P05',
-      name: 'Type-C Cable',
-      sku: 'TC100',
-      availableQty: 1240,
-      lastUpdated: '01 Feb 2026',
-      image: "https://www.portronics.com/cdn/shop/files/Portronics_Adapto_100_Multiport_100w_Charger.png?v=1738651493",
-    },
-  ]);
+      <View style={styles.valueRow}>
+        <Text style={styles.label}>In Stock:</Text>
+        <Text style={styles.bold}>{item.qty} units</Text>
+      </View>
 
-  /* 🔢 SUMMARY */
-  const totalQty = stock.reduce((sum, p) => sum + p.availableQty, 0);
+      <View style={styles.valueRow}>
+        <Text style={styles.label}>Value:</Text>
+        <Text style={styles.bold}>₹{item.value}</Text>
+      </View>
+    </View>
+  );
 
-  /* 🔧 OPEN MODAL */
-  const openModal = (product, type) => {
-    setSelectedProduct(product);
-    setMode(type);
-    setQty('');
-    setModalVisible(true);
-  };
+  const renderInwardOutward = ({ item }, type) => (
+    <View style={styles.historyCard}>
+      <View style={styles.row}>
+        {type === "INWARD" ? (
+          <TrendingUp size={18} color="#2E7D32" />
+        ) : (
+          <TrendingDown size={18} color="#D32F2F" />
+        )}
 
-  /* 💾 SAVE ACTION */
-  const saveAction = () => {
-    if (!qty || !selectedProduct) return;
+        <View style={{ flex: 1, marginLeft: 10 }}>
+          <Text style={styles.name}>
+            {item.name} - {type === "INWARD" ? "Inward" : ""}
+          </Text>
+          <Text style={styles.date}>{item.date}</Text>
+        </View>
 
-    setStock(prev =>
-      prev.map(p => {
-        if (p.id !== selectedProduct.id) return p;
-
-        let updatedQty = p.availableQty;
-
-        if (mode === 'INWARD') {
-          updatedQty += parseInt(qty);
-        }
-
-        if (mode === 'OUTWARD') {
-          updatedQty =
-            p.availableQty - parseInt(qty) < 0
-              ? 0
-              : p.availableQty - parseInt(qty);
-        }
-
-        if (mode === 'EDIT') {
-          updatedQty = parseInt(qty);
-        }
-
-        return {
-          ...p,
-          availableQty: updatedQty,
-          lastUpdated: 'Today',
-        };
-      }),
-    );
-
-    setModalVisible(false);
-  };
-
-  const renderItem = ({ item }) => (
-  <View style={styles.card}>
-    <View style={styles.topRow}>
-      {/* 🖼 PRODUCT IMAGE */}
-      <Image
-        source={{ uri: item.image }}
-        style={styles.productImage}
-        resizeMode="contain"
-      />
-
-      {/* 📦 PRODUCT INFO */}
-      <View style={styles.info}>
-        <Text style={styles.name}>{item.name}</Text>
-        <Text style={styles.sku}>SKU: {item.sku}</Text>
-        <Text style={styles.date}>
-          Updated: {item.lastUpdated}
+        <Text
+          style={[
+            styles.qty,
+            type === "INWARD" ? styles.inward : styles.outward,
+          ]}
+        >
+          {type === "INWARD" ? "+" : "-"}
+          {item.qty} units
         </Text>
       </View>
-
-      {/* 🔢 QTY */}
-      <View style={styles.qtyBox}>
-        <Text style={styles.qty}>{item.availableQty}</Text>
-        <Text style={styles.qtyLabel}>Units</Text>
-      </View>
     </View>
-
-    {/* ACTIONS */}
-    <View style={styles.actionsRow}>
-      <TouchableOpacity
-        style={styles.inwardBtn}
-        onPress={() => openModal(item, "INWARD")}
-      >
-        <Text style={styles.btnText}>+ Inward</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.outwardBtn}
-        onPress={() => openModal(item, "OUTWARD")}
-      >
-        <Text style={styles.btnText}>- Outward</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.editBtn}
-        onPress={() => openModal(item, "EDIT")}
-      >
-        <Text style={styles.btnText}>✏️ Edit</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-);
+  );
 
   return (
     <View style={styles.container}>
-      {/* <View style={styles.header}>
-        <Text style={styles.headerTitle}>Central Stock</Text>
-        <Text style={styles.headerSub}>
-          Company Inventory
-        </Text>
-      </View> */}
+      <Header title="Central Stock" />
 
-      <Header title={'Company Inventory'} />
-
-      {/* 🔴 SUMMARY BAR */}
-      <View style={styles.summaryBar}>
-        <View>
-          <Text style={styles.summaryValue}>{stock.length}</Text>
-          <Text style={styles.summaryLabel}>SKUs</Text>
-        </View>
-
-        <View>
-          <Text style={styles.summaryValue}>{totalQty}</Text>
-          <Text style={styles.summaryLabel}>Total Units</Text>
-        </View>
+      {/* TABS */}
+      <View style={styles.tabs}>
+        {["OVERVIEW", "INWARD", "OUTWARD"].map((t) => (
+          <TouchableOpacity
+            key={t}
+            style={[styles.tab, tab === t && styles.activeTab]}
+            onPress={() => setTab(t)}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                tab === t && styles.activeTabText,
+              ]}
+            >
+              {t.charAt(0) + t.slice(1).toLowerCase()}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
-      {/* LIST */}
-      <FlatList
-        data={stock}
-        keyExtractor={item => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={{ padding: 16 }}
-      />
-
-      {/* MODAL */}
-      <Modal transparent visible={modalVisible}>
-        <View style={styles.overlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>{mode} Stock</Text>
-
-            <Text style={styles.modalProduct}>{selectedProduct?.name}</Text>
-
-            <TextInput
-              placeholder={
-                mode === 'EDIT' ? 'Enter exact quantity' : 'Enter quantity'
-              }
-              keyboardType="number-pad"
-              value={qty}
-              onChangeText={setQty}
-              style={styles.input}
-            />
-
-            <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.CancelBtn} onPress={() => setModalVisible(false)}>
-                <Text style={styles.cancelText}>Cancel</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.saveBtn} onPress={saveAction}>
-                <Text style={styles.saveText}>Save</Text>
-              </TouchableOpacity>
-            </View>
+      {/* OVERVIEW */}
+      {tab === "OVERVIEW" && (
+        <>
+          <View style={styles.totalCard}>
+            <Text style={styles.totalValue}>₹15.2L</Text>
+            <Text style={styles.totalLabel}>Total Stock Value</Text>
           </View>
-        </View>
-      </Modal>
+
+          <FlatList
+            data={OVERVIEW_DATA}
+            keyExtractor={(item) => item.id}
+            renderItem={renderOverview}
+            contentContainerStyle={styles.list}
+          />
+        </>
+      )}
+
+      {/* INWARD */}
+      {tab === "INWARD" && (
+        <FlatList
+          data={INWARD_DATA}
+          keyExtractor={(item) => item.id}
+          renderItem={(item) => renderInwardOutward(item, "INWARD")}
+          contentContainerStyle={styles.list}
+        />
+      )}
+
+      {/* OUTWARD */}
+      {tab === "OUTWARD" && (
+        <FlatList
+          data={OUTWARD_DATA}
+          keyExtractor={(item) => item.id}
+          renderItem={(item) => renderInwardOutward(item, "OUTWARD")}
+          contentContainerStyle={styles.list}
+        />
+      )}
     </View>
   );
 };
