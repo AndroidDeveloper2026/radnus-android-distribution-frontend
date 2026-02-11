@@ -7,7 +7,7 @@ const SelectRoleScreen = ({ navigation }) => {
     navigation.navigate('Login');
 
     // navigation.navigate('AdminDashboard');
-    // navigation.navigate('FSEHome');
+    navigation.navigate('FSEHome');
     // navigation.navigate('FSEDashboard');
     // navigation.navigate('ProductMaster');
     // navigation.navigate('AddProduct');
@@ -24,6 +24,9 @@ const SelectRoleScreen = ({ navigation }) => {
     //  navigation.navigate('FSEManagement');
     //  navigation.navigate('ProfileSettings');
     // navigation.navigate('EditProfile');
+
+    //  navigation.navigate('RetailerOnboarding');
+      // navigation.navigate('EndDaySummary');
     
   };
 

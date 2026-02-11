@@ -25,6 +25,8 @@ import RouteList from '../screens/FieldSalesExecutive/RouteList';
 import FSEManagement from '../screens/FieldSalesExecutive/FSEManagement';
 import ProfileSettings from '../screens/Common/ProfileSettings';
 import EditProfile from '../screens/Common/EditProfile';
+import RetailerOnboarding from '../screens/Retailer/RetailerOnboarding';
+import EndDaySummary from '../screens/FieldSalesExecutive/EndDaySummary';
 //-- checking --
 import AdminDashboardScreen from '../screens/AdminDashboard/AdminDashboardScreen';
 
@@ -167,6 +169,17 @@ const StackNavigator = () => {
       <Stack.Screen
         name="EditProfile"
         component={EditProfile}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="RetailerOnboarding"
+        component={RetailerOnboarding}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="EndDaySummary"
+        component={EndDaySummary}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
