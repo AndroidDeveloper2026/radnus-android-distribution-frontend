@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "105157355919",
+    "project_id": "radnus-distribution-android",
+    "storage_bucket": "radnus-distribution-android.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:105157355919:android:1c46959ba2a68cf34b43fa",
+        "android_client_info": {
+          "package_name": "com.radnusdistribution"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADFtdEmY6P48fCEZ05PwsLhoVYmT8m7DA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:105157355919:android:8157f24b0aa39c294b43fa",
+        "android_client_info": {
+          "package_name": "com.radnusdistribution.prod"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADFtdEmY6P48fCEZ05PwsLhoVYmT8m7DA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

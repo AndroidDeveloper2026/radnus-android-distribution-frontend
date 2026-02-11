@@ -1,0 +1,134 @@
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
+// import { SafeAreaView } from 'react-native-safe-area-context';
+import AddProductStyle from './AddProductStyle';
+import Input from '../../components/Input';
+import Header from '../../components/Header';
+
+const AddProduct = ({ navigation }) => {
+  const [form, setForm] = useState({
+    name: '',
+    sku: '',
+    mrp: '',
+    distributorPrice: '',
+    retailerPrice: '',
+    gst: '',
+    moq: '',
+    image: null,
+  });
+
+  const onChange = (key, value) => {
+    setForm({ ...form, [key]: value });
+  };
+
+  /* 📸 PICK PRODUCT IMAGE */
+  const pickImage = () => {
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+        quality: 0.7,
+      },
+      response => {
+        if (response.didCancel) return;
+
+        if (response.assets && response.assets.length > 0) {
+          setForm({ ...form, image: response.assets[0] });
+        }
+      },
+    );
+  };
+
+  const onSave = () => {
+    const payload = {
+      ...form,
+      image: form.image, // send as multipart later
+    };
+
+    console.log('Product Data:', payload);
+
+    // TODO: API call (multipart/form-data)
+    navigation.goBack();
+  };
+
+  return (
+    <View style={AddProductStyle.container}>
+      <Header title={'Add Product'} />
+
+      <ScrollView
+        contentContainerStyle={AddProductStyle.form}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* 🖼 PRODUCT IMAGE */}
+        <Text style={AddProductStyle.label}>Product Image</Text>
+
+        <TouchableOpacity style={AddProductStyle.imageBox} onPress={pickImage}>
+          {form.image ? (
+            <Image
+              source={{ uri: form.image.uri }}
+              style={AddProductStyle.productImage}
+            />
+          ) : (
+            <Text style={AddProductStyle.imagePlaceholder}>
+              Tap to add image
+            </Text>
+          )}
+        </TouchableOpacity>
+
+        <Input
+          label="Product Name"
+          value={form.name}
+          onChangeText={v => onChange('name', v)}
+        />
+
+        <Input
+          label="SKU"
+          value={form.sku}
+          onChangeText={v => onChange('sku', v)}
+        />
+
+        <Input
+          label="MRP (₹)"
+          keyboardType="numeric"
+          value={form.mrp}
+          onChangeText={v => onChange('mrp', v)}
+        />
+
+        <Input
+          label="Distributor Price (₹)"
+          keyboardType="numeric"
+          value={form.distributorPrice}
+          onChangeText={v => onChange('distributorPrice', v)}
+        />
+
+        <Input
+          label="Retailer Price (₹)"
+          keyboardType="numeric"
+          value={form.retailerPrice}
+          onChangeText={v => onChange('retailerPrice', v)}
+        />
+
+        <Input
+          label="GST (%)"
+          keyboardType="numeric"
+          value={form.gst}
+          onChangeText={v => onChange('gst', v)}
+        />
+
+        <Input
+          label="MOQ (Units)"
+          keyboardType="numeric"
+          value={form.moq}
+          onChangeText={v => onChange('moq', v)}
+        />
+      </ScrollView>
+      <View style={AddProductStyle.saveBtnCard}>
+        <TouchableOpacity style={AddProductStyle.saveButton} onPress={onSave}>
+          <Text style={AddProductStyle.saveButtonText}>Save Product</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
+export default AddProduct;
