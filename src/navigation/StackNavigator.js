@@ -28,8 +28,14 @@ import EditProfile from '../screens/Common/EditProfile';
 import RetailerOnboarding from '../screens/Retailer/RetailerOnboarding';
 import EndDaySummary from '../screens/FieldSalesExecutive/EndDaySummary';
 import StockVisibility from '../screens/Retailer/StockVisibility';
+import BottomTabs from '../navigation/BottomTabsNavigator';
+import RetailerDashboard from '../screens/Retailer/RetailerDashboard';
+import DistributorDashboard from '../screens/Distributor/DistributorDashboard';
+import OrderBilling from '../screens/Distributor/OrderBilling';
+import HomeScreen from '../screens/Common/HomeScreen';
 //-- checking --
 import AdminDashboardScreen from '../screens/AdminDashboard/AdminDashboardScreen';
+
 
 const Stack = createStackNavigator();
 
@@ -68,10 +74,22 @@ const StackNavigator = () => {
       />
 
       <Stack.Screen
+        name="MainTabs"
+        component={BottomTabs}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="HomeScreen"
+        component={HomeScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
         name="AdminDashboard"
         component={AdminDashboardScreen}
         options={{ headerShown: false }}
       />
+
       <Stack.Screen
         name="FSEHome"
         component={FSEHomeScreen}
@@ -150,6 +168,12 @@ const StackNavigator = () => {
       />
 
       <Stack.Screen
+        name="DistributorDashboard"
+        component={DistributorDashboard}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
         name="RouteList"
         component={RouteList}
         options={{ headerShown: false }}
@@ -187,6 +211,18 @@ const StackNavigator = () => {
       <Stack.Screen
         name="StockVisibility"
         component={StockVisibility}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="RetailerDashboard"
+        component={RetailerDashboard}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="OrderBilling"
+        component={OrderBilling}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

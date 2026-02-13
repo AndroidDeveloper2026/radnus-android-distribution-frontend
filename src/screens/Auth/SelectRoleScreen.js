@@ -4,7 +4,7 @@ import SelectRoleStyle from './SelectRoleStyle';
 
 const SelectRoleScreen = ({ navigation }) => {
   const handleUserLogin = () => {
-    navigation.navigate('Login');
+    // navigation.navigate('Login');
 
     // navigation.navigate('AdminDashboard');
     // navigation.navigate('FSEHome');
@@ -15,9 +15,9 @@ const SelectRoleScreen = ({ navigation }) => {
     // navigation.navigate('OrderCart');
     // navigation.navigate('OrderSuccess');
     // navigation.navigate('TerritoryManagement');
-    //  navigation.navigate('RetailerList');
-    //  navigation.navigate('RetailerProfile');
-    //  navigation.navigate('RetailerSalesTab');
+    // navigation.navigate('RetailerList');
+    // navigation.navigate('RetailerProfile');
+    // navigation.navigate('RetailerSalesTab');
     // navigation.navigate('CentralStock');
     // navigation.navigate('DistributorOnboarding');
     // navigation.navigate('RouteList');
@@ -28,6 +28,10 @@ const SelectRoleScreen = ({ navigation }) => {
     //  navigation.navigate('RetailerOnboarding');
       // navigation.navigate('EndDaySummary');
       //  navigation.navigate('StockVisibility');
+      //  navigation.navigate('RetailerDashboard');
+      //  navigation.navigate('DistributorDashboard');
+      //  navigation.navigate('OrderBilling');
+       navigation.navigate('HomeScreen');
     
   };
 

@@ -1,65 +1,62 @@
 
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+// import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import {
+  Home,
+  LayoutDashboard,
+  CircleUserRound,
+  BarChart3,
+
+} from "lucide-react-native";
 
 /* SCREENS */
-import HomeScreen from "../screens/home/HomeScreen";
-import CentralStock from "../screens/stock/CentralStock";
-import ReportsDashboard from "../screens/reports/ReportsDashboard";
-import RetailerList from "../screens/retailer/RetailerList";
-import OrdersScreen from "../screens/orders/OrdersScreen";
-import ProfileScreen from "../screens/profile/ProfileScreen";
+import HomeScreen from "../screens/Common/HomeScreen";
+import ProfileSettings from "../screens/Common/ProfileSettings";
+import AdminDashboardScreen from "../screens/AdminDashboard/AdminDashboardScreen";
+import DistributorDashboard from "../screens/Distributor/DistributorDashboard";
+import FSEDashboard from "../screens/FieldSalesExecutive/FSEDashboard";
+import RetailerDashboard from "../screens/Retailer/RetailerDashboard";
 
 const Tab = createBottomTabNavigator();
 
 /* 🔐 ROLE CONFIG */
 const ROLE_TABS = {
-  MASTER_ADMIN: [
-    { name: "Home", component: HomeScreen, icon: "home-outline" },
-    { name: "Stock", component: CentralStock, icon: "warehouse" },
-    { name: "Reports", component: ReportsDashboard, icon: "chart-box-outline" },
-    { name: "Profile", component: ProfileScreen, icon: "account-outline" },
+  Admin: [
+    { name: "Dashboard", component: AdminDashboardScreen, icon: Home },
+    { name: "Home", component: ProfileSettings, icon: LayoutDashboard },
+    { name: "Profile", component: ProfileSettings, icon: CircleUserRound},
+    { name: "Reports", component: ProfileSettings, icon: BarChart3 },
   ],
 
-  ADMIN: [
-    { name: "Home", component: HomeScreen, icon: "home-outline" },
-    { name: "Stock", component: CentralStock, icon: "warehouse" },
-    { name: "Reports", component: ReportsDashboard, icon: "chart-box-outline" },
-  ],
-
-  MARKETING_MANAGER: [
-    { name: "Home", component: HomeScreen, icon: "home-outline" },
-    { name: "Reports", component: ReportsDashboard, icon: "chart-box-outline" },
-  ],
-
-  MARKETING_EXECUTIVE: [
-    { name: "Home", component: HomeScreen, icon: "home-outline" },
-    { name: "Retailers", component: RetailerList, icon: "storefront-outline" },
-  ],
-
-  DISTRIBUTOR: [
-    { name: "Home", component: HomeScreen, icon: "home-outline" },
-    { name: "Stock", component: CentralStock, icon: "warehouse" },
-    { name: "Retailers", component: RetailerList, icon: "storefront-outline" },
-    { name: "Reports", component: ReportsDashboard, icon: "chart-box-outline" },
+  Distributor: [
+    { name: "Dashboard", component: DistributorDashboard, icon: Home },
+    { name: "Home", component: ProfileSettings, icon: LayoutDashboard },
+    { name: "Profile", component: ProfileSettings, icon: CircleUserRound},
+    { name: "Reports", component: ProfileSettings, icon: BarChart3 },
   ],
 
   FSE: [
-    { name: "Home", component: HomeScreen, icon: "home-outline" },
-    { name: "Retailers", component: RetailerList, icon: "storefront-outline" },
-    { name: "Orders", component: OrdersScreen, icon: "clipboard-text-outline" },
+    { name: "Dashboard", component: FSEDashboard, icon: Home },
+    { name: "Home", component: ProfileSettings, icon: LayoutDashboard },
+    { name: "Profile", component: ProfileSettings, icon: CircleUserRound},
+    { name: "Reports", component: ProfileSettings, icon: BarChart3 },
   ],
 
-  RETAILER: [
-    { name: "Home", component: HomeScreen, icon: "home-outline" },
-    { name: "Orders", component: OrdersScreen, icon: "cart-outline" },
-    { name: "Profile", component: ProfileScreen, icon: "account-outline" },
+  Retailer: [
+    { name: "Dashboard", component: RetailerDashboard, icon: Home },
+    { name: "Home", component: ProfileSettings, icon: LayoutDashboard },
+    { name: "Profile", component: ProfileSettings, icon: CircleUserRound},
+    { name: "Reports", component: ProfileSettings, icon: BarChart3 },
   ],
 };
 
-const BottomTabs = ({ role }) => {
+
+const BottomTabs = ({ route }) => {
+  const { role } = route.params; // 👈 role passed from Stack
   const tabs = ROLE_TABS[role] || [];
+
+  console.log("--- bottom Tab (role)---", role)
 
   return (
     <Tab.Navigator
@@ -71,8 +68,6 @@ const BottomTabs = ({ role }) => {
           height: 64,
           paddingBottom: 8,
           paddingTop: 8,
-          backgroundColor: "#FFFFFF",
-          elevation: 12,
         },
         tabBarLabelStyle: {
           fontSize: 11,
@@ -86,12 +81,8 @@ const BottomTabs = ({ role }) => {
           name={tab.name}
           component={tab.component}
           options={{
-            tabBarIcon: ({ color }) => (
-              <Icon
-                name={tab.icon}
-                size={22}
-                color={color}
-              />
+            tabBarIcon: ({ color, size }) => (
+              <tab.icon color={color} size={size || 22} />
             ),
           }}
         />

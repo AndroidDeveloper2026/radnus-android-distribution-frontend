@@ -12,20 +12,20 @@ import * as Yup from 'yup';
 import styles from './RegisterStyle';
 import {useDispatch,useSelector} from "react-redux";
 import {registerUser} from "../../services/features/auth/registerSlice";
-
+import locationData from '../../utils/locationData';
 //svg
 import LeftArrow from '../../assets/svg/white-left-arrow.svg';
 
-const locationData = {
-  TamilNadu: {
-    Chennai: ['Egmore', 'T Nagar'],
-    Madurai: ['Thirumangalam', 'Melur'],
-  },
-  Karnataka: {
-    Bangalore: ['Yelahanka', 'Whitefield'],
-    Mysore: ['Nanjangud', 'KR Nagar'],
-  },
-};
+// const locationData = {
+//   TamilNadu: {
+//     Chennai: ['Egmore', 'T Nagar'],
+//     Madurai: ['Thirumangalam', 'Melur'],
+//   },
+//   Karnataka: {
+//     Bangalore: ['Yelahanka', 'Whitefield'],
+//     Mysore: ['Nanjangud', 'KR Nagar'],
+//   },
+// };
 
 const RegisterSchema = Yup.object().shape({
   role: Yup.string().required('Role is required'),

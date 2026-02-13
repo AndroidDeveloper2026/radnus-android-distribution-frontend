@@ -7,7 +7,7 @@ import styles from './LoginStyle';
 import LeftArrow from '../../assets/svg/white-left-arrow.svg';
 import * as Yup from 'yup';
 import { useDispatch } from 'react-redux';
-import {loginUser} from "../../services/features/auth/authSlice";
+import { loginUser } from '../../services/features/auth/authSlice';
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string()
@@ -18,8 +18,7 @@ const LoginSchema = Yup.object().shape({
     .min(6, 'Password must be at least 6 characters')
     .required('Password is required'),
 
-  role: Yup.string()
-    .required('Please select a role'),
+  role: Yup.string().required('Please select a role'),
 });
 
 const LoginScreen = ({ navigation }) => {
@@ -29,34 +28,43 @@ const LoginScreen = ({ navigation }) => {
   };
 
   const onSubmitLogin = (values, { setSubmitting, setErrors }) => {
-       console.log('--- loginform (values) ---',values)
+    console.log('--- loginform (values) ---', values);
 
     dispatch(
-    loginUser({
-      email:values?.email.trim(),
-      password: values?.password,
-      // role: values.role, 
-    })
-  )
-    .unwrap()
-    .then((res) => {
-      console.log('--- loginform (res.user.role) ---')
-     // role-based navigation
-      if (res.user.role === 'Distributor') {
-        navigation.replace('AddProduct');
-      } else if (res.user.role === 'FSE') {
-        navigation.replace('FSEHome');
-      } else {
-        navigation.replace('AddProduct');
-      } // or role-based navigation
-    })
-    .catch((err) => {
-      console.log('-- login form (error) --',err)
-      setErrors({ general: err?.message || err || 'Login failed', });
-    })
-    .finally(() => {
-      setSubmitting(false);
-    });
+      loginUser({
+        email: values?.email.trim(),
+        password: values?.password,
+        // role: values.role,
+      }),
+    )
+      .unwrap()
+      .then(res => {
+        console.log('--- loginform (res.user.role) ---');
+        // role-based navigation
+        if (res.user.role === 'Distributor') {
+          // navigation.replace('AddProduct');
+          navigation.replace('MainTabs', {
+            role: 'Distributor', // or ADMIN, RETAILER, etc
+          });
+        } else if (res.user.role === 'FSE') {
+          // navigation.replace('FSEDashboard');
+          navigation.replace('MainTabs', {
+            role: 'FSE', // or ADMIN, RETAILER, etc
+          });
+        } else {
+          navigation.replace('MainTabs', {
+            role: 'Retailer', // or ADMIN, RETAILER, etc
+          });
+          // navigation.replace('RetailerDashboard');
+        } // or role-based navigation
+      })
+      .catch(err => {
+        console.log('-- login form (error) --', err);
+        setErrors({ general: err?.message || err || 'Login failed' });
+      })
+      .finally(() => {
+        setSubmitting(false);
+      });
   };
 
   return (
@@ -133,7 +141,7 @@ const LoginScreen = ({ navigation }) => {
                   selectionColor={'#000'}
                   onValueChange={handleChange('role')}
                 >
-                  <Picker.Item label="Select Role" value=""  color='#000'/>
+                  <Picker.Item label="Select Role" value="" color="#000" />
                   <Picker.Item label="Distributor" value="Distributor" />
                   <Picker.Item label="FSE" value="FSE" />
                   <Picker.Item label="Retailer" value="Retailer" />

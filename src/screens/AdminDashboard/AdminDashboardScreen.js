@@ -16,7 +16,7 @@ import Color from "../../utils/constants/colors"
 const AdminDashboard = ({ navigation }) => {
   return (
     <View style={styles.container}>
-      <Header title="Admin Dashboard" />
+      <Header title="Admin Dashboard" showBackArrow={false} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.content}>

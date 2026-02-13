@@ -22,7 +22,7 @@ const FSEDashboard = ({ navigation }) => {
         <Text style={FSEDashboardStyle.headerTitle}>FSE Dashboard</Text>
       </View> */}
 
-      <Header title={'FSE Dashboard'}/>
+      <Header title={'FSE Dashboard'} showBackArrow={false}/>
 
       <ScrollView>
         <View style={FSEDashboardStyle.content}>

@@ -7,13 +7,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import LeftArrow from '../assets/svg/white-left-arrow.svg';
 import { useNavigation } from '@react-navigation/native';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+// const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-const Header = ({ title }) => {
+const Header = ({ title, showBackArrow = true }) => {
   const navigation = useNavigation();
   // const insets = useSafeAreaInsets();
 
@@ -26,15 +25,13 @@ const Header = ({ title }) => {
       <StatusBar backgroundColor="#D32F2F" barStyle="light-content" />
       <View style={styles.headerContainer}>
         <View style={styles.headerBox}>
-          <TouchableOpacity style={styles.backButton} onPress={handleBackBtn}>
-            <LeftArrow width={35} height={35} />
-          </TouchableOpacity>
+          {showBackArrow && (
+            <TouchableOpacity style={styles.backButton} onPress={handleBackBtn}>
+              <LeftArrow width={35} height={35} />
+            </TouchableOpacity>
+          )}
         </View>
-        <Text style={styles.headerTitle}>{title}</Text>
-
-        {/* <TouchableOpacity style={ProductsMasterStyle.addButton}>
-          <Text style={ProductsMasterStyle.addButtonText}>+ Add Product</Text>
-        </TouchableOpacity> */}
+          <Text style={styles.headerTitle}>{title}</Text>
       </View>
     </View>
   );
@@ -47,22 +44,22 @@ const styles = StyleSheet.create({
     // flex:0.05,
     backgroundColor: '#D32F2F',
     paddingHorizontal: 16,
-    height:100,
-    paddingTop:30,
-    justifyContent:'center'
+    height: 100,
+    paddingTop: 30,
+    justifyContent: 'center',
   },
   headerTitle: {
     color: '#fff',
     fontSize: 24,
     fontWeight: '600',
+    textAlign:'center',
   },
   headerContainer: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',
-    // backgroundColor: 'black',
-    gap: 55,
+    gap: 45,
     paddingTop: 5,
   },
 });
