@@ -24,29 +24,18 @@ const AdminScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const { token, error } = useSelector(state => state?.adminAuth);
 
-
-
   const handleBackBtn = () => {
     navigation.goBack();
   };
 
   useEffect(() => {
-  if (token) {
-    navigation.replace('AdminDashboard');
-  }
-}, [token, navigation]);
-
-  // const handleLogin = (values, { setSubmitting, setErrors }) => {
-  //   const { mobile, password } = values;
-
-  //   if (mobile === 'admin' && password === 'admin') {
-  //     navigation.navigate('Register');
-  //   } else {
-  //     setErrors({ password: 'Invalid login credentials' });
-  //   }
-
-  //   setSubmitting(false);
-  // };
+    if (token) {
+      // navigation.replace('AdminDashboard');
+      navigation.replace('MainTabs', {
+        role: 'Admin',
+      });
+    }
+  }, [token, navigation]);
 
   return (
     <View style={styles.container}>

@@ -39,6 +39,15 @@ const PRODUCT_DATA = [
     moq: 10,
     image: "https://via.placeholder.com/150",
   },
+  {
+    id: "4",
+    name: "Mobile Cover",
+    price: 350,
+    mrp: 499,
+    stock: 0,
+    moq: 10,
+    image: "https://via.placeholder.com/150",
+  },
 ];
 
 const HomeScreen = ({ navigation }) => {

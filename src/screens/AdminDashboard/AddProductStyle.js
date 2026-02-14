@@ -2,12 +2,12 @@ import { StyleSheet, StatusBar, Platform } from 'react-native';
 
 const RED = '#D32F2F';
 const LIGHT_BG = '#F6F6F6';
-// const GRAY = "#777";
+const LIGHT_GRAY = '#F3F4F6';
 
 const AddProductStyle = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor:'#D32F2F',
+    backgroundColor:LIGHT_GRAY,
   },
 
   // header: {

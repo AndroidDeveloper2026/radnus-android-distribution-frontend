@@ -16,6 +16,7 @@ const SelectRoleScreen = ({ navigation }) => {
     // navigation.navigate('OrderCart');
     // navigation.navigate('OrderSuccess');
     // navigation.navigate('TerritoryManagement');
+    
     // navigation.navigate('RetailerList');
     // navigation.navigate('RetailerProfile');
     // navigation.navigate('RetailerSalesTab');

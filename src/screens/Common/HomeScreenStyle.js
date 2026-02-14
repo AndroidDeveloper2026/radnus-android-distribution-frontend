@@ -34,7 +34,7 @@ export default StyleSheet.create({
     backgroundColor: "#FFFFFF",
     padding: 12,
     borderRadius: 12,
-    elevation: 2,
+    // elevation: 2,
   },
 
   list: {
@@ -52,7 +52,7 @@ export default StyleSheet.create({
     borderRadius: 16,
     padding: 12,
     marginBottom: 12,
-    elevation: 2,
+    // elevation: 2,
   },
 
   image: {

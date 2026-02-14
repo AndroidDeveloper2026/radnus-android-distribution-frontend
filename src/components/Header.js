@@ -23,7 +23,7 @@ const Header = ({ title, showBackArrow = true }) => {
   return (
     <View style={styles.header}>
       <StatusBar backgroundColor="#D32F2F" barStyle="light-content" />
-      <View style={styles.headerContainer}>
+      <View style={[styles.headerContainer,{ gap: showBackArrow ? 35 : 0 },]}>
         <View style={styles.headerBox}>
           {showBackArrow && (
             <TouchableOpacity style={styles.backButton} onPress={handleBackBtn}>
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',
-    gap: 45,
+    // gap: 45,
     paddingTop: 5,
   },
 });

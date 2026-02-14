@@ -12,6 +12,7 @@ import {
 
 /* SCREENS */
 import HomeScreen from "../screens/Common/HomeScreen";
+import Report from "../screens/Common/Reports";
 import ProfileSettings from "../screens/Common/ProfileSettings";
 import AdminDashboardScreen from "../screens/AdminDashboard/AdminDashboardScreen";
 import DistributorDashboard from "../screens/Distributor/DistributorDashboard";
@@ -24,30 +25,30 @@ const Tab = createBottomTabNavigator();
 const ROLE_TABS = {
   Admin: [
     { name: "Dashboard", component: AdminDashboardScreen, icon: LayoutDashboard},
-    { name: "Home", component: ProfileSettings, icon: Home },
+    { name: "Home", component: HomeScreen, icon: Home },
     { name: "Profile", component: ProfileSettings, icon: CircleUserRound},
-    { name: "Reports", component: ProfileSettings, icon: BarChart3 },
+    { name: "Reports", component: Report, icon: BarChart3 },
   ],
 
   Distributor: [
     { name: "Dashboard", component: DistributorDashboard, icon: LayoutDashboard },
-    { name: "Home", component: ProfileSettings, icon: Home },
+    { name: "Home", component: HomeScreen, icon: Home },
     { name: "Profile", component: ProfileSettings, icon: CircleUserRound},
-    { name: "Reports", component: ProfileSettings, icon: BarChart3 },
+    { name: "Reports", component: Report, icon: BarChart3 },
   ],
 
   FSE: [
     { name: "Dashboard", component: FSEDashboard, icon:  LayoutDashboard },
-    { name: "Home", component: ProfileSettings, icon: Home },
+    { name: "Home", component: HomeScreen, icon: Home },
     { name: "Profile", component: ProfileSettings, icon: CircleUserRound},
-    { name: "Reports", component: ProfileSettings, icon: BarChart3 },
+    { name: "Reports", component: Report, icon: BarChart3 },
   ],
 
   Retailer: [
     { name: "Dashboard", component: RetailerDashboard, icon:  LayoutDashboard},
-    { name: "Home", component: ProfileSettings, icon: Home },
+    { name: "Home", component: HomeScreen, icon: Home },
     { name: "Profile", component: ProfileSettings, icon: CircleUserRound},
-    { name: "Reports", component: ProfileSettings, icon: BarChart3 },
+    { name: "Reports", component: Report, icon: BarChart3 },
   ],
 };
 
