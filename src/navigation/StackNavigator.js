@@ -35,210 +35,232 @@ import OrderBilling from '../screens/Distributor/OrderBilling';
 import HomeScreen from '../screens/Common/HomeScreen';
 // import AdminRegister from '../screens/Auth/AdminRegister';
 import Reports from '../screens/Common/Reports';
+import TermsConditions from '../screens/Common/TermsConditions';
 //-- checking --
 import AdminDashboardScreen from '../screens/AdminDashboard/AdminDashboardScreen';
+import { useSelector } from 'react-redux';
+import { selectAuthState } from '../store/selectors/authSelector';
 
 const Stack = createStackNavigator();
 
 const StackNavigator = () => {
-  return (
-    <Stack.Navigator initialRouteName="Splash">
-      <Stack.Screen
-        name="Splash"
-        component={SplashScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="SelectRole"
-        component={SelectRoleScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Admin"
-        component={AdminScreen}
-        options={{ headerShown: false }}
-      />
+    const { token, role } = useSelector(selectAuthState);
+  // const { token, admin } = useSelector(state => state.adminAuth);
+  // const { token, user } = useSelector(state => state.auth);
+  // const role = user?.role;
 
-      {/* <Stack.Screen
+  const isLoggedIn = !!token;
+  // const role = admin?.role;
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {!isLoggedIn ? (
+        <>
+          <Stack.Screen
+            name="Splash"
+            component={SplashScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="SelectRole"
+            component={SelectRoleScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Admin"
+            component={AdminScreen}
+            options={{ headerShown: false }}
+          />
+
+          {/* <Stack.Screen
         name="AdminRegister"
         component={AdminRegister}
         options={{ headerShown: false }}
       /> */}
 
-      <Stack.Screen
-        name="Login"
-        component={LoginScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Register"
-        component={RegisterScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="OtpScreen"
-        component={OtpScreen}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Register"
+            component={RegisterScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="OtpScreen"
+            component={OtpScreen}
+            options={{ headerShown: false }}
+          />
+        </>
+      ) : (
+        <>
+          <Stack.Screen
+            name="MainTabs"
+            component={BottomTabs}
+            initialParams={{ role }}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="MainTabs"
-        component={BottomTabs}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="HomeScreen"
+            component={HomeScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="AdminDashboard"
+            component={AdminDashboardScreen}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="HomeScreen"
-        component={HomeScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="AdminDashboard"
-        component={AdminDashboardScreen}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="FSEHome"
+            component={FSEHomeScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="FSEDashboard"
+            component={FSEDashboard}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="FSEHome"
-        component={FSEHomeScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="FSEDashboard"
-        component={FSEDashboard}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="ProductMaster"
+            component={ProductMaster}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="ProductMaster"
-        component={ProductMaster}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="AddProduct"
+            component={AddProduct}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="AddProduct"
-        component={AddProduct}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="ProductList"
+            component={ProductList}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="ProductList"
-        component={ProductList}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="OrderCart"
+            component={OrderCart}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="OrderCart"
-        component={OrderCart}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="OrderSuccess"
+            component={OrderSuccess}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="OrderSuccess"
-        component={OrderSuccess}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="TerritoryManagement"
+            component={TerritoryManagement}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="TerritoryManagement"
-        component={TerritoryManagement}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="RetailerList"
+            component={RetailerList}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="RetailerList"
-        component={RetailerList}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="RetailerProfile"
+            component={RetailerProfile}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="RetailerProfile"
-        component={RetailerProfile}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="RetailerSalesTab"
+            component={RetailerSalesTab}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="RetailerSalesTab"
-        component={RetailerSalesTab}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="CentralStock"
+            component={CentralStock}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="CentralStock"
-        component={CentralStock}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="DistributorOnboarding"
+            component={DistributorOnboarding}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="DistributorOnboarding"
-        component={DistributorOnboarding}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="DistributorDashboard"
+            component={DistributorDashboard}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="DistributorDashboard"
-        component={DistributorDashboard}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="RouteList"
+            component={RouteList}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="RouteList"
-        component={RouteList}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="FSEManagement"
+            component={FSEManagement}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="FSEManagement"
-        component={FSEManagement}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="ProfileSettings"
+            component={ProfileSettings}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="ProfileSettings"
-        component={ProfileSettings}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="EditProfile"
+            component={EditProfile}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="EditProfile"
-        component={EditProfile}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="RetailerOnboarding"
+            component={RetailerOnboarding}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="EndDaySummary"
+            component={EndDaySummary}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="RetailerOnboarding"
-        component={RetailerOnboarding}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="EndDaySummary"
-        component={EndDaySummary}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="StockVisibility"
+            component={StockVisibility}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="StockVisibility"
-        component={StockVisibility}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="RetailerDashboard"
+            component={RetailerDashboard}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="RetailerDashboard"
-        component={RetailerDashboard}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="OrderBilling"
+            component={OrderBilling}
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="OrderBilling"
-        component={OrderBilling}
-        options={{ headerShown: false }}
-      />
-
-            <Stack.Screen
-        name="Reports"
-        component={Reports}
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="Reports"
+            component={Reports}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="TermsConditions"
+            component={TermsConditions}
+            options={{ headerShown: false }}
+          />
+        </>
+      )}
     </Stack.Navigator>
   );
 };

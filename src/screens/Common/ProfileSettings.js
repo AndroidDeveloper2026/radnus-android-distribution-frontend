@@ -7,6 +7,9 @@ import {
 } from "react-native";
 import styles from "./ProfileSettingsStyle";
 import Header from "../../components/Header";
+import { useDispatch } from "react-redux";
+// import {adminLogout} from '../../services/features/auth/adminAuthSlice'
+import { globalLogout } from '../../store/actions/globalLogout';
 import {
   User,
   Phone,
@@ -21,7 +24,23 @@ import {
   ChevronRight,
 } from "lucide-react-native";
 
+
 const ProfileSettings = ({ navigation }) => {
+const dispatch = useDispatch();
+
+const handleLogout = async () => {
+  await dispatch(globalLogout());
+};
+
+  // const handleLogout = async () => {
+  //   await dispatch(adminLogout());
+  //   console.log(navigation.getState());
+  //   navigation.reset({
+  //     index: 0,
+  //     routes: [{ name: "AdminLogin" }],
+  //   });
+  // };
+
   return (
     <View style={styles.container}>
       <Header title="Profile & Settings" />
@@ -112,7 +131,7 @@ const ProfileSettings = ({ navigation }) => {
         </Section>
 
         {/* LOGOUT */}
-        <TouchableOpacity style={styles.logoutButton}>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <LogOut size={18} color="#FFF" />
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>

@@ -36,6 +36,8 @@ const SelectRoleScreen = ({ navigation }) => {
       //  navigation.navigate('HomeScreen');
       // navigation.navigate('AdminRegister');
       // navigation.navigate('Reports');
+
+      //  navigation.navigate('TermsConditions');
     
   };
 

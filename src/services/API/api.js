@@ -1,10 +1,10 @@
 import axios from "axios";
 import { getToken } from "../../services/AuthStorage/authStorgage";
 // import config from '../../config';
-// import { API_BASE_URL } from '@env';
+import { API_BASE_URL } from '@env';
 
 const API = axios.create({
-  baseURL:`http://10.0.2.2:3000`,
+  baseURL:API_BASE_URL,  //baseURL:`http://10.0.2.2:3000`,
   timeout: 10000,
 });
 

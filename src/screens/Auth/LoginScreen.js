@@ -38,26 +38,26 @@ const LoginScreen = ({ navigation }) => {
       }),
     )
       .unwrap()
-      .then(res => {
-        console.log('--- loginform (res.user.role) ---');
-        // role-based navigation
-        if (res.user.role === 'Distributor') {
-          // navigation.replace('AddProduct');
-          navigation.replace('MainTabs', {
-            role: 'Distributor', // or ADMIN, RETAILER, etc
-          });
-        } else if (res.user.role === 'FSE') {
-          // navigation.replace('FSEDashboard');
-          navigation.replace('MainTabs', {
-            role: 'FSE', // or ADMIN, RETAILER, etc
-          });
-        } else {
-          navigation.replace('MainTabs', {
-            role: 'Retailer', // or ADMIN, RETAILER, etc
-          });
-          // navigation.replace('RetailerDashboard');
-        } // or role-based navigation
-      })
+      // .then(res => {
+      //   console.log('--- loginform (res.user.role) ---');
+      //   // role-based navigation
+      //   if (res.user.role === 'Distributor') {
+      //     // navigation.replace('AddProduct');
+      //     navigation.replace('MainTabs', {
+      //       role: 'Distributor', // or ADMIN, RETAILER, etc
+      //     });
+      //   } else if (res.user.role === 'FSE') {
+      //     // navigation.replace('FSEDashboard');
+      //     navigation.replace('MainTabs', {
+      //       role: 'FSE', // or ADMIN, RETAILER, etc
+      //     });
+      //   } else {
+      //     navigation.replace('MainTabs', {
+      //       role: 'Retailer', // or ADMIN, RETAILER, etc
+      //     });
+      //     // navigation.replace('RetailerDashboard');
+      //   } // or role-based navigation
+      // })
       .catch(err => {
         console.log('-- login form (error) --', err);
         setErrors({ general: err?.message || err || 'Login failed' });
