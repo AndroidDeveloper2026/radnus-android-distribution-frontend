@@ -23,29 +23,29 @@ const Tab = createBottomTabNavigator();
 /* 🔐 ROLE CONFIG */
 const ROLE_TABS = {
   Admin: [
-    { name: "Dashboard", component: AdminDashboardScreen, icon: Home },
-    { name: "Home", component: ProfileSettings, icon: LayoutDashboard },
+    { name: "Dashboard", component: AdminDashboardScreen, icon: LayoutDashboard},
+    { name: "Home", component: ProfileSettings, icon: Home },
     { name: "Profile", component: ProfileSettings, icon: CircleUserRound},
     { name: "Reports", component: ProfileSettings, icon: BarChart3 },
   ],
 
   Distributor: [
-    { name: "Dashboard", component: DistributorDashboard, icon: Home },
-    { name: "Home", component: ProfileSettings, icon: LayoutDashboard },
+    { name: "Dashboard", component: DistributorDashboard, icon: LayoutDashboard },
+    { name: "Home", component: ProfileSettings, icon: Home },
     { name: "Profile", component: ProfileSettings, icon: CircleUserRound},
     { name: "Reports", component: ProfileSettings, icon: BarChart3 },
   ],
 
   FSE: [
-    { name: "Dashboard", component: FSEDashboard, icon: Home },
-    { name: "Home", component: ProfileSettings, icon: LayoutDashboard },
+    { name: "Dashboard", component: FSEDashboard, icon:  LayoutDashboard },
+    { name: "Home", component: ProfileSettings, icon: Home },
     { name: "Profile", component: ProfileSettings, icon: CircleUserRound},
     { name: "Reports", component: ProfileSettings, icon: BarChart3 },
   ],
 
   Retailer: [
-    { name: "Dashboard", component: RetailerDashboard, icon: Home },
-    { name: "Home", component: ProfileSettings, icon: LayoutDashboard },
+    { name: "Dashboard", component: RetailerDashboard, icon:  LayoutDashboard},
+    { name: "Home", component: ProfileSettings, icon: Home },
     { name: "Profile", component: ProfileSettings, icon: CircleUserRound},
     { name: "Reports", component: ProfileSettings, icon: BarChart3 },
   ],

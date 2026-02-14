@@ -33,9 +33,10 @@ import RetailerDashboard from '../screens/Retailer/RetailerDashboard';
 import DistributorDashboard from '../screens/Distributor/DistributorDashboard';
 import OrderBilling from '../screens/Distributor/OrderBilling';
 import HomeScreen from '../screens/Common/HomeScreen';
+// import AdminRegister from '../screens/Auth/AdminRegister';
+import Reports from '../screens/Common/Reports';
 //-- checking --
 import AdminDashboardScreen from '../screens/AdminDashboard/AdminDashboardScreen';
-
 
 const Stack = createStackNavigator();
 
@@ -57,6 +58,13 @@ const StackNavigator = () => {
         component={AdminScreen}
         options={{ headerShown: false }}
       />
+
+      {/* <Stack.Screen
+        name="AdminRegister"
+        component={AdminRegister}
+        options={{ headerShown: false }}
+      /> */}
+
       <Stack.Screen
         name="Login"
         component={LoginScreen}
@@ -223,6 +231,12 @@ const StackNavigator = () => {
       <Stack.Screen
         name="OrderBilling"
         component={OrderBilling}
+        options={{ headerShown: false }}
+      />
+
+            <Stack.Screen
+        name="Reports"
+        component={Reports}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import styles from './LoginStyle';
 
@@ -7,6 +7,8 @@ import LeftArrow from '../../assets/svg/white-left-arrow.svg';
 import { Formik } from 'formik';
 
 import * as Yup from 'yup';
+import { useSelector, useDispatch } from 'react-redux';
+import { adminLogin } from '../../services/features/auth/adminAuthSlice';
 
 const AdminValidationSchema = Yup.object().shape({
   emailID: Yup.string()
@@ -19,9 +21,20 @@ const AdminValidationSchema = Yup.object().shape({
 });
 
 const AdminScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
+  const { token, error } = useSelector(state => state?.adminAuth);
+
+
+
   const handleBackBtn = () => {
     navigation.goBack();
   };
+
+  useEffect(() => {
+  if (token) {
+    navigation.replace('AdminDashboard');
+  }
+}, [token, navigation]);
 
   // const handleLogin = (values, { setSubmitting, setErrors }) => {
   //   const { mobile, password } = values;
@@ -49,7 +62,9 @@ const AdminScreen = ({ navigation }) => {
       <Formik
         initialValues={{ emailID: '', password: '' }}
         validationSchema={AdminValidationSchema}
-        onSubmit={value => {}}
+        onSubmit={async values => {
+          dispatch(adminLogin(values));
+        }}
       >
         {({
           handleChange,

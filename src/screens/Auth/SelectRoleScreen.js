@@ -4,7 +4,8 @@ import SelectRoleStyle from './SelectRoleStyle';
 
 const SelectRoleScreen = ({ navigation }) => {
   const handleUserLogin = () => {
-    // navigation.navigate('Login');
+    navigation.navigate('Login');
+    // navigation.navigate('AdminRegister');
 
     // navigation.navigate('AdminDashboard');
     // navigation.navigate('FSEHome');
@@ -31,12 +32,15 @@ const SelectRoleScreen = ({ navigation }) => {
       //  navigation.navigate('RetailerDashboard');
       //  navigation.navigate('DistributorDashboard');
       //  navigation.navigate('OrderBilling');
-       navigation.navigate('HomeScreen');
+      //  navigation.navigate('HomeScreen');
+      // navigation.navigate('AdminRegister');
+      // navigation.navigate('Reports');
     
   };
 
   const handleAdminLogin = () => {
     navigation.navigate('Admin');
+    // navigation.navigate('AdminRegister');
   };
 
   return (
