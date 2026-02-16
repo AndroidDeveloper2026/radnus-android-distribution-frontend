@@ -9,11 +9,11 @@ const styles = StyleSheet.create({
   /*  TOP BAR */
   header: {
     height: 220,
-    flexDirection: 'row',
+    // flexDirection: 'row',
     backgroundColor: '#D32F2F',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    // paddingHorizontal: 16,
   },
 
   headerTitle: {

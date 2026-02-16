@@ -28,8 +28,8 @@ const ROLE_TABS = {
       icon: LayoutDashboard,
     },
     { name: 'Home', component: HomeScreen, icon: Home },
-    { name: 'Profile', component: ProfileSettings, icon: CircleUserRound },
     { name: 'Reports', component: Report, icon: BarChart3 },
+    { name: 'Profile', component: ProfileSettings, icon: CircleUserRound },
   ],
 
   Distributor: [
@@ -39,22 +39,22 @@ const ROLE_TABS = {
       icon: LayoutDashboard,
     },
     { name: 'Home', component: HomeScreen, icon: Home },
-    { name: 'Profile', component: ProfileSettings, icon: CircleUserRound },
     { name: 'Reports', component: Report, icon: BarChart3 },
+    { name: 'Profile', component: ProfileSettings, icon: CircleUserRound },
   ],
 
   FSE: [
     { name: 'Dashboard', component: FSEDashboard, icon: LayoutDashboard },
     { name: 'Home', component: HomeScreen, icon: Home },
-    { name: 'Profile', component: ProfileSettings, icon: CircleUserRound },
     { name: 'Reports', component: Report, icon: BarChart3 },
+    { name: 'Profile', component: ProfileSettings, icon: CircleUserRound },
   ],
 
   Retailer: [
     { name: 'Dashboard', component: RetailerDashboard, icon: LayoutDashboard },
     { name: 'Home', component: HomeScreen, icon: Home },
-    { name: 'Profile', component: ProfileSettings, icon: CircleUserRound },
     { name: 'Reports', component: Report, icon: BarChart3 },
+    { name: 'Profile', component: ProfileSettings, icon: CircleUserRound },
   ],
 };
 

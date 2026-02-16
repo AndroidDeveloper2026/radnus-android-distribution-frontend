@@ -44,7 +44,7 @@ import { selectAuthState } from '../store/selectors/authSelector';
 const Stack = createStackNavigator();
 
 const StackNavigator = () => {
-    const { token, role } = useSelector(selectAuthState);
+  const { token, role } = useSelector(selectAuthState);
   // const { token, admin } = useSelector(state => state.adminAuth);
   // const { token, user } = useSelector(state => state.auth);
   // const role = user?.role;
@@ -87,6 +87,13 @@ const StackNavigator = () => {
             component={RegisterScreen}
             options={{ headerShown: false }}
           />
+
+          <Stack.Screen
+            name="TermsConditions"
+            component={TermsConditions}
+            options={{ headerShown: false }}
+          />
+
           <Stack.Screen
             name="OtpScreen"
             component={OtpScreen}
@@ -252,11 +259,6 @@ const StackNavigator = () => {
           <Stack.Screen
             name="Reports"
             component={Reports}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="TermsConditions"
-            component={TermsConditions}
             options={{ headerShown: false }}
           />
         </>

@@ -10,8 +10,8 @@ import { Picker } from '@react-native-picker/picker';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import styles from './RegisterStyle';
-import {useDispatch,useSelector} from "react-redux";
-import {registerUser} from "../../services/features/auth/registerSlice";
+import { useDispatch, useSelector } from 'react-redux';
+import { registerUser } from '../../services/features/auth/registerSlice';
 import locationData from '../../utils/locationData';
 //svg
 import LeftArrow from '../../assets/svg/white-left-arrow.svg';
@@ -33,9 +33,7 @@ const RegisterSchema = Yup.object().shape({
   district: Yup.string().required('District is required'),
   taluk: Yup.string().required('Taluk is required'),
   name: Yup.string().required('Name is required'),
-  email: Yup.string()
-  .email('Invalid email')
-  .required('Email is required'),
+  email: Yup.string().email('Invalid email').required('Email is required'),
   mobile: Yup.string()
     .matches(/^[6-9]\d{9}$/, 'Invalid mobile number')
     .required('Mobile is required'),
@@ -47,7 +45,7 @@ const RegisterSchema = Yup.object().shape({
 
 const RegisterScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const {loading} = useSelector(state => state?.register)
+  const { loading } = useSelector(state => state?.register);
   const handleBackBtn = () => navigation.goBack();
 
   return (
@@ -73,14 +71,18 @@ const RegisterScreen = ({ navigation }) => {
             taluk: '',
           }}
           validationSchema={RegisterSchema}
-          onSubmit={async (values) => {
-            const result = await dispatch(registerUser(values));
-            
-            if(registerUser.fulfilled.match(result)){
-              navigation.navigate('OtpScreen',{
-                mobile:values.mobile,
-              });
-            }
+          onSubmit={async values => {
+            // const result = await dispatch(registerUser(values));
+
+            // if(registerUser.fulfilled.match(result)){
+            //   navigation.navigate('OtpScreen',{
+            //     mobile:values.mobile,
+            //   });
+            // }
+
+            navigation.navigate('TermsConditions', {
+              registerData: values,
+            });
 
             console.log('Register Payload:', values);
             // navigation.navigate('OtpScreen');

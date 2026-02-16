@@ -1,23 +1,27 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
-import styles from "./TermsConditionsStyle";
-import Header from "../../components/Header";
-import { CheckSquare, Square } from "lucide-react-native";
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import styles from './TermsConditionsStyle';
+import Header from '../../components/Header';
+import { CheckSquare, Square } from 'lucide-react-native';
+import { useDispatch } from 'react-redux';
+import { registerUser } from '../../services/features/auth/registerSlice';
 
-const TermsConditions = ({ navigation }) => {
+const TermsConditions = ({ navigation, route }) => {
   const [accepted, setAccepted] = useState(false);
+  const dispatch = useDispatch();
+  const { registerData } = route.params;
 
-  const onAccept = () => {
-    // ✅ Save consent (API or local storage)
-    // Example:
-    // await api.post("/user/accept-terms");
+  const onAccept = async () => {
+    console.log('onAccept called with accepted:', accepted);
+    if (!accepted) return;
 
-    navigation.replace("Login"); // or Dashboard
+    const result = await dispatch(registerUser(registerData));
+
+    if (registerUser.fulfilled.match(result)) {
+      navigation.replace('OtpScreen', {
+        mobile: registerData.mobile,
+      });
+    }
   };
 
   return (
@@ -25,39 +29,35 @@ const TermsConditions = ({ navigation }) => {
       <Header title="Terms & Conditions" />
 
       {/* TERMS TEXT */}
-      <ScrollView
-        style={styles.card}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView style={styles.card} showsVerticalScrollIndicator={false}>
         <Text style={styles.heading}>Terms of Use</Text>
 
         <Text style={styles.text}>
-          By using this application, you agree to comply with all
-          company policies related to sales operations, stock handling,
-          billing, and customer management.
+          By using this application, you agree to comply with all company
+          policies related to sales operations, stock handling, billing, and
+          customer management.
         </Text>
 
         <Text style={styles.text}>
-          Location data may be captured during working hours to verify
-          retailer visits and ensure accurate reporting. No tracking is
-          performed outside working hours.
+          Location data may be captured during working hours to verify retailer
+          visits and ensure accurate reporting. No tracking is performed outside
+          working hours.
         </Text>
 
         <Text style={styles.text}>
-          Any misuse of the application, data manipulation, or
-          unauthorized access may lead to suspension or termination of
-          access.
+          Any misuse of the application, data manipulation, or unauthorized
+          access may lead to suspension or termination of access.
         </Text>
 
         <Text style={styles.text}>
-          The company reserves the right to update these terms at any
-          time. Continued use of the application implies acceptance of
-          the updated terms.
+          The company reserves the right to update these terms at any time.
+          Continued use of the application implies acceptance of the updated
+          terms.
         </Text>
 
         <Text style={styles.text}>
-          If you do not agree with these terms, please do not proceed
-          with registration.
+          If you do not agree with these terms, please do not proceed with
+          registration.
         </Text>
       </ScrollView>
 
@@ -79,10 +79,7 @@ const TermsConditions = ({ navigation }) => {
 
       {/* ACTION BUTTON */}
       <TouchableOpacity
-        style={[
-          styles.okButton,
-          !accepted && styles.disabledBtn,
-        ]}
+        style={[styles.okButton, !accepted && styles.disabledBtn]}
         disabled={!accepted}
         onPress={onAccept}
       >
