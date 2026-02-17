@@ -85,7 +85,7 @@ const RetailerDashboard = ({ navigation }) => {
         <QuickAction
           icon={<Package size={18} color="#D32F2F" />}
           label="View Product Catalog"
-          onPress={() => navigation.navigate("ProductCatalog")}
+          onPress={() => navigation.navigate("ProductMaster")}
         />
 
         <QuickAction

@@ -5,8 +5,12 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import AddProductStyle from './AddProductStyle';
 import Input from '../../components/Input';
 import Header from '../../components/Header';
+import { useDispatch } from "react-redux";
+import { addProduct } from "../../services/features/products/productSlice";
 
 const AddProduct = ({ navigation }) => {
+  const dispatch = useDispatch();
+
   const [form, setForm] = useState({
     name: '',
     sku: '',
@@ -39,16 +43,46 @@ const AddProduct = ({ navigation }) => {
     );
   };
 
-  const onSave = () => {
-    const payload = {
-      ...form,
-      image: form.image, // send as multipart later
-    };
+  const onSave = async () => {
 
-    console.log('Product Data:', payload);
+    try {
+    const formData = new FormData();
 
-    // TODO: API call (multipart/form-data)
+    formData.append("name", form.name);
+    formData.append("category", form.category);
+    formData.append("sku", form.sku);
+
+    formData.append("mrp", form.mrp);
+    formData.append("distributorPrice", form.distributorPrice);
+    formData.append("retailerPrice", form.retailerPrice);
+
+    formData.append("gst", form.gst);
+    formData.append("moq", form.moq);
+
+    if (form.image) {
+      formData.append("image", {
+        uri: form.image.uri,
+        type: form.image.type || "image/jpeg",
+        name: form.image.fileName || "product.jpg",
+      });
+    }
+
+    await dispatch(addProduct(formData)).unwrap();
+
     navigation.goBack();
+  } catch (error) {
+    console.log("Add product failed:", error);
+  }
+
+    // const payload = {
+    //   ...form,
+    //   image: form.image, // send as multipart later
+    // };
+
+    // console.log('Product Data:', payload);
+
+    // // TODO: API call (multipart/form-data)
+    // navigation.goBack();
   };
 
   return (
@@ -79,6 +113,12 @@ const AddProduct = ({ navigation }) => {
           label="Product Name"
           value={form.name}
           onChangeText={v => onChange('name', v)}
+        />
+
+        <Input
+          label="Category"
+          value={form.category}
+          onChangeText={v => onChange('category', v)}
         />
 
         <Input
