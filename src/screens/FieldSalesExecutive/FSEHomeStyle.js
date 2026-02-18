@@ -1,23 +1,23 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet } from 'react-native';
 
 const FSEHomeStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#ebeaea',
   },
 
   /* 🔴 TOP BAR */
   header: {
     height: 56,
-    backgroundColor: "#D32F2F",
-    justifyContent: "center",
+    backgroundColor: '#D32F2F',
+    justifyContent: 'center',
     paddingHorizontal: 16,
   },
 
   headerTitle: {
-    color: "#FFFFFF",
+    color: '#ffffff',
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: '600',
   },
 
   content: {
@@ -26,54 +26,55 @@ const FSEHomeStyles = StyleSheet.create({
 
   title: {
     fontSize: 20,
-    fontWeight: "600",
-    color: "#212121",
+    fontWeight: '600',
+    color: '#212121',
     marginBottom: 12,
   },
 
   infoBox: {
     borderWidth: 1,
-    borderColor: "#E0E0E0",
-    borderRadius: 6,
+    borderColor: '#dcdcdc',
+    borderRadius: 8,
     padding: 14,
     marginBottom: 16,
+    backgroundColor:'#ffffff'
   },
 
   infoLabel: {
     fontSize: 13,
-    color: "#757575",
+    color: '#757575',
     marginBottom: 4,
   },
 
   infoValue: {
     fontSize: 15,
-    fontWeight: "500",
-    color: "#212121",
+    fontWeight: '500',
+    color: '#212121',
   },
 
   gpsStatus: {
     fontSize: 14,
     marginTop: 8,
-    color: "#212121",
+    color: '#212121',
   },
 
   button: {
     marginTop: 24,
     height: 44,
-    backgroundColor: "#D32F2F",
+    backgroundColor: '#D32F2F',
     borderRadius: 6,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   buttonDisabled: {
-    backgroundColor: "#BDBDBD",
+    backgroundColor: '#BDBDBD',
   },
 
   buttonText: {
-    color: "#FFFFFF",
+    color: '#FFFFFF',
     fontSize: 15,
-    fontWeight: "600",
+    fontWeight: '600',
   },
 });
 

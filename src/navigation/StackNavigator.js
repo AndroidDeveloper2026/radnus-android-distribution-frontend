@@ -33,6 +33,8 @@ import RetailerDashboard from '../screens/Retailer/RetailerDashboard';
 import DistributorDashboard from '../screens/Distributor/DistributorDashboard';
 import OrderBilling from '../screens/Distributor/OrderBilling';
 import HomeScreen from '../screens/Common/HomeScreen';
+import EditProduct from '../screens/AdminDashboard/EditProduct';
+import Forgotpassword from '../screens/Auth/ForgotPassword';
 // import AdminRegister from '../screens/Auth/AdminRegister';
 import Reports from '../screens/Common/Reports';
 import TermsConditions from '../screens/Common/TermsConditions';
@@ -89,6 +91,12 @@ const StackNavigator = () => {
           />
 
           <Stack.Screen
+            name="Forgotpassword"
+            component={Forgotpassword}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
             name="TermsConditions"
             component={TermsConditions}
             options={{ headerShown: false }}
@@ -140,6 +148,12 @@ const StackNavigator = () => {
           <Stack.Screen
             name="AddProduct"
             component={AddProduct}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="EditProduct"
+            component={EditProduct}
             options={{ headerShown: false }}
           />
 

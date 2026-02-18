@@ -138,13 +138,13 @@ const LoginScreen = ({ navigation }) => {
               <View style={styles.pickerWrapper}>
                 <Picker
                   selectedValue={values.role}
-                  selectionColor={'#000'}
+                  // selectionColor={'#ffffff'}
                   onValueChange={handleChange('role')}
                 >
-                  <Picker.Item label="Select Role" value="" color="#000" />
-                  <Picker.Item label="Distributor" value="Distributor" />
-                  <Picker.Item label="FSE" value="FSE" />
-                  <Picker.Item label="Retailer" value="Retailer" />
+                  <Picker.Item label="Select Role" value="" color='#000000'/>
+                  <Picker.Item label="Distributor" value="Distributor" color='#000000'/>
+                  <Picker.Item label="FSE" value="FSE" color='#000000'/>
+                  <Picker.Item label="Retailer" value="Retailer" color='#000000'/>
                 </Picker>
               </View>
               {touched.role && errors.role && (
@@ -155,6 +155,15 @@ const LoginScreen = ({ navigation }) => {
               {errors.general && (
                 <Text style={styles.error}>{errors.general}</Text>
               )}
+
+              <View style={styles.richtext}>
+                <TouchableOpacity
+                  style={styles.accBtn}
+                  onPress={() => navigation.navigate('Forgotpassword')}
+                >
+                  <Text style={styles.richtextBtn}>Forgot Password?</Text>
+                </TouchableOpacity>
+              </View>
 
               {/* LOGIN BUTTON */}
               <TouchableOpacity

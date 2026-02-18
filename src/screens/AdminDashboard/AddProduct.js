@@ -5,8 +5,10 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import AddProductStyle from './AddProductStyle';
 import Input from '../../components/Input';
 import Header from '../../components/Header';
-import { useDispatch } from "react-redux";
-import { addProduct } from "../../services/features/products/productSlice";
+import { useDispatch } from 'react-redux';
+import { addProduct } from '../../services/features/products/productSlice';
+import { Picker } from '@react-native-picker/picker';
+import styles from './AdminDashboardStyle';
 
 const AddProduct = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -44,35 +46,36 @@ const AddProduct = ({ navigation }) => {
   };
 
   const onSave = async () => {
+    console.log('--- save product ---');
 
     try {
-    const formData = new FormData();
+      const formData = new FormData();
 
-    formData.append("name", form.name);
-    formData.append("category", form.category);
-    formData.append("sku", form.sku);
+      formData.append('name', form.name);
+      formData.append('category', form.category);
+      formData.append('sku', form.sku);
 
-    formData.append("mrp", form.mrp);
-    formData.append("distributorPrice", form.distributorPrice);
-    formData.append("retailerPrice", form.retailerPrice);
+      formData.append('mrp', form.mrp);
+      formData.append('distributorPrice', form.distributorPrice);
+      formData.append('retailerPrice', form.retailerPrice);
 
-    formData.append("gst", form.gst);
-    formData.append("moq", form.moq);
+      formData.append('gst', form.gst);
+      formData.append('moq', form.moq);
 
-    if (form.image) {
-      formData.append("image", {
-        uri: form.image.uri,
-        type: form.image.type || "image/jpeg",
-        name: form.image.fileName || "product.jpg",
-      });
+      if (form.image) {
+        formData.append('image', {
+          uri: form.image.uri,
+          type: form.image.type || 'image/jpeg',
+          name: form.image.fileName || 'product.jpg',
+        });
+      }
+
+      await dispatch(addProduct(formData)).unwrap();
+
+      navigation.goBack();
+    } catch (error) {
+      console.log('Add product failed:', error);
     }
-
-    await dispatch(addProduct(formData)).unwrap();
-
-    navigation.goBack();
-  } catch (error) {
-    console.log("Add product failed:", error);
-  }
 
     // const payload = {
     //   ...form,
@@ -115,11 +118,28 @@ const AddProduct = ({ navigation }) => {
           onChangeText={v => onChange('name', v)}
         />
 
-        <Input
+        {/* <Input
           label="Category"
           value={form.category}
           onChangeText={v => onChange('category', v)}
-        />
+        /> */}
+
+        <Text style={AddProductStyle.label}>Category</Text>
+
+        <View style={AddProductStyle.dropDown}>
+          <Picker
+            selectedValue={form.category}
+            onValueChange={value => onChange('category', value)}
+          >
+            <Picker.Item label="Select Category" value=""  color='#757575'/>
+            <Picker.Item label="PD Chargers & Car Chargers" value="PD Chargers & Car Chargers" />
+            <Picker.Item label="Charger" value="Charger" />
+            <Picker.Item label="Data Cables" value="Data Cables" />
+            <Picker.Item label="Handsfree" value="Handsfree" />
+            <Picker.Item label="Bluetooth Neckband" value="Bluetooth Neckband" />
+            <Picker.Item label="Ear Buds" value="Ear Buds" />
+          </Picker>
+        </View>
 
         <Input
           label="SKU"

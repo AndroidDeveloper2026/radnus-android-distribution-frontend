@@ -6,7 +6,7 @@ const GREEN = '#2E7D32';
 const RED = '#D32F2F';
 const GRAY = '#757575';
 
-const ProductCard = ({ item, onEdit }) => {
+const ProductCard = ({ item, onEdit, onDelete }) => {
   return (
     <View style={styles.card}>
       <View style={styles.topRow}>
@@ -57,7 +57,7 @@ const ProductCard = ({ item, onEdit }) => {
 
         {/* ACTIONS */}
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.iconBtn}>
+          <TouchableOpacity style={styles.iconBtn} onPress={onDelete}>
             <Trash2 size={18} color={RED} />
           </TouchableOpacity>
 

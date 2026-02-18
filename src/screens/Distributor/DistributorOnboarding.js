@@ -2,124 +2,133 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  FlatList,
+  TextInput,
   TouchableOpacity,
+  ScrollView,
+  Image,
 } from "react-native";
 import styles from "./DistributorOnboardingStyle";
 import Header from "../../components/Header";
-import { Store } from "lucide-react-native";
-
-const DATA = [
-  {
-    id: "1",
-    name: "Jane Distributor",
-    firm: "Jane Suppliers",
-    mobile: "9876543211",
-    territory: "Bangalore South",
-    status: "PENDING",
-  },
-  {
-    id: "2",
-    name: "John Distributor",
-    firm: "John Traders",
-    mobile: "9876543210",
-    territory: "Bangalore North",
-    status: "APPROVED",
-  },
-];
+import { launchCamera } from "react-native-image-picker";
+import { Camera, MapPin } from "lucide-react-native";
 
 const DistributorOnboarding = ({ navigation }) => {
-  const [tab, setTab] = useState("PENDING");
+  const [shopPhoto, setShopPhoto] = useState(null);
 
-  const filtered = DATA.filter(
-    (d) => d.status === tab
-  );
+  const [form, setForm] = useState({
+    shopName: "",
+    ownerName: "",
+    mobile: "",
+    gps: "Fetching location...",
+  });
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() =>
-        navigation.navigate("DistributorDetails", {
-          distributor: item,
-        })
+  const onChange = (key, value) => {
+    setForm({ ...form, [key]: value });
+  };
+
+  const capturePhoto = () => {
+    launchCamera({ mediaType: "photo", quality: 0.7 }, (response) => {
+      if (!response.didCancel && response.assets) {
+        setShopPhoto(response.assets[0].uri);
       }
-    >
-      <View style={styles.row}>
-        <View style={styles.iconCircle}>
-          <Store size={18} color="#D32F2F" />
-        </View>
+    });
+  };
 
-        <View style={{ flex: 1 }}>
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.sub}>{item.firm}</Text>
-        </View>
-
-        <View
-          style={[
-            styles.badge,
-            tab === "APPROVED" && styles.approved,
-            tab === "PENDING" && styles.pending,
-            tab === "REJECTED" && styles.rejected,
-          ]}
-        >
-          <Text style={styles.badgeText}>{tab}</Text>
-        </View>
-      </View>
-
-      <View style={styles.infoRow}>
-        <Text style={styles.label}>Mobile:</Text>
-        <Text style={styles.value}>{item.mobile}</Text>
-      </View>
-
-      <View style={styles.infoRow}>
-        <Text style={styles.label}>Territory:</Text>
-        <Text style={styles.value}>{item.territory}</Text>
-      </View>
-    </TouchableOpacity>
-  );
+  const submitRetailer = () => {
+    // 🔗 API CALL
+    console.log("Retailer Data:", form, shopPhoto);
+    navigation.goBack();
+  };
 
   return (
     <View style={styles.container}>
-      <Header title="Distributor Onboarding" />
+      <Header title="Retailer Onboarding" />
 
-      {/* TABS */}
-      <View style={styles.tabs}>
-        {["PENDING", "APPROVED", "REJECTED"].map(
-          (t) => (
-            <TouchableOpacity
-              key={t}
-              style={[
-                styles.tab,
-                tab === t && styles.activeTab,
-              ]}
-              onPress={() => setTab(t)}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  tab === t && styles.activeTabText,
-                ]}
-              >
-                {t}
-              </Text>
-            </TouchableOpacity>
-          )
-        )}
-      </View>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
 
-      <FlatList
-        data={filtered}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.list}
-        ListEmptyComponent={
-          <Text style={styles.empty}>
-            No {tab.toLowerCase()} distributors
+
+        {/* BASIC DETAILS */}
+        <View style={styles.card}>
+          <Text style={styles.sectionTitle}>Retailer Details</Text>
+
+          <Label text="Shop Name *" />
+          <TextInput
+            style={styles.input}
+            placeholder="Enter shop name"
+            value={form.shopName}
+            onChangeText={(v) => onChange("shopName", v)}
+          />
+
+          <Label text="Owner Name *" />
+          <TextInput
+            style={styles.input}
+            placeholder="Enter owner name"
+            value={form.ownerName}
+            onChangeText={(v) => onChange("ownerName", v)}
+          />
+
+          <Label text="Mobile Number *" />
+          <TextInput
+            style={styles.input}
+            placeholder="10-digit mobile"
+            keyboardType="phone-pad"
+            maxLength={10}
+            value={form.mobile}
+            onChangeText={(v) => onChange("mobile", v)}
+          />
+        </View>
+
+        {/* GPS LOCATION */}
+        <View style={styles.card}>
+          <Text style={styles.sectionTitle}>Location</Text>
+
+          <View style={styles.gpsRow}>
+            <MapPin size={16} color="#D32F2F" />
+            <Text style={styles.gpsText}>{form.gps}</Text>
+          </View>
+
+          <Text style={styles.gpsHint}>
+            Location is auto-captured for verification
           </Text>
-        }
-      />
+        </View>
+
+                {/* SHOP PHOTO */}
+        <View style={styles.photoSection}>
+          <TouchableOpacity
+            style={styles.photoBox}
+            onPress={capturePhoto}
+          >
+            {shopPhoto ? (
+              <Image source={{ uri: shopPhoto }} style={styles.photo} />
+            ) : (
+              <>
+              <View style={styles.photoIcon}>
+                <Camera size={26} color="#D32F2F" />
+                <Text style={styles.photoText}>Take Photo</Text>
+              </View>
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
+
+        {/* SUBMIT */}
+        <TouchableOpacity
+          style={styles.submitBtn}
+          onPress={submitRetailer}
+        >
+          <Text style={styles.submitText}>Submit for Approval</Text>
+        </TouchableOpacity>
+
+      </ScrollView>
     </View>
   );
 };
+
+const Label = ({ text }) => (
+  <Text style={styles.label}>{text}</Text>
+);
 
 export default DistributorOnboarding;

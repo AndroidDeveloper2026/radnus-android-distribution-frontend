@@ -198,16 +198,16 @@ const RegisterScreen = ({ navigation }) => {
                 <View style={styles.pickerWrapper}>
                   <Picker
                     selectedValue={values.state}
-                    selectionColor={'#000'}
+                    selectionColor={'#000000'}
                     onValueChange={val => {
                       setFieldValue('state', val);
                       setFieldValue('district', '');
                       setFieldValue('taluk', '');
                     }}
                   >
-                    <Picker.Item label="Select State" value="" color="#000" />
+                    <Picker.Item label="Select State" value="" color="#000000"/>
                     {Object.keys(locationData).map(st => (
-                      <Picker.Item key={st} label={st} value={st} />
+                      <Picker.Item key={st} label={st} value={st} color="#000000"/>
                     ))}
                   </Picker>
                 </View>
@@ -234,7 +234,7 @@ const RegisterScreen = ({ navigation }) => {
                     />
                     {values.state &&
                       Object.keys(locationData[values.state]).map(dist => (
-                        <Picker.Item key={dist} label={dist} value={dist} />
+                        <Picker.Item key={dist} label={dist} value={dist} color="#000000"/>
                       ))}
                   </Picker>
                 </View>
@@ -251,11 +251,11 @@ const RegisterScreen = ({ navigation }) => {
                     selectionColor={'#000'}
                     onValueChange={val => setFieldValue('taluk', val)}
                   >
-                    <Picker.Item label="Select Taluk" value="" color="#000" />
+                    <Picker.Item label="Select Taluk" value="" color="#000000"/>
                     {values.state &&
                       values.district &&
                       locationData[values.state][values.district].map(t => (
-                        <Picker.Item key={t} label={t} value={t} />
+                        <Picker.Item key={t} label={t} value={t} color="#000000"/>
                       ))}
                   </Picker>
                 </View>

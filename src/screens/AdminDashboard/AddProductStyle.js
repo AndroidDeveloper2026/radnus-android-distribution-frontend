@@ -7,7 +7,7 @@ const LIGHT_GRAY = '#F3F4F6';
 const AddProductStyle = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor:LIGHT_GRAY,
+    backgroundColor: LIGHT_GRAY,
   },
 
   // header: {
@@ -47,6 +47,17 @@ const AddProductStyle = StyleSheet.create({
   //     borderWidth: 1,
   //     borderColor: "#E0E0E0",
   //   },
+
+  dropDown: {
+    backgroundColor: '#fff', 
+    height: 40,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 8,
+    justifyContent: 'center',
+    fontSize: 13,
+    marginBottom: 14,
+  },
 
   saveButton: {
     // flex:1,
@@ -96,7 +107,7 @@ const AddProductStyle = StyleSheet.create({
     marginTop: 20,
     backgroundColor: '#ffffff',
     paddingBottom: 54,
-    paddingTop:20,
+    paddingTop: 20,
     paddingHorizontal: 10,
     borderRadius: 8,
     alignItems: 'center',

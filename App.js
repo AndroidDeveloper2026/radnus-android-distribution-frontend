@@ -9,8 +9,10 @@ import { store } from './src/store/store';
 import { API_BASE_URL } from '@env';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+
 const App = () => {
   console.log('----- API base url----', API_BASE_URL);
+
 
   useEffect(() => {
     const unsubscribe = getMessaging().onMessage(async remoteMessage => {

@@ -48,22 +48,7 @@ const RetailerOnboarding = ({ navigation }) => {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* SHOP PHOTO */}
-        <View style={styles.photoSection}>
-          <TouchableOpacity
-            style={styles.photoBox}
-            onPress={capturePhoto}
-          >
-            {shopPhoto ? (
-              <Image source={{ uri: shopPhoto }} style={styles.photo} />
-            ) : (
-              <>
-                <Camera size={26} color="#D32F2F" />
-                <Text style={styles.photoText}>Capture Shop Photo</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        </View>
+
 
         {/* BASIC DETAILS */}
         <View style={styles.card}>
@@ -108,6 +93,25 @@ const RetailerOnboarding = ({ navigation }) => {
           <Text style={styles.gpsHint}>
             Location is auto-captured for verification
           </Text>
+        </View>
+
+                {/* SHOP PHOTO */}
+        <View style={styles.photoSection}>
+          <TouchableOpacity
+            style={styles.photoBox}
+            onPress={capturePhoto}
+          >
+            {shopPhoto ? (
+              <Image source={{ uri: shopPhoto }} style={styles.photo} />
+            ) : (
+              <>
+              <View style={styles.photoIcon}>
+                <Camera size={26} color="#D32F2F" />
+                <Text style={styles.photoText}>Take Shop Photo</Text>
+              </View>
+              </>
+            )}
+          </TouchableOpacity>
         </View>
 
         {/* SUBMIT */}

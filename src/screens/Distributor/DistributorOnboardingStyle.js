@@ -1,179 +1,111 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F6F6F6",
+    backgroundColor: '#F3F4F6',
   },
 
-  tabs: {
-    flexDirection: "row",
-    backgroundColor: "#FFFFFF",
-  },
-
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: "center",
-    borderBottomWidth: 2,
-    borderBottomColor: "transparent",
-  },
-
-  activeTab: {
-    borderBottomColor: "#D32F2F",
-  },
-
-  tabText: {
-    fontWeight: "600",
-    color: "#777",
-  },
-
-  activeTabText: {
-    color: "#D32F2F",
-  },
-
-  list: {
+  content: {
     padding: 16,
+    paddingBottom: 40,
+  },
+
+  photoSection: {
+    marginBottom: 20,
+  },
+
+  photoBox: {
+    flexDirection: 'row',
+    paddingVertical: 16,
+    borderRadius: 20,
+    backgroundColor: '#ffffff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 3,
+  },
+
+  photo: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 16,
+  },
+
+  photoText: {
+    fontSize: 12,
+    color: '#D32F2F',
+    fontWeight: '700',
+    marginTop: 6,
+    marginLeft: 10,
+  },
+
+  photoIcon: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
-    padding: 14,
-    marginBottom: 14,
+    padding: 16,
+    marginBottom: 16,
     elevation: 2,
   },
 
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-
-  iconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#FDECEA",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 10,
-  },
-
-  iconCircleLarge: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#FDECEA",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-
-  name: {
-    fontSize: 15,
-    fontWeight: "700",
-  },
-
-  sub: {
-    fontSize: 12,
-    color: "#777",
-  },
-
-  infoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 4,
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#212121',
+    marginBottom: 12,
   },
 
   label: {
     fontSize: 12,
-    color: "#777",
+    color: '#555',
+    marginTop: 10,
+    marginBottom: 6,
   },
 
-  value: {
-    fontSize: 12,
-    fontWeight: "600",
+  input: {
+    backgroundColor: '#F3F4F6',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
   },
 
-  badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+  gpsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 
-  approved: {
-    backgroundColor: "#E8F5E9",
+  gpsText: {
+    fontSize: 13,
+    color: '#212121',
+    marginLeft: 6,
   },
 
-  pending: {
-    backgroundColor: "#FFF3E0",
-  },
-
-  rejected: {
-    backgroundColor: "#FDECEA",
-  },
-
-  badgeText: {
+  gpsHint: {
     fontSize: 11,
-    fontWeight: "700",
+    color: '#777',
+    marginTop: 6,
   },
 
-  empty: {
-    textAlign: "center",
-    marginTop: 40,
-    color: "#999",
+  submitBtn: {
+    backgroundColor: '#D32F2F',
+    paddingVertical: 16,
+    borderRadius: 30,
+    alignItems: 'center',
+    marginTop: 10,
+    elevation: 3,
   },
 
-  detailCard: {
-    backgroundColor: "#FFFFFF",
-    margin: 16,
-    borderRadius: 16,
-    padding: 16,
-  },
-
-  section: {
-    marginTop: 14,
-    fontWeight: "700",
-    fontSize: 13,
-  },
-
-  detailRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 8,
-  },
-
-  detailText: {
-    marginLeft: 8,
-    fontSize: 13,
-  },
-
-  actionRow: {
-    flexDirection: "row",
-    margin: 16,
-  },
-
-  approveBtn: {
-    flex: 1,
-    backgroundColor: "#2E7D32",
-    padding: 14,
-    borderRadius: 12,
-    marginRight: 8,
-    alignItems: "center",
-  },
-
-  rejectBtn: {
-    flex: 1,
-    backgroundColor: "#D32F2F",
-    padding: 14,
-    borderRadius: 12,
-    marginLeft: 8,
-    alignItems: "center",
-  },
-
-  actionText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
+  submitText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
   },
 });

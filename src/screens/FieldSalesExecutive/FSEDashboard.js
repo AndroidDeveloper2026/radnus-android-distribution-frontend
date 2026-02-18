@@ -2,7 +2,6 @@ import React from 'react';
 import {
   View,
   Text,
-  SafeAreaView,
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
@@ -22,7 +21,7 @@ const FSEDashboard = ({ navigation }) => {
         <Text style={FSEDashboardStyle.headerTitle}>FSE Dashboard</Text>
       </View> */}
 
-      <Header title={'FSE Dashboard'} showBackArrow={false}/>
+      <Header title={'FSE Dashboard'} />
 
       <ScrollView>
         <View style={FSEDashboardStyle.content}>
@@ -81,7 +80,7 @@ const FSEDashboard = ({ navigation }) => {
 
           <TouchableOpacity
             style={FSEDashboardStyle.actionItem}
-            onPress={() => navigation.navigate('AddRetailer')}
+            onPress={() => navigation.navigate('RetailerOnboarding')}
           >
             <Icon label="➕" />
             <Text style={FSEDashboardStyle.actionText}>Add New Retailer</Text>

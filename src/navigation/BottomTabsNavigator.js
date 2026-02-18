@@ -16,6 +16,7 @@ import AdminDashboardScreen from '../screens/AdminDashboard/AdminDashboardScreen
 import DistributorDashboard from '../screens/Distributor/DistributorDashboard';
 import FSEDashboard from '../screens/FieldSalesExecutive/FSEDashboard';
 import RetailerDashboard from '../screens/Retailer/RetailerDashboard';
+import FSEHomeScreen from '../screens/FieldSalesExecutive/FSEHomeScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -44,8 +45,8 @@ const ROLE_TABS = {
   ],
 
   FSE: [
+    { name: 'Home', component: FSEHomeScreen, icon: Home },
     { name: 'Dashboard', component: FSEDashboard, icon: LayoutDashboard },
-    { name: 'Home', component: HomeScreen, icon: Home },
     { name: 'Reports', component: Report, icon: BarChart3 },
     { name: 'Profile', component: ProfileSettings, icon: CircleUserRound },
   ],
@@ -104,7 +105,7 @@ const BottomTabs = ({ route }) => {
         tabBarActiveTintColor: '#D32F2F',
         tabBarInactiveTintColor: '#757575',
         tabBarStyle: {
-          height: 64,
+          height: 85,
           paddingBottom: 8,
           paddingTop: 8,
         },
@@ -128,6 +129,6 @@ const BottomTabs = ({ route }) => {
       ))}
     </Tab.Navigator>
   );
-};
+}; 
 
 export default BottomTabs;

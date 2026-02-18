@@ -25,7 +25,7 @@ const RetailerDashboard = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Header title="Retailer Dashboard" />
+      <Header title="Retailer Dashboard" showBackArrow={false}/>
 
       <ScrollView
         contentContainerStyle={styles.content}

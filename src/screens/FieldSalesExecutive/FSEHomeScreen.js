@@ -96,7 +96,7 @@ const FSEHomeScreen = ({ navigation }) => {
         <Text style={FSEHomeStyles.headerTitle}>Start Day</Text>
       </View> */}
 
-      <Header title = {'Start Day'}/>
+      <Header title = {'Start Day'} showBackArrow={false}/>
 
       <View style={FSEHomeStyles.content}>
         <Text style={FSEHomeStyles.title}>Mark Attendance</Text>
