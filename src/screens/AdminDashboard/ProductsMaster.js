@@ -13,35 +13,16 @@ import { Plus, Search } from 'lucide-react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts } from '../../services/features/products/productSlice';
 import { deleteProduct } from '../../services/features/products/productSlice';
+import PopupModal from '../../components/PopupModal';
 
-// const PRODUCTS = [
-//   {
-//     id: "1",
-//     name: "Product A",
-//     sku: "RND001",
-//     mrp: 100,
-//     distributorPrice: 85,
-//     retailerPrice: 92,
-//     gst: "18%",
-//     moq: "10 units",
-//     status: "Active",
-//   },
-//   {
-//     id: "2",
-//     name: "Product B",
-//     sku: "RND002",
-//     mrp: 150,
-//     distributorPrice: 130,
-//     retailerPrice: 140,
-//     gst: "18%",
-//     moq: "5 units",
-//     status: "Active",
-//   },
-// ];
+
 
 const ProductMaster = ({ navigation }) => {
   const dispatch = useDispatch();
   const products = useSelector(state => state.products.list);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
 
   const [search, setSearch] = useState('');
 
@@ -49,8 +30,21 @@ const ProductMaster = ({ navigation }) => {
     dispatch(fetchProducts());
   }, [dispatch]);
 
+  // const handleDelete = id => {
+  //   dispatch(deleteProduct(id));
+  // };
+
   const handleDelete = id => {
-    dispatch(deleteProduct(id));
+    setSelectedId(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = () => {
+    if (selectedId) {
+      dispatch(deleteProduct(selectedId));
+    }
+    setShowDeleteModal(false);
+    setSelectedId(null);
   };
 
   // 🔎 SEARCH FILTER
@@ -92,7 +86,9 @@ const ProductMaster = ({ navigation }) => {
 
       <FlatList
         data={filteredProducts}
-        keyExtractor={(item,index)=> item?._id ? item._id.toString() : index.toString()}
+        keyExtractor={(item, index) =>
+          item?._id ? item._id.toString() : index.toString()
+        }
         renderItem={({ item }) => (
           <ProductCard
             item={item}
@@ -107,6 +103,16 @@ const ProductMaster = ({ navigation }) => {
             <Text style={ProductsMasterStyle.emptyText}>No Products Found</Text>
           </View>
         )}
+      />
+
+      <PopupModal
+        visible={showDeleteModal}
+        title="Delete Product"
+        description="Are you sure you want to delete this product? This action cannot be undone."
+        buttonText="Delete"
+        secondaryText="Cancel"
+        onPress={confirmDelete}
+        onSecondaryPress={() => setShowDeleteModal(false)}
       />
     </View>
   );
