@@ -33,6 +33,20 @@ const ROLE_TABS = {
     { name: 'Profile', component: ProfileSettings, icon: CircleUserRound },
   ],
 
+  MarketingManager: [
+    { name: 'Dashboard', component: RetailerDashboard, icon: LayoutDashboard },
+    { name: 'Home', component: HomeScreen, icon: Home },
+    { name: 'Reports', component: Report, icon: BarChart3 },
+    { name: 'Profile', component: ProfileSettings, icon: CircleUserRound },
+  ],
+
+  MarketingExecutive: [
+    { name: 'Dashboard', component: RetailerDashboard, icon: LayoutDashboard },
+    { name: 'Home', component: HomeScreen, icon: Home },
+    { name: 'Reports', component: Report, icon: BarChart3 },
+    { name: 'Profile', component: ProfileSettings, icon: CircleUserRound },
+  ],
+
   Distributor: [
     {
       name: 'Dashboard',
@@ -129,6 +143,6 @@ const BottomTabs = ({ route }) => {
       ))}
     </Tab.Navigator>
   );
-}; 
+};
 
 export default BottomTabs;

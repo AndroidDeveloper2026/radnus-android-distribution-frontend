@@ -121,7 +121,7 @@ const AdminDashboard = ({ navigation }) => {
 
           <TouchableOpacity
             style={styles.navItem}
-            onPress={() => navigation.navigate("TerritoryManagement")}
+            onPress={() => navigation.navigate("TerritoryMapping")}
           >
             <Text style={styles.navTitle}>Territory Management</Text>
             <Text style={styles.navSubTitle}>

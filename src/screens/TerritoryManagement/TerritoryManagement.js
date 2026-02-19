@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -10,38 +10,43 @@ import {
 } from 'react-native';
 import styles from './TerritoryManagementStyle';
 import Header from '../../components/Header';
+import { useDispatch, useSelector } from 'react-redux';
+import { addDistrict, addTaluk } from '../../services/features/Territory/TerritorySlice';
+import { fetchTerritory } from '../../services/features/Territory/TerritorySlice';
+
+
+
 
 // 🔐 Example role (replace from login)
 const userRole = 'super_admin';
 // super_admin | admin | manager
 
 const TerritoryManagement = () => {
+
+  const dispatch = useDispatch();
+const { data } = useSelector(state => state.territory);
+
   const [expandedDistrict, setExpandedDistrict] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [formType, setFormType] = useState(''); // district | taluk
   const [selectedDistrict, setSelectedDistrict] = useState(null);
   const [name, setName] = useState('');
 
-  const [territoryData, setTerritoryData] = useState([
-    {
-      districtId: 'D01',
-      districtName: 'Chennai',
-      active: true,
-      taluks: [
-        { talukId: 'T01', talukName: 'Egmore', active: true },
-        { talukId: 'T02', talukName: 'Mylapore', active: false },
-      ],
-    },
-    {
-      districtId: 'D02',
-      districtName: 'Coimbatore',
-      active: true,
-      taluks: [
-        { talukId: 'T03', talukName: 'Pollachi', active: true },
-        { talukId: 'T04', talukName: 'Mettupalayam', active: true },
-      ],
-    },
-  ]);
+  useEffect(() => {
+    dispatch(fetchTerritory());
+  },[dispatch]);
+
+    // 🔥 Convert API → UI format
+  const formattedData = Object.keys(data?.TamilNadu || {}).map(
+    (districtName, index) => ({
+      districtId: `D${index}`,
+      districtName,
+      taluks: data.TamilNadu[districtName].map((t, i) => ({
+        talukId: `T${i}`,
+        talukName: t.taluk,
+      })),
+    })
+  );
 
   const toggleDistrict = id => {
     setExpandedDistrict(expandedDistrict === id ? null : id);
@@ -62,42 +67,71 @@ const TerritoryManagement = () => {
   };
 
   const saveTerritory = () => {
-    if (!name.trim()) return;
+  if (!name.trim()) return;
 
-    if (formType === 'district') {
-      setTerritoryData([
-        ...territoryData,
-        {
-          districtId: `D${Date.now()}`,
-          districtName: name,
-          active: true,
-          taluks: [],
-        },
-      ]);
-    }
+  if (formType === 'district') {
+    dispatch(
+      addDistrict({
+        state: 'TamilNadu',
+        district: name,
+      })
+    );
+  }
 
-    if (formType === 'taluk' && selectedDistrict) {
-      setTerritoryData(
-        territoryData.map(d =>
-          d.districtId === selectedDistrict.districtId
-            ? {
-                ...d,
-                taluks: [
-                  ...d.taluks,
-                  {
-                    talukId: `T${Date.now()}`,
-                    talukName: name,
-                    active: true,
-                  },
-                ],
-              }
-            : d,
-        ),
-      );
-    }
+  if (formType === 'taluk' && selectedDistrict) {
+    dispatch(
+      addTaluk({
+        state: 'TamilNadu',
+        district: selectedDistrict.districtName,
+        taluk: name,
+      })
+    );
+  }
 
-    setModalVisible(false);
-  };
+  setModalVisible(false);
+  setName('');
+};
+
+
+  // const saveTerritory = () => {
+  //   if (!name.trim()) return;
+
+  //   if (formType === 'district') {
+  //     setTerritoryData([
+  //       ...territoryData,
+  //       {
+  //         districtId: `D${Date.now()}`,
+  //         districtName: name,
+  //         active: true,
+  //         taluks: [],
+  //       },
+  //     ]);
+  //   }
+
+  //   if (formType === 'taluk' && selectedDistrict) {
+  //     setTerritoryData(
+  //       territoryData.map(d =>
+  //         d.districtId === selectedDistrict.districtId
+  //           ? {
+  //               ...d,
+  //               taluks: [
+  //                 ...d.taluks,
+  //                 {
+  //                   talukId: `T${Date.now()}`,
+  //                   talukName: name,
+  //                   active: true,
+  //                 },
+  //               ],
+  //             }
+  //           : d,
+  //       ),
+  //     );
+  //   }
+
+  //   setModalVisible(false);
+  // };
+
+  
 
   return (
     <View style={styles.container}>
@@ -119,77 +153,54 @@ const TerritoryManagement = () => {
       )}
 
       <ScrollView contentContainerStyle={styles.content}>
-        {territoryData.map(district => (
+        {formattedData.map(district => (
           <View key={district.districtId} style={styles.card}>
-            {/* DISTRICT */}
+
             <TouchableOpacity
               style={styles.districtRow}
               onPress={() => toggleDistrict(district.districtId)}
             >
-              <Text style={styles.districtName}>{district.districtName}</Text>
-              <Text
-                style={[styles.status, !district.active && styles.inactive]}
-              >
-                {district.active ? 'ACTIVE' : 'INACTIVE'}
+              <Text style={styles.districtName}>
+                {district.districtName}
               </Text>
             </TouchableOpacity>
 
-            {/* TALUKS */}
             {expandedDistrict === district.districtId &&
               district.taluks.map(taluk => (
                 <View key={taluk.talukId} style={styles.talukRow}>
-                  <Text style={styles.talukName}>{taluk.talukName}</Text>
-                  <Text
-                    style={[styles.status, !taluk.active && styles.inactive]}
-                  >
-                    {taluk.active ? 'ACTIVE' : 'INACTIVE'}
-                  </Text>
+                  <Text>{taluk.talukName}</Text>
                 </View>
               ))}
 
-            {/* ADD TALUK */}
-            {expandedDistrict === district.districtId &&
-              userRole !== 'manager' && (
-                <TouchableOpacity
-                  style={styles.addTalukButton}
-                  onPress={() => openAddTaluk(district)}
-                >
-                  <Text style={styles.addTalukText}>+ Add Taluk</Text>
-                </TouchableOpacity>
-              )}
+            {expandedDistrict === district.districtId && (
+              <TouchableOpacity
+                onPress={() => openAddTaluk(district)}
+              >
+                <Text style={{ color: 'green' }}>+ Add Taluk</Text>
+              </TouchableOpacity>
+            )}
           </View>
         ))}
       </ScrollView>
 
       {/* MODAL */}
-      <Modal transparent visible={modalVisible} animationType="fade">
+      <Modal visible={modalVisible} transparent>
         <View style={styles.overlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>
+            <Text>
               {formType === 'district' ? 'Add District' : 'Add Taluk'}
             </Text>
 
             <TextInput
-              placeholder={
-                formType === 'district' ? 'District name' : 'Taluk name'
-              }
-              style={styles.input}
+              placeholder="Enter name"
               value={name}
               onChangeText={setName}
+              style={styles.input}
             />
 
-            <View style={styles.modalActions}>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Text style={styles.cancelText}>Cancel</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.saveButton}
-                onPress={saveTerritory}
-              >
-                <Text style={styles.saveButtonText}>Save</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity  style={styles.primaryButton} onPress={saveTerritory}>
+              <Text>Save</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>

@@ -38,6 +38,7 @@ import Forgotpassword from '../screens/Auth/ForgotPassword';
 // import AdminRegister from '../screens/Auth/AdminRegister';
 import Reports from '../screens/Common/Reports';
 import TermsConditions from '../screens/Common/TermsConditions';
+import TerritoryMapping from '../screens/TerritoryManagement/TerritoryMappingScreen';
 //-- checking --
 import AdminDashboardScreen from '../screens/AdminDashboard/AdminDashboardScreen';
 import { useSelector } from 'react-redux';
@@ -178,6 +179,12 @@ const StackNavigator = () => {
           <Stack.Screen
             name="TerritoryManagement"
             component={TerritoryManagement}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="TerritoryMapping"
+            component={TerritoryMapping}
             options={{ headerShown: false }}
           />
 

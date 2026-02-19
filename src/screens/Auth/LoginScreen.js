@@ -141,10 +141,28 @@ const LoginScreen = ({ navigation }) => {
                   // selectionColor={'#ffffff'}
                   onValueChange={handleChange('role')}
                 >
-                  <Picker.Item label="Select Role" value="" color='#000000'/>
-                  <Picker.Item label="Distributor" value="Distributor" color='#000000'/>
-                  <Picker.Item label="FSE" value="FSE" color='#000000'/>
-                  <Picker.Item label="Retailer" value="Retailer" color='#000000'/>
+                  <Picker.Item label="Select Role" value="" color="#000000" />
+                  <Picker.Item
+                    label="Distributor"
+                    value="Distributor"
+                    color="#000000"
+                  />
+                  <Picker.Item label="FSE" value="FSE" color="#000000" />
+                  <Picker.Item
+                    label="Retailer"
+                    value="Retailer"
+                    color="#000000"
+                  />
+                  <Picker.Item
+                    label="Marketing Manager"
+                    value="MarketingManager"
+                    color="#000"
+                  />
+                  <Picker.Item
+                    label="Marketing Executive"
+                    value="MarketingExecutive"
+                    color="#000"
+                  />
                 </Picker>
               </View>
               {touched.role && errors.role && (
