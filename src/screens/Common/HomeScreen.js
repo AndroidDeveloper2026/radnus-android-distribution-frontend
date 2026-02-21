@@ -1,4 +1,4 @@
-import React from "react";
+// import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,15 +6,22 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import styles from "./HomeScreenStyle";
 import Header from "../../components/Header";
 import { Search, Filter } from "lucide-react-native";
+import { useState } from "react";
 
+/* ------------------ CATEGORY DATA ------------------ */
+const CATEGORIES = ["All", "Chargers", "Cables", "Bluetooth", "Ear Buds", "Speakers", "Battery"];
+
+/* ------------------ PRODUCT DATA ------------------ */
 const PRODUCT_DATA = [
   {
     id: "1",
     name: "Samsung Charger",
+    category: "Chargers",
     price: 850,
     mrp: 999,
     stock: 120,
@@ -24,6 +31,7 @@ const PRODUCT_DATA = [
   {
     id: "2",
     name: "Bluetooth Headset",
+    category: "Headsets",
     price: 2150,
     mrp: 2500,
     stock: 25,
@@ -33,6 +41,7 @@ const PRODUCT_DATA = [
   {
     id: "3",
     name: "Mobile Cover",
+    category: "Covers",
     price: 350,
     mrp: 499,
     stock: 0,
@@ -42,6 +51,7 @@ const PRODUCT_DATA = [
   {
     id: "4",
     name: "Mobile Cover",
+    category: "Covers",
     price: 350,
     mrp: 499,
     stock: 0,
@@ -51,6 +61,23 @@ const PRODUCT_DATA = [
 ];
 
 const HomeScreen = ({ navigation }) => {
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchText, setSearchText] = useState("");
+
+  /* ------------------ FILTER LOGIC ------------------ */
+  const filteredData = PRODUCT_DATA.filter((item) => {
+    const matchCategory =
+      selectedCategory === "All" ||
+      item.category === selectedCategory;
+
+    const matchSearch = item.name
+      .toLowerCase()
+      .includes(searchText.toLowerCase());
+
+    return matchCategory && matchSearch;
+  });
+
+  /* ------------------ PRODUCT CARD ------------------ */
   const renderItem = ({ item }) => (
     <TouchableOpacity
       style={styles.card}
@@ -87,13 +114,15 @@ const HomeScreen = ({ navigation }) => {
     <View style={styles.container}>
       <Header title="Product Catalog" />
 
-      {/* SEARCH + FILTER */}
+      {/* ------------------ SEARCH + FILTER ------------------ */}
       <View style={styles.searchRow}>
         <View style={styles.searchBox}>
           <Search size={16} color="#777" />
           <TextInput
             placeholder="What are you looking for?"
             style={styles.searchInput}
+            value={searchText}
+            onChangeText={setSearchText}
           />
         </View>
 
@@ -102,9 +131,36 @@ const HomeScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* PRODUCT GRID */}
+      {/* ------------------ CATEGORY TABS ------------------ */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.categoryContainer}
+      >
+        {CATEGORIES.map((cat, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[
+              styles.categoryTab,
+              selectedCategory === cat && styles.activeTab,
+            ]}
+            onPress={() => setSelectedCategory(cat)}
+          >
+            <Text
+              style={[
+                styles.categoryText,
+                selectedCategory === cat && styles.activeText,
+              ]}
+            >
+              {cat}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      {/* ------------------ PRODUCT GRID ------------------ */}
       <FlatList
-        data={PRODUCT_DATA}
+        data={filteredData}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         numColumns={2}

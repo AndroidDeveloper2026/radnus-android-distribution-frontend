@@ -9,6 +9,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { useSelector, useDispatch } from 'react-redux';
 import { adminLogin } from '../../services/features/auth/adminAuthSlice';
+import showToast from '../../utils/toast';
 
 const AdminValidationSchema = Yup.object().shape({
   emailID: Yup.string()
@@ -30,7 +31,8 @@ const AdminScreen = ({ navigation }) => {
 
   useEffect(() => {
     if (token) {
-      // navigation.replace('AdminDashboard');
+      showToast('Successfully login','short')
+      
       navigation.replace('MainTabs', {
         role: 'Admin',
       });

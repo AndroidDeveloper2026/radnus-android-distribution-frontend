@@ -138,6 +138,8 @@ const AddProduct = ({ navigation }) => {
             <Picker.Item label="Handsfree" value="Handsfree" />
             <Picker.Item label="Bluetooth Neckband" value="Bluetooth Neckband" />
             <Picker.Item label="Ear Buds" value="Ear Buds" />
+            <Picker.Item label="Speakers" value="Speakers" />
+            <Picker.Item label="Radnus Battery" value="Speakers" />
           </Picker>
         </View>
 

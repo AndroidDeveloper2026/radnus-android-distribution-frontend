@@ -12,14 +12,14 @@ import { setToken, clearToken } from '../../AuthStorage/authStorgage';
 export const adminLogin = createAsyncThunk(
   'auth/admin',
   async (data, { rejectWithValue }) => {
-    console.log('--- Adminlogin (data) ---', data);
+    // console.log('--- Adminlogin (data) ---', data);
     try {
       const res = await API.post('/api/auth/admin', data);
-      console.log('--- Adminlogin (res.data) ---', res.data);
+      // console.log('--- Adminlogin (res.data) ---', res.data);
       await setToken(res.data.token);
       return res.data;
     } catch (err) {
-      console.log('--- Adminlogin (error) ---', err);
+      // console.log('--- Adminlogin (error) ---', err);
       return rejectWithValue(err.response.data.message);
     }
   },

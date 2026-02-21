@@ -1,25 +1,25 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#F3F4F6",
+    // flex: 1,
+    backgroundColor: '#F3F4F6',
   },
 
   searchRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
     padding: 16,
-    alignItems: "center",
+    alignItems: 'center',
   },
 
   searchBox: {
     flex: 1,
-    flexDirection: "row",
-    backgroundColor: "#FFFFFF",
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    alignItems: "center",
+    alignItems: 'center',
     // elevation: 2,
   },
 
@@ -31,7 +31,7 @@ export default StyleSheet.create({
 
   filterBtn: {
     marginLeft: 10,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#FFFFFF',
     padding: 12,
     borderRadius: 12,
     // elevation: 2,
@@ -43,12 +43,12 @@ export default StyleSheet.create({
   },
 
   row: {
-    justifyContent: "space-between",
+    justifyContent: 'space-between',
   },
 
   card: {
-    backgroundColor: "#FFFFFF",
-    width: "48%",
+    backgroundColor: '#FFFFFF',
+    width: '48%',
     borderRadius: 16,
     padding: 12,
     marginBottom: 12,
@@ -56,46 +56,72 @@ export default StyleSheet.create({
   },
 
   image: {
-    width: "100%",
+    width: '100%',
     height: 120,
     borderRadius: 12,
     marginBottom: 8,
-    backgroundColor: "#EEE",
+    backgroundColor: '#EEE',
   },
 
   name: {
     fontSize: 13,
-    fontWeight: "700",
-    color: "#212121",
+    fontWeight: '700',
+    color: '#212121',
   },
 
   price: {
     fontSize: 14,
-    fontWeight: "700",
-    color: "#D32F2F",
+    fontWeight: '700',
+    color: '#D32F2F',
     marginTop: 4,
   },
 
   mrp: {
     fontSize: 11,
-    color: "#999",
-    textDecorationLine: "line-through",
+    color: '#999',
+    textDecorationLine: 'line-through',
   },
 
   stock: {
     fontSize: 11,
-    color: "#2E7D32",
+    color: '#2E7D32',
     marginTop: 4,
   },
 
   outStock: {
-    color: "#D32F2F",
+    color: '#D32F2F',
   },
 
   moq: {
     fontSize: 11,
-    color: "#777",
+    color: '#777',
     marginTop: 2,
   },
-});
 
+  categoryContainer: {
+    marginVertical: 10,
+    paddingHorizontal: 10,
+  },
+
+  categoryTab: {
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    backgroundColor: '#eee',
+    borderRadius: 20,
+    marginRight: 10,
+  },
+
+  activeTab: {
+    backgroundColor: '#D32F2F',
+  },
+
+  categoryText: {
+    fontSize: 13,
+    color: '#333',
+  },
+
+  activeText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+});

@@ -1,9 +1,21 @@
 import { Text, TouchableOpacity, View } from 'react-native';
 import React from 'react';
 import SelectRoleStyle from './SelectRoleStyle';
+import messaging from '@react-native-firebase/messaging';
+import { PermissionsAndroid, Platform } from 'react-native';
 
 const SelectRoleScreen = ({ navigation }) => {
-  const handleUserLogin = () => {
+  const requestPermission = async () => {
+    if (Platform.OS === 'android') {
+      await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+      );
+    }
+
+    await messaging().requestPermission();
+  };
+  const handleUserLogin = async () => {
+     await requestPermission(); 
     navigation.navigate('Login');
     // navigation.navigate('AdminRegister');
 
@@ -16,7 +28,7 @@ const SelectRoleScreen = ({ navigation }) => {
     // navigation.navigate('OrderCart');
     // navigation.navigate('OrderSuccess');
     // navigation.navigate('TerritoryManagement');
-    
+
     // navigation.navigate('RetailerList');
     // navigation.navigate('RetailerProfile');
     // navigation.navigate('RetailerSalesTab');
@@ -28,20 +40,20 @@ const SelectRoleScreen = ({ navigation }) => {
     // navigation.navigate('EditProfile');
 
     //  navigation.navigate('RetailerOnboarding');
-      // navigation.navigate('EndDaySummary');
-      //  navigation.navigate('StockVisibility');
-      //  navigation.navigate('RetailerDashboard');
-      //  navigation.navigate('DistributorDashboard');
-      //  navigation.navigate('OrderBilling');
-      //  navigation.navigate('HomeScreen');
-      // navigation.navigate('AdminRegister');
-      // navigation.navigate('Reports');
+    // navigation.navigate('EndDaySummary');
+    //  navigation.navigate('StockVisibility');
+    //  navigation.navigate('RetailerDashboard');
+    //  navigation.navigate('DistributorDashboard');
+    //  navigation.navigate('OrderBilling');
+    //  navigation.navigate('HomeScreen');
+    // navigation.navigate('AdminRegister');
+    // navigation.navigate('Reports');
 
-      //  navigation.navigate('TermsConditions');
-    
+    //  navigation.navigate('TermsConditions');
   };
 
-  const handleAdminLogin = () => {
+  const handleAdminLogin = async () => {
+      await requestPermission(); 
     navigation.navigate('Admin');
     // navigation.navigate('AdminRegister');
   };

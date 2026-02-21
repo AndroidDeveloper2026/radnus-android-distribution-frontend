@@ -39,6 +39,9 @@ import Forgotpassword from '../screens/Auth/ForgotPassword';
 import Reports from '../screens/Common/Reports';
 import TermsConditions from '../screens/Common/TermsConditions';
 import TerritoryMapping from '../screens/TerritoryManagement/TerritoryMappingScreen';
+import AddTerritory from '../screens/TerritoryManagement/AddTerritory';
+import EditTerritory from '../screens/TerritoryManagement/EditTerritory';
+import Resetpassword from '../screens/Auth/ResetPassword';
 //-- checking --
 import AdminDashboardScreen from '../screens/AdminDashboard/AdminDashboardScreen';
 import { useSelector } from 'react-redux';
@@ -94,6 +97,12 @@ const StackNavigator = () => {
           <Stack.Screen
             name="Forgotpassword"
             component={Forgotpassword}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="Resetpassword"
+            component={Resetpassword}
             options={{ headerShown: false }}
           />
 
@@ -185,6 +194,18 @@ const StackNavigator = () => {
           <Stack.Screen
             name="TerritoryMapping"
             component={TerritoryMapping}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="AddTerritory"
+            component={AddTerritory}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="EditTerritory"
+            component={EditTerritory}
             options={{ headerShown: false }}
           />
 

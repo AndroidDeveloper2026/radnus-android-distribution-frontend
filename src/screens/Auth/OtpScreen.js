@@ -8,12 +8,13 @@ import {
   resendOtp,
   resetOtpState,
 } from '../../services/features/auth/otpSlice';
+import { verifyResetOtp } from '../../services/features/auth/resetOTPSlice'
 
 const OTP_LENGTH = 6;
 const OTP_TIMER = 45;
 
 const OtpScreen = ({ navigation, route }) => {
-  const { mobile } = route.params;
+  const { mobile, email, type } = route.params;
 
   const dispatch = useDispatch();
   const { loading, error, verified } = useSelector(state => state.otp);
@@ -24,7 +25,7 @@ const OtpScreen = ({ navigation, route }) => {
 
   const inputRefs = useRef([]);
 
-//for cehcking useeffect
+  //for cehcking useeffect
   // useEffect(() => {
   //   console.log('Route mobile param:', mobile);
   // });
@@ -53,18 +54,36 @@ const OtpScreen = ({ navigation, route }) => {
     if (verified) {
       Alert.alert('Success', 'OTP verified');
       dispatch(resetOtpState());
+      //   navigation.reset({
+      //     index: 0,
+      //     routes: [{ name: 'Login' }],
+      //   });
 
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Login' }],
-      });
+      //    navigation.navigate('Resetpassword', {
+      //   email,
+      //   otp: otp.join(''),
+      // });
+
+      if (type === 'register') {
+        // ✅ Go to login after signup
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Login' }],
+        });
+      } else if (type === 'reset') {
+        // ✅ Go to reset password
+        navigation.navigate('Resetpassword', {
+          email,
+          otp: otp.join(''),
+        });
+      }
     }
-  }, [verified, dispatch, navigation]);
+  }, [verified, type, email, otp, dispatch, navigation]);
 
   /* ---------------- ERROR HANDLER ---------------- */
   useEffect(() => {
     if (error) {
-      console.log('-- otp error --',error)
+      console.log('-- otp error --', error);
       Alert.alert('OTP Error', error);
       setOtp(Array(OTP_LENGTH).fill(''));
       inputRefs.current[0]?.focus();
@@ -98,21 +117,46 @@ const OtpScreen = ({ navigation, route }) => {
       return;
     }
 
+    // if (type === 'register') {
+    //   dispatch(
+    //     verifyOtp({
+    //       mobile,
+    //       otp: code,
+    //     }),
+    //   );
+    // } else if (type === 'reset') {
+    //   dispatch(
+    //     verifyResetOtp({
+    //       email,
+    //       otp: code,
+    //     }),
+    //   );
+    // }
+
     dispatch(
       verifyOtp({
+        type,
         mobile,
+        email,
         otp: code,
       }),
     );
+
+    // dispatch(verifyResetOtp({ email, otp: code }));
   };
 
   /* ---------------- RESEND OTP ---------------- */
   const resend = () => {
     if (!canResend) return;
-    
-    dispatch(resendOtp({ mobile }));
-    console.log('-- dispatch otp resend (run)--');
-    
+
+  //   if (type === 'register') {
+  //   dispatch(resendOtp({ mobile }));
+  // } else {
+  //   dispatch(resendOtp({ email })); // or create resendResetOtp
+  // }
+
+    dispatch(resendOtp({ mobile, type,email })); 
+
     setOtp(Array(OTP_LENGTH).fill(''));
     setTimer(OTP_TIMER);
     setCanResend(false);
@@ -124,7 +168,10 @@ const OtpScreen = ({ navigation, route }) => {
     <View style={styles.container}>
       {/* HEADER */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
           <LeftArrow width={30} height={30} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Verify OTP</Text>
@@ -132,7 +179,10 @@ const OtpScreen = ({ navigation, route }) => {
 
       <View style={styles.content}>
         <Text style={styles.title}>Enter OTP</Text>
-        <Text style={styles.subtitle}>Sent to +91 {mobile}</Text>
+        <Text style={styles.subtitle}>
+          {type === 'register' ? `Sent to +91 ${mobile}` : `Sent to ${email}`}
+        </Text>
+        {/* <Text style={styles.subtitle}>Sent to +91 {mobile}</Text> */}
 
         {/* OTP INPUT */}
         <View style={styles.otpContainer}>

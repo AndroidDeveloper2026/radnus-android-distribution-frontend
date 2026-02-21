@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import RootNavigator from './src/navigation/RootNavigator';
 // import Config from 'react-native-config';
-import { Alert, PermissionsAndroid, Platform } from 'react-native';
+// import { Alert, PermissionsAndroid, Platform } from 'react-native';
 // import { getMessaging } from '@react-native-firebase/messaging';
 import messaging from '@react-native-firebase/messaging';
 import { Provider } from 'react-redux';
@@ -26,7 +26,7 @@ const App = () => {
   // }, []);
 
   useEffect(() => {
-    requestPermission();
+    // requestPermission();
 
     // Foreground message
     // const unsubscribe = messaging().onMessage(async remoteMessage => {
@@ -69,15 +69,15 @@ const App = () => {
     return unsubscribe;
   }, []);
 
-  const requestPermission = async () => {
-    if (Platform.OS === 'android') {
-      await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-      );
-    }
+  // const requestPermission = async () => {
+  //   if (Platform.OS === 'android') {
+  //     await PermissionsAndroid.request(
+  //       PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+  //     );
+  //   }
 
-    await messaging().requestPermission();
-  };
+  //   await messaging().requestPermission();
+  // };
 
   return (
     <SafeAreaProvider>

@@ -5,6 +5,8 @@ import adminReducer from '../services/features/auth/adminAuthSlice';
 import otpReducer from '../services/features/auth/otpSlice';
 import productReducer from '../services/features/products/productSlice';
 import territoryReducer from '../services/features/Territory/TerritorySlice';
+import verifyResetReducer from '../services/features/auth/resetOTPSlice';
+
 
 export const store = configureStore({
   reducer: {
@@ -14,5 +16,6 @@ export const store = configureStore({
     otp: otpReducer,
     products: productReducer,
     territory: territoryReducer,
+    resetOtp:verifyResetReducer,
   },
 });

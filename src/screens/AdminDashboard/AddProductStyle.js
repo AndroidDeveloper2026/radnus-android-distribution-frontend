@@ -10,43 +10,12 @@ const AddProductStyle = StyleSheet.create({
     backgroundColor: LIGHT_GRAY,
   },
 
-  // header: {
-  //   backgroundColor: RED,
-  // },
-
-  // headerTitle: {
-  //   color: "#fff",
-  //   fontSize: 18,
-  //   fontWeight: "600",
-  // },
-
   form: {
     paddingLeft: 16,
     paddingRight: 16,
     paddingTop: 16,
     paddingBottom: 10,
-    // backgroundColor: RED,
   },
-
-  //   inputContainer: {
-  //     marginBottom: 14,
-  //   },
-
-  //   label: {
-  //     fontSize: 13,
-  //     color: GRAY,
-  //     marginBottom: 6,
-  //   },
-
-  //   input: {
-  //     backgroundColor: "#fff",
-  //     borderRadius: 8,
-  //     paddingHorizontal: 12,
-  //     paddingVertical: 10,
-  //     fontSize: 14,
-  //     borderWidth: 1,
-  //     borderColor: "#E0E0E0",
-  //   },
 
   dropDown: {
     backgroundColor: '#fff', 
@@ -62,7 +31,6 @@ const AddProductStyle = StyleSheet.create({
   saveButton: {
     // flex:1,
     width: '100%',
-    // marginTop: 20,
     backgroundColor: RED,
     paddingVertical: 14,
     borderRadius: 8,

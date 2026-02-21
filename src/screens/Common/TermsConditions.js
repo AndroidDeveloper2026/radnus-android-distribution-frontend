@@ -20,6 +20,7 @@ const TermsConditions = ({ navigation, route }) => {
     if (registerUser.fulfilled.match(result)) {
       navigation.replace('OtpScreen', {
         mobile: registerData.mobile,
+        type: 'register',
       });
     }
   };
