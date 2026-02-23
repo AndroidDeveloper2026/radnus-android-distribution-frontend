@@ -71,7 +71,7 @@ const DistributorDashboard = ({ navigation }) => {
         <QuickAction
           icon={<Package size={18} color="#D32F2F" />}
           label="Stock Summary"
-          onPress={() => navigation.navigate("StockSummary")}
+          onPress={() => navigation.navigate("StockVisibility")}
         />
 
         <QuickAction
@@ -83,7 +83,7 @@ const DistributorDashboard = ({ navigation }) => {
         <QuickAction
           icon={<ClipboardList size={18} color="#2E7D32" />}
           label="Retailer Orders"
-          onPress={() => navigation.navigate("Orders")}
+          onPress={() => navigation.navigate("Order")}
         />
 
         <QuickAction

@@ -6,7 +6,7 @@ const FSEDashboardStyle = StyleSheet.create({
     backgroundColor: '#F4F5F7',
   },
 
-  /* 🔴 HEADER */
+  /* HEADER */
   header: {
     height: 56,
     backgroundColor: '#D32F2F',

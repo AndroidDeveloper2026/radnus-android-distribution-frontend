@@ -3,31 +3,37 @@ import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import styles from './ForgotPasswordStyle';
 import API from '../../services/API/api';
 import LeftArrow from '../../assets/svg/white-left-arrow.svg';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
+
+const validationSchema = Yup.object().shape({
+  email: Yup.string()
+    .trim()
+    .email('Enter a valid email')
+    .required('Email is required'),
+});
 
 const ForgotPassword = ({ navigation }) => {
-  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleBackBtn = () => {
     navigation.goBack();
   };
 
-  const submit = async () => {
-    console.log('--- forgotpassword ---', email);
-    if (!email) {
-      Alert.alert('Error', 'Enter email');
-      return;
-    }
-
+  const handleSubmit = async values => {
     try {
       setLoading(true);
-      console.log('Before API');
-      const res = await API.post('/api/auth/forgot-password', { email });
-      console.log('After API');
-      console.log('--- forgotpassword  (try) ---', email);
-      console.log("OTP FROM BACKEND:", res.data.otp);
 
-      navigation.navigate('OtpScreen', { email, type: 'reset' });
+     const res = await API.post('/api/auth/forgot-password', {
+        email: values.email,
+      });
+
+      if (res.data.success) {
+      navigation.navigate('OtpScreen', {
+        email: values.email,
+        type: 'reset',
+      });
+    }
     } catch (err) {
       Alert.alert(
         'Error',
@@ -46,29 +52,61 @@ const ForgotPassword = ({ navigation }) => {
         </TouchableOpacity>
         <Text style={styles.title}>Forgot Password</Text>
       </View>
-      <View style={styles.card}>
-        <Text style={styles.subText}>
-          Enter your registered email to receive a reset link
-        </Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Enter email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-        />
+      <Formik
+        initialValues={{ email: '' }}
+        validationSchema={validationSchema}
+        onSubmit={handleSubmit}
+        validateOnChange={false}
+        validateOnBlur={true}
+      >
+        {({
+          handleChange,
+          handleBlur,
+          handleSubmit,
+          values,
+          errors,
+          touched,
+        }) => (
+          <View style={styles.card}>
+            <Text style={styles.subText}>
+              Enter your registered email to receive a reset link
+            </Text>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={submit}
-          disabled={loading}
-        >
-          <Text style={styles.buttonText}>
-            {loading ? 'Sending...' : 'Send Reset Link'}
-          </Text>
-        </TouchableOpacity>
-      </View>
+            {/* Email Input */}
+            <TextInput
+              style={[
+                styles.input,
+                errors.email && touched.email ? { borderColor: 'red' } : null,
+              ]}
+              placeholder="Enter email"
+              value={values.email}
+              onChangeText={handleChange('email')}
+              onBlur={handleBlur('email')}
+              autoCapitalize="none"
+            />
+
+            {/* Error Message */}
+            {errors.email && touched.email && (
+              <Text style={{ color: 'red', marginTop: 5 }}>{errors.email}</Text>
+            )}
+
+            {/* Button */}
+            <TouchableOpacity
+              style={[
+                styles.button,
+                (loading || !values.email || errors.email) && { opacity: 0.5 },
+              ]}
+              onPress={handleSubmit}
+              disabled={loading || !values.email || !!errors.email}
+            >
+              <Text style={styles.buttonText}>
+                {loading ? 'Sending...' : 'Send Reset Link'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </Formik>
     </View>
   );
 };

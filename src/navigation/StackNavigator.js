@@ -42,6 +42,7 @@ import TerritoryMapping from '../screens/TerritoryManagement/TerritoryMappingScr
 import AddTerritory from '../screens/TerritoryManagement/AddTerritory';
 import EditTerritory from '../screens/TerritoryManagement/EditTerritory';
 import Resetpassword from '../screens/Auth/ResetPassword';
+import DistributorOnboardList from '../screens/Distributor/DistributorOnboardList';
 //-- checking --
 import AdminDashboardScreen from '../screens/AdminDashboard/AdminDashboardScreen';
 import { useSelector } from 'react-redux';
@@ -236,6 +237,12 @@ const StackNavigator = () => {
           <Stack.Screen
             name="DistributorOnboarding"
             component={DistributorOnboarding}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="DistributorOnboardList"
+            component={DistributorOnboardList}
             options={{ headerShown: false }}
           />
 

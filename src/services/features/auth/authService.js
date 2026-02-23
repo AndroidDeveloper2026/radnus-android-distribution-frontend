@@ -10,7 +10,6 @@ const register = async userData => {
 //Login
 const login = async userData => {
   const res = await API.post('/api/auth/login', userData);
-   console.log('--- login (userData) ---',userData)
   if (res.data.token) {
     await AsyncStorage.setItem('token', res.data.token);
   }

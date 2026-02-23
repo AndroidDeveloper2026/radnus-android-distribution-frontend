@@ -6,7 +6,7 @@ const FSEHomeStyles = StyleSheet.create({
     backgroundColor: '#ebeaea',
   },
 
-  /* 🔴 TOP BAR */
+  /* TOP BAR */
   header: {
     height: 56,
     backgroundColor: '#D32F2F',

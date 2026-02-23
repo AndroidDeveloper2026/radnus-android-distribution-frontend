@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  SafeAreaView,
   TextInput,
   TouchableOpacity,
   Alert,
@@ -38,7 +37,7 @@ const RetailerProfile = ({ route, navigation }) => {
   });
 
   var Status = "APPROVED";
-  // 🔒 BLOCK UNAPPROVED RETAILERS (retailer.status !== "APPROVED")
+  // BLOCK UNAPPROVED RETAILERS (retailer.status !== "APPROVED")
   if (Status !== "APPROVED") {
     Alert.alert("Access Denied", "Retailer not approved yet", [
       { text: "OK", onPress: () => navigation.goBack() },
@@ -66,12 +65,6 @@ const RetailerProfile = ({ route, navigation }) => {
       
         <Header  title={'Retailer Profile'}/>
       <ScrollView contentContainerStyle={styles.scroll}>
-        {/* HEADER */}
-        {/* <View style={styles.header}>
-          <Text style={styles.headerTitle}>Retailer Profile</Text>
-          <Text style={styles.headerStatus}>Status: APPROVED</Text>
-        </View> */}
-
 
         {/* PROFILE CARD */}
         <View style={styles.card}>

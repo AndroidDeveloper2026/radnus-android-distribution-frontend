@@ -6,7 +6,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
 
-  /* ❌ BLOCKED */
+  /* BLOCKED */
   blockedText: {
     marginTop: 32,
     textAlign: 'center',
@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  /* 🔴 SUMMARY – HERO CARD */
+  /* SUMMARY – HERO CARD */
   summaryCard: {
     backgroundColor: '#D32F2F', // BLACK HERO
     borderRadius: 18,
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  /* 🧾 SALES CARD */
+  /* SALES CARD */
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 
-  /* 🏷️ CHIP STYLE (OPTIONAL EXTENSION) */
+  /* CHIP STYLE (OPTIONAL EXTENSION) */
   chip: {
     marginTop: 10,
     alignSelf: 'flex-start',

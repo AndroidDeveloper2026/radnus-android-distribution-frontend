@@ -88,7 +88,7 @@ const AdminDashboard = ({ navigation }) => {
 
           <TouchableOpacity
             style={styles.navItem}
-            onPress={() => navigation.navigate("AdminApprovals")}
+            onPress={() => navigation.navigate("DistributorOnboardList")}
           >
             <Text style={styles.navTitle}>Pending Approvals</Text>
             <Text style={styles.navSubTitle}>

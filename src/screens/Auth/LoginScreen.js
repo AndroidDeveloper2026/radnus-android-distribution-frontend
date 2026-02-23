@@ -28,13 +28,12 @@ const LoginScreen = ({ navigation }) => {
   };
 
   const onSubmitLogin = (values, { setSubmitting, setErrors }) => {
-    console.log('--- loginform (values) ---', values);
+    // console.log('--- loginform (values) ---', values);
 
     dispatch(
       loginUser({
         email: values?.email.trim(),
         password: values?.password.trim(),
-        // role: values.role,
       }),
     )
       .unwrap()

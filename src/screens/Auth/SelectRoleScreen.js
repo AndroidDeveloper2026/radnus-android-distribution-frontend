@@ -55,7 +55,6 @@ const SelectRoleScreen = ({ navigation }) => {
   const handleAdminLogin = async () => {
       await requestPermission(); 
     navigation.navigate('Admin');
-    // navigation.navigate('AdminRegister');
   };
 
   return (

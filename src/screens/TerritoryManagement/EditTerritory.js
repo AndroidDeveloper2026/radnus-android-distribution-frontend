@@ -39,7 +39,7 @@ const EditTerritory = ({ route, navigation }) => {
   }, [territory]);
 
   const onChange = (key, value) => {
-    setForm({ ...form, [key]: value });
+     setForm(prev => ({ ...prev, [key]: value }));
   };
 
   const submit = async () => {

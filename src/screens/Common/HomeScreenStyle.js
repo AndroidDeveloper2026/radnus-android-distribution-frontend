@@ -16,7 +16,7 @@ export default StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    borderRadius: 25,
     paddingHorizontal: 12,
     paddingVertical: 10,
     alignItems: 'center',
@@ -38,7 +38,9 @@ export default StyleSheet.create({
   },
 
   list: {
+    // backgroundColor:'black',
     paddingHorizontal: 12,
+    paddingVertical:10,
     paddingBottom: 30,
   },
 
@@ -56,7 +58,7 @@ export default StyleSheet.create({
   },
 
   image: {
-    width: '100%',
+    // width: '100%',
     height: 120,
     borderRadius: 12,
     marginBottom: 8,
@@ -104,10 +106,10 @@ export default StyleSheet.create({
   },
 
   categoryTab: {
-    paddingVertical: 6,
+    paddingVertical: 10,
     paddingHorizontal: 14,
     backgroundColor: '#eee',
-    borderRadius: 20,
+    borderRadius: 14,
     marginRight: 10,
   },
 

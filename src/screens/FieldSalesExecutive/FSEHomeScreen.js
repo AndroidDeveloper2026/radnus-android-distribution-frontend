@@ -20,7 +20,7 @@ const FSEHomeScreen = ({ navigation }) => {
     requestLocationPermission();
   }, );
 
-  // 📍 REQUEST GPS PERMISSION
+  //  REQUEST GPS PERMISSION
   const requestLocationPermission = async () => {
     if (Platform.OS === "android") {
       try {
@@ -41,7 +41,7 @@ const FSEHomeScreen = ({ navigation }) => {
     }
   };
 
-  // 📍 GET CURRENT LOCATION
+  //  GET CURRENT LOCATION
   const getCurrentLocation = () => {
     Geolocation.getCurrentPosition(
       (position) => {
@@ -74,7 +74,7 @@ const FSEHomeScreen = ({ navigation }) => {
 
     console.log("Attendance Payload:", payload);
 
-    // 🔐 CALL ATTENDANCE API HERE
+    //  CALL ATTENDANCE API HERE
 
     setTimeout(() => {
       setAttendanceMarked(true);
@@ -91,10 +91,6 @@ const FSEHomeScreen = ({ navigation }) => {
 
   return (
     <View style={FSEHomeStyles.container}>
-      {/* 🔴 HEADER */}
-      {/* <View style={FSEHomeStyles.header}>
-        <Text style={FSEHomeStyles.headerTitle}>Start Day</Text>
-      </View> */}
 
       <Header title = {'Start Day'} showBackArrow={false}/>
 

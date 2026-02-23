@@ -16,16 +16,6 @@ import locationData from '../../utils/locationData';
 //svg
 import LeftArrow from '../../assets/svg/white-left-arrow.svg';
 
-// const locationData = {
-//   TamilNadu: {
-//     Chennai: ['Egmore', 'T Nagar'],
-//     Madurai: ['Thirumangalam', 'Melur'],
-//   },
-//   Karnataka: {
-//     Bangalore: ['Yelahanka', 'Whitefield'],
-//     Mysore: ['Nanjangud', 'KR Nagar'],
-//   },
-// };
 
 const RegisterSchema = Yup.object().shape({
   role: Yup.string().required('Role is required'),
@@ -72,20 +62,10 @@ const RegisterScreen = ({ navigation }) => {
           }}
           validationSchema={RegisterSchema}
           onSubmit={async values => {
-            // const result = await dispatch(registerUser(values));
-
-            // if(registerUser.fulfilled.match(result)){
-            //   navigation.navigate('OtpScreen',{
-            //     mobile:values.mobile,
-            //   });
-            // }
-
             navigation.navigate('TermsConditions', {
               registerData: values,
             });
 
-            console.log('Register Payload:', values);
-            // navigation.navigate('OtpScreen');
           }}
         >
           {({

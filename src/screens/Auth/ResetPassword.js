@@ -28,14 +28,12 @@ const ResetPassword = ({ route, navigation }) => {
 
     try {
       setLoading(true);
-      console.log('--- RESET DATA:----', { email, otp, password });
       const res = await API.post('/api/auth/reset-password', {
         email,
         otp,
         password: password.trim(),
       });
 
-      console.log('---RESET RESPONSE:---', res.data);
       Alert.alert('Success', 'Password reset successful');
 
       navigation.reset({

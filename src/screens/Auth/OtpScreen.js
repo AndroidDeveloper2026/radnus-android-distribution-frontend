@@ -8,7 +8,7 @@ import {
   resendOtp,
   resetOtpState,
 } from '../../services/features/auth/otpSlice';
-import { verifyResetOtp } from '../../services/features/auth/resetOTPSlice'
+// import { verifyResetOtp } from '../../services/features/auth/resetOTPSlice'
 
 const OTP_LENGTH = 6;
 const OTP_TIMER = 45;
@@ -25,17 +25,7 @@ const OtpScreen = ({ navigation, route }) => {
 
   const inputRefs = useRef([]);
 
-  //for cehcking useeffect
-  // useEffect(() => {
-  //   console.log('Route mobile param:', mobile);
-  // });
 
-  // useEffect(() => {
-  //   console.log('Reset OTP state');
-  //   dispatch(resetOtpState());
-  // }, [dispatch]);
-
-  /* ---------------- TIMER ---------------- */
   useEffect(() => {
     if (timer === 0) {
       setCanResend(true);
@@ -54,24 +44,16 @@ const OtpScreen = ({ navigation, route }) => {
     if (verified) {
       Alert.alert('Success', 'OTP verified');
       dispatch(resetOtpState());
-      //   navigation.reset({
-      //     index: 0,
-      //     routes: [{ name: 'Login' }],
-      //   });
 
-      //    navigation.navigate('Resetpassword', {
-      //   email,
-      //   otp: otp.join(''),
-      // });
 
       if (type === 'register') {
-        // ✅ Go to login after signup
+        // Go to login after signup
         navigation.reset({
           index: 0,
           routes: [{ name: 'Login' }],
         });
       } else if (type === 'reset') {
-        // ✅ Go to reset password
+        // Go to reset password
         navigation.navigate('Resetpassword', {
           email,
           otp: otp.join(''),
@@ -83,7 +65,7 @@ const OtpScreen = ({ navigation, route }) => {
   /* ---------------- ERROR HANDLER ---------------- */
   useEffect(() => {
     if (error) {
-      console.log('-- otp error --', error);
+
       Alert.alert('OTP Error', error);
       setOtp(Array(OTP_LENGTH).fill(''));
       inputRefs.current[0]?.focus();
@@ -92,7 +74,6 @@ const OtpScreen = ({ navigation, route }) => {
 
   /* ---------------- OTP INPUT ---------------- */
   const handleOtpChange = (value, index) => {
-    //  console.log("--- Digit typed: ---", value, "at index:", index);
     if (!/^\d?$/.test(value)) return;
 
     const updatedOtp = [...otp];
@@ -107,31 +88,11 @@ const OtpScreen = ({ navigation, route }) => {
   /* ---------------- VERIFY OTP ---------------- */
   const submitOtp = () => {
     const code = otp.join('');
-
-    console.log('--- OTP array: ---', otp);
-    console.log('--- Final OTP code: ---', code);
-    console.log('--- Mobile sent:---', mobile);
-
     if (code.length !== OTP_LENGTH) {
       Alert.alert('Error', 'Enter 6-digit OTP');
       return;
     }
 
-    // if (type === 'register') {
-    //   dispatch(
-    //     verifyOtp({
-    //       mobile,
-    //       otp: code,
-    //     }),
-    //   );
-    // } else if (type === 'reset') {
-    //   dispatch(
-    //     verifyResetOtp({
-    //       email,
-    //       otp: code,
-    //     }),
-    //   );
-    // }
 
     dispatch(
       verifyOtp({
@@ -142,18 +103,11 @@ const OtpScreen = ({ navigation, route }) => {
       }),
     );
 
-    // dispatch(verifyResetOtp({ email, otp: code }));
   };
 
   /* ---------------- RESEND OTP ---------------- */
   const resend = () => {
     if (!canResend) return;
-
-  //   if (type === 'register') {
-  //   dispatch(resendOtp({ mobile }));
-  // } else {
-  //   dispatch(resendOtp({ email })); // or create resendResetOtp
-  // }
 
     dispatch(resendOtp({ mobile, type,email })); 
 
@@ -182,7 +136,7 @@ const OtpScreen = ({ navigation, route }) => {
         <Text style={styles.subtitle}>
           {type === 'register' ? `Sent to +91 ${mobile}` : `Sent to ${email}`}
         </Text>
-        {/* <Text style={styles.subtitle}>Sent to +91 {mobile}</Text> */}
+        
 
         {/* OTP INPUT */}
         <View style={styles.otpContainer}>

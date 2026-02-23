@@ -32,14 +32,6 @@ const handleLogout = async () => {
   await dispatch(globalLogout());
 };
 
-  // const handleLogout = async () => {
-  //   await dispatch(adminLogout());
-  //   console.log(navigation.getState());
-  //   navigation.reset({
-  //     index: 0,
-  //     routes: [{ name: "AdminLogin" }],
-  //   });
-  // };
 
   return (
     <View style={styles.container}>

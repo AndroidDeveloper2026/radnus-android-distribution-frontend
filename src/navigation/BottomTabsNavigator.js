@@ -84,35 +84,6 @@ const BottomTabs = ({ route }) => {
   console.log('--- bottom Tab (role)---', role);
 
   return (
-    // <Tab.Navigator
-    //   screenOptions={{
-    //     headerShown: false,
-    //     tabBarActiveTintColor: "#D32F2F",
-    //     tabBarInactiveTintColor: "#757575",
-    //     tabBarStyle: {
-    //       height: 64,
-    //       paddingBottom: 8,
-    //       paddingTop: 8,
-    //     },
-    //     tabBarLabelStyle: {
-    //       fontSize: 11,
-    //       fontWeight: "600",
-    //     },
-    //   }}
-    // >
-    //   {tabs.map((tab) => (
-    //     <Tab.Screen
-    //       key={tab.name}
-    //       name={tab.name}
-    //       component={tab.component}
-    //       options={{
-    //         tabBarIcon: ({ color, size }) => (
-    //           <tab.icon color={color} size={size || 22} />
-    //         ),
-    //       }}
-    //     />
-    //   ))}
-    // </Tab.Navigator>
     <Tab.Navigator
       screenOptions={{
         headerShown: false,

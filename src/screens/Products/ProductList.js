@@ -11,7 +11,7 @@ import styles from "./ProductListStyle";
 import Header from "../../components/Header";
 
 
-// 🔐 TEMP: replace with role from login / redux / context
+// TEMP: replace with role from login / redux / context
 const userRole = "fse";
 // admin | distributor | fse | retailer
 
@@ -98,10 +98,6 @@ const ProductList = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-
-      {/* <View style={styles.header}>
-        <Text style={styles.headerTitle}>Product List</Text>
-      </View> */}
       
       <Header title={'Product List'} />
  

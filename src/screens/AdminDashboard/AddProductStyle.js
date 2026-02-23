@@ -1,7 +1,7 @@
 import { StyleSheet, StatusBar, Platform } from 'react-native';
 
 const RED = '#D32F2F';
-const LIGHT_BG = '#F6F6F6';
+// const LIGHT_BG = '#F6F6F6';
 const LIGHT_GRAY = '#F3F4F6';
 
 const AddProductStyle = StyleSheet.create({

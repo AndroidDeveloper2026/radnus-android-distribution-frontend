@@ -41,7 +41,6 @@ const EditProfile = ({ navigation }) => {
   const onSave = () => {
     // 🔗 API CALL
     // Send form + profileImage
-    console.log(form, profileImage);
     navigation.goBack();
   };
 

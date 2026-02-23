@@ -7,83 +7,141 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-} from "react-native";
-import styles from "./HomeScreenStyle";
-import Header from "../../components/Header";
-import { Search, Filter } from "lucide-react-native";
-import { useState } from "react";
+  ActivityIndicator,
+} from 'react-native';
+import styles from './HomeScreenStyle';
+import Header from '../../components/Header';
+import { Search, Filter } from 'lucide-react-native';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProducts } from '../../services/features/products/productSlice';
 
 /* ------------------ CATEGORY DATA ------------------ */
-const CATEGORIES = ["All", "Chargers", "Cables", "Bluetooth", "Ear Buds", "Speakers", "Battery"];
+// const CATEGORIES = [
+//   'All',
+//   'Chargers',
+//   'Cables',
+//   'Bluetooth',
+//   'Ear Buds',
+//   'Speakers',
+//   'Battery',
+// ];
 
 /* ------------------ PRODUCT DATA ------------------ */
-const PRODUCT_DATA = [
-  {
-    id: "1",
-    name: "Samsung Charger",
-    category: "Chargers",
-    price: 850,
-    mrp: 999,
-    stock: 120,
-    moq: 5,
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: "2",
-    name: "Bluetooth Headset",
-    category: "Headsets",
-    price: 2150,
-    mrp: 2500,
-    stock: 25,
-    moq: 2,
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: "3",
-    name: "Mobile Cover",
-    category: "Covers",
-    price: 350,
-    mrp: 499,
-    stock: 0,
-    moq: 10,
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: "4",
-    name: "Mobile Cover",
-    category: "Covers",
-    price: 350,
-    mrp: 499,
-    stock: 0,
-    moq: 10,
-    image: "https://via.placeholder.com/150",
-  },
-];
+// const PRODUCT_DATA = [
+//   {
+//     id: "1",
+//     name: "Samsung Charger",
+//     category: "Chargers",
+//     price: 850,
+//     mrp: 999,
+//     stock: 120,
+//     moq: 5,
+//     image: "https://via.placeholder.com/150",
+//   },
+//   {
+//     id: "2",
+//     name: "Bluetooth Headset",
+//     category: "Headsets",
+//     price: 2150,
+//     mrp: 2500,
+//     stock: 25,
+//     moq: 2,
+//     image: "https://via.placeholder.com/150",
+//   },
+//   {
+//     id: "3",
+//     name: "Mobile Cover",
+//     category: "Covers",
+//     price: 350,
+//     mrp: 499,
+//     stock: 0,
+//     moq: 10,
+//     image: "https://via.placeholder.com/150",
+//   },
+//   {
+//     id: "4",
+//     name: "Mobile Cover",
+//     category: "Covers",
+//     price: 350,
+//     mrp: 499,
+//     stock: 0,
+//     moq: 10,
+//     image: "https://via.placeholder.com/150",
+//   },
+// ];
 
 const HomeScreen = ({ navigation }) => {
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [searchText, setSearchText] = useState("");
+  const dispatch = useDispatch();
+  const { list: products, loading } = useSelector(state => state.products);
+
+  const { user } = useSelector(state => state.auth);
+  const role = user?.role || 'Retailer';
+
+  const [categories, setCategories] = useState(['All']);
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [searchText, setSearchText] = useState('');
+
+  useEffect(() => {
+    dispatch(fetchProducts());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (products?.length > 0) {
+      const uniqueCategories = [
+        'All',
+        ...new Set(products.map(p => p.category)),
+      ];
+      setCategories(uniqueCategories);
+    }
+  }, [products]);
+
+  const getPrice = item => {
+    switch (role) {
+      case 'Admin':
+        return `D: ₹${item.distributorPrice} | R: ₹${item.retailerPrice}`;
+      case 'Distributor':
+        return `₹${item.distributorPrice}`;
+      case 'Retailer':
+        return `₹${item.retailerPrice}`;
+      default:
+        return `₹${item.retailerPrice}`;
+    }
+  };
 
   /* ------------------ FILTER LOGIC ------------------ */
-  const filteredData = PRODUCT_DATA.filter((item) => {
+  // const filteredData = PRODUCT_DATA.filter((item) => {
+  //   const matchCategory =
+  //     selectedCategory === "All" ||
+  //     item.category === selectedCategory;
+
+  //   const matchSearch = item.name
+  //     .toLowerCase()
+  //     .includes(searchText.toLowerCase());
+
+  //   return matchCategory && matchSearch;
+  // });
+
+  /* ------------------ FILTER LOGIC ------------------ */
+  const filteredData = products.filter(item => {
     const matchCategory =
-      selectedCategory === "All" ||
-      item.category === selectedCategory;
+      selectedCategory === 'All' ||
+      item.category?.toLowerCase().includes(selectedCategory.toLowerCase());
 
     const matchSearch = item.name
-      .toLowerCase()
+      ?.toLowerCase()
       .includes(searchText.toLowerCase());
 
-    return matchCategory && matchSearch;
+    const matchStatus = role === 'Admin' ? true : item.status === 'Active';
+
+    return matchCategory && matchSearch && matchStatus;
   });
 
   /* ------------------ PRODUCT CARD ------------------ */
   const renderItem = ({ item }) => (
     <TouchableOpacity
       style={styles.card}
-      onPress={() =>
-        navigation.navigate("ProductDetail", { product: item })
-      }
+      onPress={() => navigation.navigate('ProductDetail', { product: item })}
     >
       <Image source={{ uri: item.image }} style={styles.image} />
 
@@ -91,19 +149,12 @@ const HomeScreen = ({ navigation }) => {
         {item.name}
       </Text>
 
-      <Text style={styles.price}>₹{item.price}</Text>
+      <Text style={styles.price}>₹{getPrice(item)}</Text>
 
       <Text style={styles.mrp}>₹{item.mrp}</Text>
 
-      <Text
-        style={[
-          styles.stock,
-          item.stock === 0 && styles.outStock,
-        ]}
-      >
-        {item.stock > 0
-          ? `Stock: ${item.stock}`
-          : "Out of stock"}
+      <Text style={[styles.stock, item.stock === 0 && styles.outStock]}>
+        {item.stock > 0 ? `Stock: ${item.stock}` : 'Out of stock'}
       </Text>
 
       <Text style={styles.moq}>MOQ: {item.moq}</Text>
@@ -115,29 +166,56 @@ const HomeScreen = ({ navigation }) => {
       <Header title="Product Catalog" />
 
       {/* ------------------ SEARCH + FILTER ------------------ */}
-      <View style={styles.searchRow}>
-        <View style={styles.searchBox}>
-          <Search size={16} color="#777" />
-          <TextInput
-            placeholder="What are you looking for?"
-            style={styles.searchInput}
-            value={searchText}
-            onChangeText={setSearchText}
-          />
-        </View>
+      <View style={styles.tabMenu}>
+        <View style={styles.searchRow}>
+          <View style={styles.searchBox}>
+            <Search size={16} color="#777" />
+            <TextInput
+              placeholder="What are you looking for?"
+              style={styles.searchInput}
+              value={searchText}
+              onChangeText={setSearchText}
+            />
+          </View>
 
-        <TouchableOpacity style={styles.filterBtn}>
-          <Filter size={18} color="#D32F2F" />
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.filterBtn}>
+            <Filter size={18} color="#D32F2F" />
+          </TouchableOpacity>
+        </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.categoryContainer}
+        >
+          {categories.map((cat, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.categoryTab,
+                selectedCategory === cat && styles.activeTab,
+              ]}
+              onPress={() => setSelectedCategory(cat)}
+            >
+              <Text
+                style={[
+                  styles.categoryText,
+                  selectedCategory === cat && styles.activeText,
+                ]}
+              >
+                {cat}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
 
       {/* ------------------ CATEGORY TABS ------------------ */}
-      <ScrollView
+      {/* <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.categoryContainer}
       >
-        {CATEGORIES.map((cat, index) => (
+        {categories.map((cat, index) => (
           <TouchableOpacity
             key={index}
             style={[
@@ -156,18 +234,22 @@ const HomeScreen = ({ navigation }) => {
             </Text>
           </TouchableOpacity>
         ))}
-      </ScrollView>
+      </ScrollView> */}
 
       {/* ------------------ PRODUCT GRID ------------------ */}
-      <FlatList
-        data={filteredData}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-      />
+      {loading ? (
+        <ActivityIndicator size="large" color="#D32F2F" />
+      ) : (
+        <FlatList
+          data={filteredData}
+          keyExtractor={item => item._id}
+          renderItem={renderItem}
+          numColumns={2}
+          columnWrapperStyle={styles.row}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
     </View>
   );
 };

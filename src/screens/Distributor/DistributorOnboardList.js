@@ -80,7 +80,7 @@ const DistributorOnboardList = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Header title="Distributor Onboarding" />
+      <Header title="Distributor Onbaord List" />
 
       {/* TABS */}
       <View style={styles.tabs}>

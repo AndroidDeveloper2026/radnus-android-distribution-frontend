@@ -1,8 +1,8 @@
 import { StyleSheet } from "react-native";
 
 const RED = "#D32F2F";
-const LIGHT_BG = "#F6F6F6";
-const DARK = "#212121";
+// const LIGHT_BG = "#F6F6F6";
+// const DARK = "#212121";
 const GRAY = "#757575";
 
 export default StyleSheet.create({

@@ -91,53 +91,8 @@ const { data } = useSelector(state => state.territory);
   setName('');
 };
 
-
-  // const saveTerritory = () => {
-  //   if (!name.trim()) return;
-
-  //   if (formType === 'district') {
-  //     setTerritoryData([
-  //       ...territoryData,
-  //       {
-  //         districtId: `D${Date.now()}`,
-  //         districtName: name,
-  //         active: true,
-  //         taluks: [],
-  //       },
-  //     ]);
-  //   }
-
-  //   if (formType === 'taluk' && selectedDistrict) {
-  //     setTerritoryData(
-  //       territoryData.map(d =>
-  //         d.districtId === selectedDistrict.districtId
-  //           ? {
-  //               ...d,
-  //               taluks: [
-  //                 ...d.taluks,
-  //                 {
-  //                   talukId: `T${Date.now()}`,
-  //                   talukName: name,
-  //                   active: true,
-  //                 },
-  //               ],
-  //             }
-  //           : d,
-  //       ),
-  //     );
-  //   }
-
-  //   setModalVisible(false);
-  // };
-
-  
-
   return (
     <View style={styles.container}>
-      {/* <View style={styles.header}>
-        <Text style={styles.headerTitle}>Territory Management</Text>
-        <Text style={styles.headerSub}>Tamil Nadu</Text>
-      </View> */}
 
       <Header title={'Territory Management'} />
 

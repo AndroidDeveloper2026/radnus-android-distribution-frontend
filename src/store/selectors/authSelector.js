@@ -1,4 +1,3 @@
-// src/store/selectors/authSelector.js
 export const selectAuthState = (state) => {
   if (state.adminAuth?.token) {
     return {

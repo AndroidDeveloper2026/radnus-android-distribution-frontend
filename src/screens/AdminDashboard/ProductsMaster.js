@@ -30,9 +30,6 @@ const ProductMaster = ({ navigation }) => {
     dispatch(fetchProducts());
   }, [dispatch]);
 
-  // const handleDelete = id => {
-  //   dispatch(deleteProduct(id));
-  // };
 
   const handleDelete = id => {
     setSelectedId(id);

@@ -8,7 +8,7 @@ import Header from '../../components/Header';
 import { useDispatch } from 'react-redux';
 import { addProduct } from '../../services/features/products/productSlice';
 import { Picker } from '@react-native-picker/picker';
-import styles from './AdminDashboardStyle';
+// import styles from './AdminDashboardStyle';
 
 const AddProduct = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -117,12 +117,6 @@ const AddProduct = ({ navigation }) => {
           value={form.name}
           onChangeText={v => onChange('name', v)}
         />
-
-        {/* <Input
-          label="Category"
-          value={form.category}
-          onChangeText={v => onChange('category', v)}
-        /> */}
 
         <Text style={AddProductStyle.label}>Category</Text>
 

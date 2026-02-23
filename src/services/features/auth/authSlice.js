@@ -6,14 +6,13 @@ import { setToken, clearToken } from '../../AuthStorage/authStorgage';
 export const loginUser = createAsyncThunk(
   'auth/login',
   async (data, { rejectWithValue }) => {
-    console.log('--- authSlice (data) ---', data);
     try {
       const res = await API.post('/api/auth/login', data);
-      console.log('--- loginuser (data) ---', res.data);
+
       await setToken(res.data.token);
       return res.data;
     } catch (err) {
-      console.log('--- loginuser (error) ---', err);
+
       return rejectWithValue(err.response?.data?.msg || 'Login failed');
     }
   },

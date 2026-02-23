@@ -9,15 +9,25 @@ import {
 } from '../../services/features/Territory/TerritorySlice';
 import styles from './TerritoryMappingStyle';
 import Header from '../../components/Header';
-import { ChevronRight, ChevronDown, Trash2 } from 'lucide-react-native';
+import PopupModal from '../../components/PopupModal';
+import {
+  ChevronRight,
+  ChevronDown,
+  Trash2,
+  SquarePen,
+} from 'lucide-react-native';
 
 const TerritoryMappingScreen = ({ navigation }) => {
   const dispatch = useDispatch();
 
   const { data } = useSelector(state => state.territory);
-  //   console.log('-- territory mapping (data) ---',data)
   const [expandedState, setExpandedState] = useState(null);
   const [expandedDistrict, setExpandedDistrict] = useState(null);
+
+  // ✅ DELETE MODAL STATES
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteType, setDeleteType] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   useEffect(() => {
     dispatch(fetchTerritory());
@@ -39,7 +49,37 @@ const TerritoryMappingScreen = ({ navigation }) => {
   const handleEditTerritory = item => {
     navigation.navigate('EditTerritory', {
       territory: item,
-    });
+    }); 
+  };
+
+  // OPEN DELETE MODAL
+  const handleDeleteClick = (type, payload) => {
+    setDeleteType(type);
+    setSelectedItem(payload);
+    setShowDeleteModal(true);
+  };
+
+  // CONFIRM DELETE
+  const confirmDelete = () => {
+    if (deleteType === 'state') {
+      dispatch(deleteState(selectedItem));
+    } else if (deleteType === 'district') {
+      dispatch(deleteDistrict(selectedItem));
+    } else if (deleteType === 'taluk') {
+      dispatch(deleteTaluk(selectedItem));
+    }
+
+    setShowDeleteModal(false);
+    setSelectedItem(null);
+    setDeleteType(null);
+  };
+
+  // OPTIONAL: Dynamic message
+  const getDeleteMessage = () => {
+    if (deleteType === 'state') return 'Delete this state and all its data?';
+    if (deleteType === 'district') return 'Delete this district?';
+    if (deleteType === 'taluk') return 'Delete this taluk?';
+    return 'Are you sure you want to delete?';
   };
 
   return (
@@ -76,7 +116,7 @@ const TerritoryMappingScreen = ({ navigation }) => {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  onPress={() => dispatch(deleteState(stateName))}
+                  onPress={() => handleDeleteClick('state', stateName)}
                 >
                   <Trash2 size={20} color="red" />
                 </TouchableOpacity>
@@ -101,9 +141,10 @@ const TerritoryMappingScreen = ({ navigation }) => {
 
                       <TouchableOpacity
                         onPress={() =>
-                          dispatch(
-                            deleteDistrict({ state: stateName, district }),
-                          )
+                          handleDeleteClick('district', {
+                            state: stateName,
+                            district,
+                          })
                         }
                       >
                         <Trash2 size={18} color="red" />
@@ -124,14 +165,20 @@ const TerritoryMappingScreen = ({ navigation }) => {
                             {/* EDIT */}
                             <TouchableOpacity
                               style={styles.editBtn}
-                              onPress={() => handleEditTerritory(item)}
+                              onPress={() => handleEditTerritory({
+                                  ...item,
+                                  state: stateName,
+                                  district: district,
+                                })}
                             >
                               {/* <Text style={styles.editText}>Edit</Text> */}
-                              <Trash2 size={22} color="red" />
+                              <SquarePen size={22} color="red" />
                             </TouchableOpacity>
 
                             <TouchableOpacity
-                              onPress={() => dispatch(deleteTaluk(item._id))}
+                              onPress={() =>
+                                handleDeleteClick('taluk', item._id)
+                              }
                             >
                               <Trash2 size={22} color="red" />
                             </TouchableOpacity>
@@ -177,6 +224,17 @@ const TerritoryMappingScreen = ({ navigation }) => {
           ))}
         </View>
       </ScrollView>
+
+      {/* ✅ DELETE CONFIRMATION MODAL */}
+      <PopupModal
+        visible={showDeleteModal}
+        title="Delete Territory"
+        description={getDeleteMessage()}
+        buttonText="Delete"
+        secondaryText="Cancel"
+        onPress={confirmDelete}
+        onSecondaryPress={() => setShowDeleteModal(false)}
+      />
     </View>
   );
 };
