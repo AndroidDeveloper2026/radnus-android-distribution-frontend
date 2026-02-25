@@ -9,7 +9,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { displayNotification } from './src/utils/notificationService';
 
 const App = () => {
-
+ console.log('--- APP js url ---',API_BASE_URL);
+ 
   useEffect(() => {
 
     const unsubscribe = messaging().onMessage(async remoteMessage => {

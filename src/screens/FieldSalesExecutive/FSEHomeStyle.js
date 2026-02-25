@@ -52,6 +52,13 @@ const FSEHomeStyles = StyleSheet.create({
     color: '#212121',
   },
 
+    infoAddressValue: {
+    marginTop:20,  
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#212121',
+  },
+
   gpsStatus: {
     fontSize: 14,
     marginTop: 8,

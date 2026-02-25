@@ -14,6 +14,10 @@ import Color from "../../utils/constants/colors"
 
 
 const AdminDashboard = ({ navigation }) => {
+
+  const handleDistributorOnboarding = () =>{
+  navigation.navigate('DistributorOnboarding')
+  }
   return (
     <View style={styles.container}>
       <Header title="Admin Dashboard" showBackArrow={false} />
@@ -39,11 +43,11 @@ const AdminDashboard = ({ navigation }) => {
           </View>
 
           <View style={styles.kpiRow}>
-            <View style={styles.kpiBox}>
+            <TouchableOpacity style={styles.kpiBox} onPress={handleDistributorOnboarding}>
                 <Icons name={"UsersRound"} size={25} color="#4b4efc" circleSize={55} withCircle={true} backgroundColor="#bebffe92"/>
               <Text style={styles.kpiLabel}>Total Distributors</Text>
               <Text style={styles.kpiValue}>32</Text>
-            </View>
+            </TouchableOpacity>
 
             <View style={styles.kpiBox}>
                 <Icons name={"UserCheck"} size={25} color="#F59E0B" circleSize={55} withCircle={true} backgroundColor="#fee7beb3"/>

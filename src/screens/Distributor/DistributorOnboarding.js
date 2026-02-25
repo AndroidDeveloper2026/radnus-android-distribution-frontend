@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,110 +6,211 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
-} from "react-native";
-import styles from "./DistributorOnboardingStyle";
-import Header from "../../components/Header";
-import { launchCamera } from "react-native-image-picker";
-import { Camera } from "lucide-react-native";
+} from 'react-native';
+import { useDispatch } from 'react-redux';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
+import styles from './DistributorOnboardingStyle';
+import Header from '../../components/Header';
+import { launchCamera } from 'react-native-image-picker';
+import { Camera } from 'lucide-react-native';
+import { addDistributor } from '../../services/features/distributor/distributorSlice';
+
+/* ---------------- VALIDATION ---------------- */
+
+const validationSchema = Yup.object().shape({
+  name: Yup.string().required('Name is required'),
+  businessName: Yup.string().required('Business name is required'),
+  mobile: Yup.string()
+    .matches(/^[0-9]{10}$/, 'Enter valid 10-digit mobile')
+    .required('Mobile is required'),
+  alternateMobile: Yup.string().matches(/^[0-9]{10}$/, 'Enter valid mobile'),
+  address: Yup.string().required('Address is required'),
+  fseAadhaar: Yup.string().matches(/^[0-9]{12}$/, 'Enter valid Aadhaar'),
+});
+
+/* ---------------- COMPONENT ---------------- */
 
 const DistributorOnboarding = ({ navigation }) => {
+  const dispatch = useDispatch();
+
   const [images, setImages] = useState({
     shop: null,
     aadhaar: null,
     passport: null,
   });
 
-  const [form, setForm] = useState({
-    name: "",
-    businessName: "",
-    mobile: "",
-    alternateMobile: "",
-    gst: "",
-    msme: "",
-    address: "",
-    communicationAddress: "",
-    bankDetails: "",
-    fseAadhaar: "",
-  });
-
-  const onChange = (key, value) => {
-    setForm({ ...form, [key]: value });
-  };
-
-  const captureImage = (type) => {
-    launchCamera({ mediaType: "photo", quality: 0.7 }, (res) => {
-      if (!res.didCancel && res.assets) {
-        setImages({ ...images, [type]: res.assets[0].uri });
+  const captureImage = type => {
+    launchCamera({ mediaType: 'photo', quality: 0.7 }, res => {
+      if (!res.didCancel && res.assets && res.assets.length > 0) {
+        setImages(prev => ({
+          ...prev,
+          [type]: res.assets[0].uri,
+        }));
       }
     });
-  };
-
-  const submit = () => {
-    console.log("DATA:", form, images);
-    navigation.goBack();
   };
 
   return (
     <View style={styles.container}>
       <Header title="Distributor Onboarding" />
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <Formik
+        initialValues={{
+          name: '',
+          businessName: '',
+          mobile: '',
+          alternateMobile: '',
+          gst: '',
+          msme: '',
+          address: '',
+          communicationAddress: '',
+          fseAadhaar: '',
+        }}
+        validationSchema={validationSchema}
+        onSubmit={values => {
+          const formData = new FormData();
 
-        {/* BASIC DETAILS */}
-        <Section title="Basic Details">
-          <Input label="Name *" value={form.name} onChangeText={(v) => onChange("name", v)} />
-          <Input label="Business Name *" value={form.businessName} onChangeText={(v) => onChange("businessName", v)} />
-          <Input label="Mobile Number *" value={form.mobile} keyboardType="phone-pad" />
-          <Input label="Alternate Mobile" value={form.alternateMobile} />
-          <Input label="GST Number" value={form.gst} />
-          <Input label="MSME" value={form.msme} />
-        </Section>
+          // Append text fields
+          Object.keys(values).forEach(key => {
+            formData.append(key, values[key]);
+          });
 
-        {/* ADDRESS */}
-        <Section title="Address Details">
-          <Input label="Residential Address" value={form.address} />
-          <Input label="Communication Address" value={form.communicationAddress} />
-        </Section>
+          formData.append('status', 'PENDING');
 
-        {/* BANK */}
-        <Section title="Bank Details">
-          <Input label="Bank Details" value={form.bankDetails} />
-        </Section>
+          // Append images properly
+          Object.keys(images).forEach(key => {
+            if (images[key]) {
+              formData.append(key, {
+                uri: images[key],
+                type: 'image/jpeg',
+                name: `${key}.jpg`,
+              });
+            }
+          });
 
-        {/* KYC */}
-        <Section title="KYC Details">
-          <Input label="FSE Aadhaar Number" value={form.fseAadhaar} />
-        </Section>
+          console.log('FINAL PAYLOAD:', formData);
 
-        {/* IMAGES */}
-        <Section title="Upload Documents">
+          dispatch(addDistributor(formData));
+          navigation.goBack();
+        }}
+      >
+        {({
+          handleChange,
+          handleSubmit,
+          handleBlur,
+          values,
+          errors,
+          touched,
+        }) => (
+          <ScrollView contentContainerStyle={styles.content}>
+            {/* BASIC DETAILS */}
+            <Section title="Basic Details">
+              <Input
+                label="Name *"
+                value={values.name}
+                onChangeText={handleChange('name')}
+                onBlur={handleBlur('name')}
+                error={touched.name && errors.name}
+              />
 
-          <ImagePicker
-            label="Shop Photo"
-            image={images.shop}
-            onPress={() => captureImage("shop")}
-          />
+              <Input
+                label="Business Name *"
+                value={values.businessName}
+                onChangeText={handleChange('businessName')}
+                onBlur={handleBlur('businessName')}
+                error={touched.businessName && errors.businessName}
+              />
 
-          <ImagePicker
-            label="Aadhaar Photo"
-            image={images.aadhaar}
-            onPress={() => captureImage("aadhaar")}
-          />
+              <Input
+                label="Mobile Number *"
+                value={values.mobile}
+                onChangeText={handleChange('mobile')}
+                onBlur={handleBlur('mobile')}
+                keyboardType="phone-pad"
+                error={touched.mobile && errors.mobile}
+              />
 
-          <ImagePicker
-            label="Passport Photo"
-            image={images.passport}
-            onPress={() => captureImage("passport")}
-          />
+              <Input
+                label="Alternate Mobile"
+                value={values.alternateMobile}
+                onChangeText={handleChange('alternateMobile')}
+                onBlur={handleBlur('alternateMobile')}
+                error={touched.alternateMobile && errors.alternateMobile}
+              />
 
-        </Section>
+              <Input
+                label="GST Number"
+                value={values.gst}
+                onChangeText={handleChange('gst')}
+                onBlur={handleBlur('gst')}
+              />
 
-        {/* SUBMIT */}
-        <TouchableOpacity style={styles.submitBtn} onPress={submit}>
-          <Text style={styles.submitText}>Submit for Approval</Text>
-        </TouchableOpacity>
+              <Input
+                label="MSME"
+                value={values.msme}
+                onChangeText={handleChange('msme')}
+                onBlur={handleBlur('msme')}
+              />
+            </Section>
 
-      </ScrollView>
+            {/* ADDRESS */}
+            <Section title="Address Details">
+              <Input
+                label="Residential Address *"
+                value={values.address}
+                onChangeText={handleChange('address')}
+                onBlur={handleBlur('address')}
+                error={touched.address && errors.address}
+              />
+
+              <Input
+                label="Communication Address"
+                value={values.communicationAddress}
+                onChangeText={handleChange('communicationAddress')}
+                onBlur={handleBlur('communicationAddress')}
+              />
+            </Section>
+
+            {/* KYC */}
+            <Section title="KYC Details">
+              <Input
+                label="FSE Aadhaar Number"
+                value={values.fseAadhaar}
+                onChangeText={handleChange('fseAadhaar')}
+                onBlur={handleBlur('fseAadhaar')}
+                error={touched.fseAadhaar && errors.fseAadhaar}
+              />
+            </Section>
+
+            {/* IMAGES */}
+            <Section title="Upload Documents">
+              <ImagePicker
+                label="Shop Photo"
+                image={images.shop}
+                onPress={() => captureImage('shop')}
+              />
+
+              <ImagePicker
+                label="Aadhaar Photo"
+                image={images.aadhaar}
+                onPress={() => captureImage('aadhaar')}
+              />
+
+              <ImagePicker
+                label="Passport Photo"
+                image={images.passport}
+                onPress={() => captureImage('passport')}
+              />
+            </Section>
+
+            {/* SUBMIT */}
+            <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
+              <Text style={styles.submitText}>Submit for Approval</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        )}
+      </Formik>
     </View>
   );
 };
@@ -123,10 +224,11 @@ const Section = ({ title, children }) => (
   </View>
 );
 
-const Input = ({ label, ...props }) => (
+const Input = ({ label, error, ...props }) => (
   <>
     <Text style={styles.label}>{label}</Text>
     <TextInput style={styles.input} {...props} />
+    {error && <Text style={{ color: 'red' }}>{error}</Text>}
   </>
 );
 
@@ -147,4 +249,3 @@ const ImagePicker = ({ label, image, onPress }) => (
 );
 
 export default DistributorOnboarding;
-

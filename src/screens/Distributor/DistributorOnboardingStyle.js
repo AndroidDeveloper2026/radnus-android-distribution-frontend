@@ -18,11 +18,13 @@ export default StyleSheet.create({
   photoBox: {
     flexDirection: 'row',
     paddingVertical: 16,
-    borderRadius: 20,
-    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    borderColor: '#D32F2F',
+    borderWidth:1,
+    // backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 3,
+    // elevation: 3,
   },
 
   photo: {

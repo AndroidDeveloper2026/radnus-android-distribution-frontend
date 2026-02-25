@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,84 +6,143 @@ import {
   Alert,
   Platform,
   PermissionsAndroid,
-} from "react-native";
-import Geolocation from "@react-native-community/geolocation";
-import FSEHomeStyles from "./FSEHomeStyle";
-import Header from "../../components/Header";
+  Linking,
+} from 'react-native';
+import Geolocation from '@react-native-community/geolocation';
+import FSEHomeStyles from './FSEHomeStyle';
+import Header from '../../components/Header';
 
 const FSEHomeScreen = ({ navigation }) => {
   const [location, setLocation] = useState(null);
+  const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
   const [attendanceMarked, setAttendanceMarked] = useState(false);
 
   useEffect(() => {
     requestLocationPermission();
-  }, );
+  }, []);
 
-  //  REQUEST GPS PERMISSION
+  // ✅ REQUEST PERMISSION
   const requestLocationPermission = async () => {
-    if (Platform.OS === "android") {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-        );
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      );
 
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          getCurrentLocation();
-        } else {
-          Alert.alert("Permission Denied", "GPS permission is required");
-        }
-      } catch (err) {
-        console.warn(err);
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        getCurrentLocation();
+      } else {
+        Alert.alert('Permission Required', 'Location permission is required');
       }
     } else {
       getCurrentLocation();
     }
   };
 
-  //  GET CURRENT LOCATION
+  // 🌍 FREE ADDRESS (FIXED VERSION)
+  const getAddressFromOSM = async (lat, lng) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
+        {
+          headers: {
+            'User-Agent': 'FSEApp/1.0 (support@yourapp.com)', // ✅ IMPORTANT
+            Accept: 'application/json',
+          },
+        },
+      );
+
+      const data = await response.json();
+
+      console.log('OSM DATA:', data);
+
+      if (data && data.display_name) {
+        setAddress(data.display_name);
+      } else {
+        setAddress('Address not found');
+      }
+    } catch (error) {
+      console.log('OSM ERROR:', error);
+      setAddress('Error fetching address');
+    }
+  };
+
+  // 📍 GET LOCATION
   const getCurrentLocation = () => {
+    setLoading(true);
+
     Geolocation.getCurrentPosition(
-      (position) => {
+      position => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
         setLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
+          latitude: lat,
+          longitude: lng,
         });
+
+        // ✅ SMALL DELAY (avoid rate-limit issues)
+        setTimeout(() => {
+          getAddressFromOSM(lat, lng);
+        }, 1000);
+
+        setLoading(false);
       },
-      (error) => {
-        Alert.alert("Error", "Unable to fetch GPS location");
+      error => {
+        setLoading(false);
+
+        if (error.code === 1) {
+          Alert.alert('Permission Denied', 'Enable location permission');
+        } else if (error.code === 2) {
+          Alert.alert('Location Disabled', 'Please turn ON GPS', [
+            {
+              text: 'Open Settings',
+              onPress: () => Linking.openSettings(),
+            },
+            { text: 'Cancel', style: 'cancel' },
+          ]);
+        } else if (error.code === 3) {
+          Alert.alert('Timeout', 'Fetching location is taking too long');
+        }
       },
-      { enableHighAccuracy: true, timeout: 15000 }
+      {
+        enableHighAccuracy: true,
+        timeout: 20000,
+        maximumAge: 10000,
+      },
     );
   };
 
   // ✅ MARK ATTENDANCE
   const markAttendance = () => {
     if (!location) {
-      Alert.alert("GPS Error", "Location not captured");
+      Alert.alert('GPS Error', 'Location not captured');
       return;
     }
-
-    setLoading(true);
 
     const payload = {
       latitude: location.latitude,
       longitude: location.longitude,
+      address: address,
       time: new Date(),
     };
 
-    console.log("Attendance Payload:", payload);
+    console.log('Attendance Payload:', payload);
 
-    //  CALL ATTENDANCE API HERE
+    setLoading(true);
 
     setTimeout(() => {
       setAttendanceMarked(true);
       setLoading(false);
 
-      Alert.alert("Success", "Attendance marked successfully", [
+      Alert.alert('Success', 'Attendance marked successfully', [
         {
-          text: "OK",
-          onPress: () => navigation.replace("FseDashboard"),
+          text: 'OK',
+          onPress: () =>
+            navigation.replace('MainTabs', {
+              screen: 'Dashboard',
+              params: { role: 'FSE' },
+            }),
         },
       ]);
     }, 1000);
@@ -91,13 +150,12 @@ const FSEHomeScreen = ({ navigation }) => {
 
   return (
     <View style={FSEHomeStyles.container}>
-
-      <Header title = {'Start Day'} showBackArrow={false}/>
+      <Header title={'Start Day'} showBackArrow={false} />
 
       <View style={FSEHomeStyles.content}>
         <Text style={FSEHomeStyles.title}>Mark Attendance</Text>
 
-        {/* DATE & TIME */}
+        {/* DATE */}
         <View style={FSEHomeStyles.infoBox}>
           <Text style={FSEHomeStyles.infoLabel}>Date</Text>
           <Text style={FSEHomeStyles.infoValue}>
@@ -105,6 +163,7 @@ const FSEHomeScreen = ({ navigation }) => {
           </Text>
         </View>
 
+        {/* TIME */}
         <View style={FSEHomeStyles.infoBox}>
           <Text style={FSEHomeStyles.infoLabel}>Time</Text>
           <Text style={FSEHomeStyles.infoValue}>
@@ -112,9 +171,10 @@ const FSEHomeScreen = ({ navigation }) => {
           </Text>
         </View>
 
-        {/* GPS */}
+        {/* LOCATION + ADDRESS */}
         <View style={FSEHomeStyles.infoBox}>
           <Text style={FSEHomeStyles.infoLabel}>GPS Location</Text>
+
           {location ? (
             <>
               <Text style={FSEHomeStyles.infoValue}>
@@ -123,13 +183,17 @@ const FSEHomeScreen = ({ navigation }) => {
               <Text style={FSEHomeStyles.infoValue}>
                 Long: {location.longitude}
               </Text>
+
+              <Text style={FSEHomeStyles.infoAddressValue}>
+                {address || 'Fetching address...'}
+              </Text>
             </>
           ) : (
             <Text style={FSEHomeStyles.gpsStatus}>Fetching location…</Text>
           )}
         </View>
 
-        {/* ATTENDANCE BUTTON */}
+        {/* BUTTON */}
         <TouchableOpacity
           style={[
             FSEHomeStyles.button,
@@ -140,7 +204,7 @@ const FSEHomeScreen = ({ navigation }) => {
           disabled={!location || loading || attendanceMarked}
         >
           <Text style={FSEHomeStyles.buttonText}>
-            {attendanceMarked ? "ATTENDANCE MARKED" : "START DAY"}
+            {attendanceMarked ? 'ATTENDANCE MARKED' : 'START DAY'}
           </Text>
         </TouchableOpacity>
       </View>

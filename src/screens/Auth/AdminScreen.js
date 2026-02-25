@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import styles from './LoginStyle';
 
@@ -10,6 +10,7 @@ import * as Yup from 'yup';
 import { useSelector, useDispatch } from 'react-redux';
 import { adminLogin } from '../../services/features/auth/adminAuthSlice';
 import showToast from '../../utils/toast';
+import { Eye, EyeOff } from 'lucide-react-native';
 
 const AdminValidationSchema = Yup.object().shape({
   emailID: Yup.string()
@@ -23,6 +24,7 @@ const AdminValidationSchema = Yup.object().shape({
 
 const AdminScreen = ({ navigation }) => {
   const dispatch = useDispatch();
+  const [showPassword, setShowPassword] = useState(false);
   const { token, error } = useSelector(state => state?.adminAuth);
 
   const handleBackBtn = () => {
@@ -31,8 +33,8 @@ const AdminScreen = ({ navigation }) => {
 
   useEffect(() => {
     if (token) {
-      showToast('Successfully login','short')
-      
+      showToast('Successfully login', 'short');
+
       navigation.replace('MainTabs', {
         role: 'Admin',
       });
@@ -54,6 +56,8 @@ const AdminScreen = ({ navigation }) => {
         initialValues={{ emailID: '', password: '' }}
         validationSchema={AdminValidationSchema}
         onSubmit={async values => {
+          console.log('--- admin (login) ---',values);
+          
           dispatch(adminLogin(values));
         }}
       >
@@ -90,14 +94,33 @@ const AdminScreen = ({ navigation }) => {
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Password</Text>
               <TextInput
-                style={styles.input}
-                secureTextEntry
+                style={[
+                  styles.input,
+                  { paddingRight: 45 }, // space for icon inside
+                ]}
+                secureTextEntry={!showPassword}
                 value={values.password}
                 onChangeText={handleChange('password')}
                 onBlur={handleBlur('password')}
                 placeholderTextColor={'#000'}
                 placeholder="Enter your password"
               />
+              {/* 👁️ ICON INSIDE INPUT */}
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: 12,
+                  top: '65%',
+                  transform: [{ translateY: -10 }],
+                }}
+              >
+                {showPassword ? (
+                  <EyeOff size={20} color="#555" />
+                ) : (
+                  <Eye size={20} color="#555" />
+                )}
+              </TouchableOpacity>
               {touched.password && errors.password && (
                 <Text style={styles.error}>{errors.password}</Text>
               )}

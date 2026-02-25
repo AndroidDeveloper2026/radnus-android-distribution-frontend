@@ -9,7 +9,9 @@ import { registerUser } from '../../services/features/auth/registerSlice';
 const TermsConditions = ({ navigation, route }) => {
   const [accepted, setAccepted] = useState(false);
   const dispatch = useDispatch();
-  const { registerData } = route.params;
+  // const { registerData } = route.params;
+  const registerData = route?.params?.registerData;
+  console.log('registerData:', registerData);
 
   const onAccept = async () => {
     console.log('onAccept called with accepted:', accepted);

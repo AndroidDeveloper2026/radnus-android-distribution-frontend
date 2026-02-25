@@ -8,11 +8,11 @@ export const loginUser = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const res = await API.post('/api/auth/login', data);
-
+      console.log('--- loginuser ---',res.data);
       await setToken(res.data.token);
       return res.data;
     } catch (err) {
-
+      console.log('--- loginuser (err)---',err);
       return rejectWithValue(err.response?.data?.msg || 'Login failed');
     }
   },

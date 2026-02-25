@@ -172,6 +172,7 @@ const HomeScreen = ({ navigation }) => {
             <Search size={16} color="#777" />
             <TextInput
               placeholder="What are you looking for?"
+              placeholderTextColor={'#777'}
               style={styles.searchInput}
               value={searchText}
               onChangeText={setSearchText}

@@ -17,6 +17,7 @@ import DistributorDashboard from '../screens/Distributor/DistributorDashboard';
 import FSEDashboard from '../screens/FieldSalesExecutive/FSEDashboard';
 import RetailerDashboard from '../screens/Retailer/RetailerDashboard';
 import FSEHomeScreen from '../screens/FieldSalesExecutive/FSEHomeScreen';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Tab = createBottomTabNavigator();
 
@@ -74,6 +75,7 @@ const ROLE_TABS = {
 };
 
 const BottomTabs = ({ route }) => {
+  const insets = useSafeAreaInsets();
   // const { role } = route.params; // 👈 role passed from Stack
   const role = route?.params?.role;
 
@@ -90,9 +92,9 @@ const BottomTabs = ({ route }) => {
         tabBarActiveTintColor: '#D32F2F',
         tabBarInactiveTintColor: '#757575',
         tabBarStyle: {
-          height: 85,
-          paddingBottom: 8,
-          paddingTop: 8,
+          height: 60 + insets.bottom, //old value 85
+          paddingBottom:insets.bottom, //old value 8
+          paddingTop: 6, //old value 8
         },
         tabBarLabelStyle: {
           fontSize: 11,

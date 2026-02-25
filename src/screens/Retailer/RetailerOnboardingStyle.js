@@ -26,9 +26,11 @@ export default StyleSheet.create({
   },
 
   photo: {
-    width: '100%',
-    height: '100%',
+    width: '90%',
+    height: 180,
     borderRadius: 16,
+    padding:5,
+    objectFit:'cover',
   },
 
   photoText: {
@@ -43,6 +45,7 @@ export default StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    gap:8,
   },
 
   card: {

@@ -83,7 +83,7 @@ const DistributorDashboard = ({ navigation }) => {
         <QuickAction
           icon={<ClipboardList size={18} color="#2E7D32" />}
           label="Retailer Orders"
-          onPress={() => navigation.navigate("Order")}
+          onPress={() => navigation.navigate("OrderSuccess")}
         />
 
         <QuickAction

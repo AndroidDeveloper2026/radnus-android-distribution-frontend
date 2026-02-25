@@ -8,6 +8,7 @@ export const registerUser = createAsyncThunk(
     try {
 
       const fcmToken = await requestUserPermission();
+      console.log('FCM TOKEN 👉', fcmToken);
 
       const payload = {
         ...values,

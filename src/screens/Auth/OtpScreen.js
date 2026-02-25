@@ -25,7 +25,6 @@ const OtpScreen = ({ navigation, route }) => {
 
   const inputRefs = useRef([]);
 
-
   useEffect(() => {
     if (timer === 0) {
       setCanResend(true);
@@ -44,7 +43,6 @@ const OtpScreen = ({ navigation, route }) => {
     if (verified) {
       Alert.alert('Success', 'OTP verified');
       dispatch(resetOtpState());
-
 
       if (type === 'register') {
         // Go to login after signup
@@ -65,7 +63,6 @@ const OtpScreen = ({ navigation, route }) => {
   /* ---------------- ERROR HANDLER ---------------- */
   useEffect(() => {
     if (error) {
-
       Alert.alert('OTP Error', error);
       setOtp(Array(OTP_LENGTH).fill(''));
       inputRefs.current[0]?.focus();
@@ -93,7 +90,6 @@ const OtpScreen = ({ navigation, route }) => {
       return;
     }
 
-
     dispatch(
       verifyOtp({
         type,
@@ -102,14 +98,13 @@ const OtpScreen = ({ navigation, route }) => {
         otp: code,
       }),
     );
-
   };
 
   /* ---------------- RESEND OTP ---------------- */
   const resend = () => {
     if (!canResend) return;
 
-    dispatch(resendOtp({ mobile, type,email })); 
+    dispatch(resendOtp({ mobile, type, email }));
 
     setOtp(Array(OTP_LENGTH).fill(''));
     setTimer(OTP_TIMER);
@@ -117,6 +112,15 @@ const OtpScreen = ({ navigation, route }) => {
   };
 
   const formatTime = () => `00:${timer < 10 ? `0${timer}` : timer}`;
+
+  const maskMobile = mobile => {
+    if (!mobile) return '';
+
+    const visibleDigits = 2; // last 2 digits visible
+    const maskedPart = 'x'.repeat(mobile.length - visibleDigits);
+
+    return maskedPart + mobile.slice(-visibleDigits);
+  };
 
   return (
     <View style={styles.container}>
@@ -133,10 +137,15 @@ const OtpScreen = ({ navigation, route }) => {
 
       <View style={styles.content}>
         <Text style={styles.title}>Enter OTP</Text>
-        <Text style={styles.subtitle}>
+        {/* <Text style={styles.subtitle}>
           {type === 'register' ? `Sent to +91 ${mobile}` : `Sent to ${email}`}
+        </Text> */}
+
+        <Text style={styles.subtitle}>
+          {type === 'register'
+            ? `Sent to +91 ${maskMobile(mobile)}`
+            : `Sent to ${email}`}
         </Text>
-        
 
         {/* OTP INPUT */}
         <View style={styles.otpContainer}>
