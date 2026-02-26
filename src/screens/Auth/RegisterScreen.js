@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,7 @@ import { registerUser } from '../../services/features/auth/registerSlice';
 import locationData from '../../utils/locationData';
 //svg
 import LeftArrow from '../../assets/svg/white-left-arrow.svg';
-
+import { Eye, EyeOff } from 'lucide-react-native';
 
 const RegisterSchema = Yup.object().shape({
   role: Yup.string().required('Role is required'),
@@ -34,6 +34,7 @@ const RegisterSchema = Yup.object().shape({
 });
 
 const RegisterScreen = ({ navigation }) => {
+  const [showPassword, setShowPassword] = useState(false);
   const dispatch = useDispatch();
   const { loading } = useSelector(state => state?.register);
   const handleBackBtn = () => navigation.goBack();
@@ -65,7 +66,6 @@ const RegisterScreen = ({ navigation }) => {
             navigation.navigate('TermsConditions', {
               registerData: values,
             });
-
           }}
         >
           {({
@@ -126,10 +126,25 @@ const RegisterScreen = ({ navigation }) => {
                   style={styles.input}
                   placeholderTextColor={'#000'}
                   placeholder="Enter your Password"
-                  secureTextEntry
+                  secureTextEntry={!showPassword}
                   value={values.password}
                   onChangeText={handleChange('password')}
                 />
+                <TouchableOpacity
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: 12,
+                    top: '46%',
+                    transform: [{ translateY: -10 }],
+                  }}
+                >
+                  {showPassword ? (
+                    <EyeOff size={20} color="#555" />
+                  ) : (
+                    <Eye size={20} color="#555" />
+                  )}
+                </TouchableOpacity>
                 {touched.password && errors.password && (
                   <Text style={styles.error}>{errors.password}</Text>
                 )}
@@ -140,10 +155,25 @@ const RegisterScreen = ({ navigation }) => {
                   style={styles.input}
                   placeholderTextColor={'#000'}
                   placeholder="Enter your Confirm Password"
-                  secureTextEntry
+                  secureTextEntry={!showPassword}
                   value={values.confirmPassword}
                   onChangeText={handleChange('confirmPassword')}
                 />
+                <TouchableOpacity
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: 12,
+                    top: '56.5%',
+                    transform: [{ translateY: -10 }],
+                  }}
+                >
+                  {showPassword ? (
+                    <EyeOff size={20} color="#555" />
+                  ) : (
+                    <Eye size={20} color="#555" />
+                  )}
+                </TouchableOpacity>
                 {touched.confirmPassword && errors.confirmPassword && (
                   <Text style={styles.error}>{errors.confirmPassword}</Text>
                 )}

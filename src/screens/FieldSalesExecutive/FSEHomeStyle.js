@@ -83,6 +83,19 @@ const FSEHomeStyles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
   },
+
+  infoAccuracy: {
+ fontSize: 12,
+ color: '#777',
+ marginTop: 4,
+},
+
+// infoAddressValue: {
+//  fontSize: 13,
+//  color: '#212121',
+//  marginTop: 6,
+// },
+
 });
 
 export default FSEHomeStyles;
