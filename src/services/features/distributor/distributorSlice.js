@@ -18,12 +18,15 @@ export const fetchDistributors = createAsyncThunk(
   }
 );
 
-// ADD
 export const addDistributor = createAsyncThunk(
   "distributors/add",
   async (data, { rejectWithValue }) => {
     try {
-      const res = await API.post("/api/distributors", data);
+      const res = await API.post("/api/distributors", data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       return res.data;
     } catch (err) {
       return rejectWithValue(
@@ -32,6 +35,21 @@ export const addDistributor = createAsyncThunk(
     }
   }
 );
+
+// ADD
+// export const addDistributor = createAsyncThunk(
+//   "distributors/add",
+//   async (data, { rejectWithValue }) => {
+//     try {
+//       const res = await API.post("/api/distributors", data);
+//       return res.data;
+//     } catch (err) {
+//       return rejectWithValue(
+//         err.response?.data?.message || "Add failed"
+//       );
+//     }
+//   }
+// );
 
 // UPDATE
 export const updateDistributor = createAsyncThunk(

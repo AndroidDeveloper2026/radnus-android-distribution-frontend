@@ -102,16 +102,16 @@ export default StyleSheet.create({
     borderRadius: 12,
   },
 
-  approved: {
-    backgroundColor: "#E8F5E9",
+  badgeApproved: {
+    backgroundColor: "#91fe9a",
   },
 
-  pending: {
-    backgroundColor: "#FFF3E0",
+  badgePending: {
+    backgroundColor: "#fcd088",
   },
 
-  rejected: {
-    backgroundColor: "#FDECEA",
+  badgeRejected: {
+    backgroundColor: "#fe9d92",
   },
 
   badgeText: {
@@ -157,7 +157,7 @@ export default StyleSheet.create({
   approveBtn: {
     flex: 1,
     backgroundColor: "#2E7D32",
-    padding: 14,
+    padding: 12,
     borderRadius: 12,
     marginRight: 8,
     alignItems: "center",
@@ -166,7 +166,7 @@ export default StyleSheet.create({
   rejectBtn: {
     flex: 1,
     backgroundColor: "#D32F2F",
-    padding: 14,
+    padding: 12,
     borderRadius: 12,
     marginLeft: 8,
     alignItems: "center",
@@ -176,4 +176,61 @@ export default StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "700",
   },
+
+  /* 🔥 NEW ADDITIONS */
+
+// Profile Image
+avatar: {
+  width: 55,
+  height: 55,
+  borderRadius: 28,
+},
+
+avatarPlaceholder: {
+  width: 55,
+  height: 55,
+  borderRadius: 28,
+  backgroundColor: "#eee",
+  justifyContent: "center",
+  alignItems: "center",
+  marginRight: 10,
+},
+
+// Text adjustments (if needed)
+subText: {
+  fontSize: 13,
+  color: "#555",
+},
+
+mobile: {
+  fontSize: 12,
+  color: "#777",
+},
+
+// Delete icon
+deleteIcon: {
+  padding: 6,
+},
+
+// Center text (loading / empty)
+center: {
+  textAlign: "center",
+  marginTop: 20,
+},
+
+// Error text
+error: {
+  color: "red",
+  textAlign: "center",
+  marginTop: 10,
+},
+statusCol:{
+  flexDirection:'column',
+  alignItems:'flex-end',
+  gap:8,
+},
+
+btnText:{
+  color:'#fff'
+}
 });

@@ -1,41 +1,30 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+} from 'react-native';
 import styles from './DistributorOnboardListStyle';
 import Header from '../../components/Header';
-import { Store } from 'lucide-react-native';
+import { User2Icon, Trash2 } from 'lucide-react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchDistributors,
   deleteDistributor,
   updateStatus,
 } from '../../services/features/distributor/distributorSlice';
+import PopupModal from '../../components/PopupModal';
 
-// const DATA = [
-//   {
-//     id: "1",
-//     name: "Jane Distributor",
-//     firm: "Jane Suppliers",
-//     mobile: "9876543211",
-//     territory: "Bangalore South",
-//     status: "PENDING",
-//   },
-//   {
-//     id: "2",
-//     name: "John Distributor",
-//     firm: "John Traders",
-//     mobile: "9876543210",
-//     territory: "Bangalore North",
-//     status: "APPROVED",
-//   },
-// ];
-
-const DistributorOnboardList = ({ navigation }) => {
+const DistributorOnboardList = () => {
   const dispatch = useDispatch();
   const [tab, setTab] = useState('PENDING');
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
 
-    const { list, loading, error } = useSelector(
-    (state) => state.distributors
-  );
+  const { list, loading, error } = useSelector(state => state.distributors);
 
   useEffect(() => {
     dispatch(fetchDistributors());
@@ -43,117 +32,125 @@ const DistributorOnboardList = ({ navigation }) => {
 
   const filtered = list.filter(d => d.status === tab);
 
+  const confirmReject = () => {
+    dispatch(
+      updateStatus({
+        id: selectedId,
+        status: 'REJECTED',
+      }),
+    );
+
+    setShowRejectModal(false);
+  };
+
   const renderItem = ({ item }) => (
     <View style={styles.card}>
-      <Text style={styles.name}>{item.name}</Text>
-      <Text>{item.businessName}</Text>
-      <Text>{item.mobile}</Text>
+      {/* TOP ROW */}
+      <View style={styles.row}>
+        {/* IMAGE */}
+        {item.profileImage ? (
+          <Image
+            source={{
+              uri: `data:image/*;base64,${item.profileImage}`,
+            }}
+            style={styles.avatar}
+          />
+        ) : (
+          <View style={styles.avatarPlaceholder}>
+            <User2Icon size={22} color="#999" />
+          </View>
+        )}
 
-      {/* ACTION BUTTONS */}
-      {item.status === "PENDING" && (
-        <View style={{ flexDirection: "row", gap: 10 }}>
+        {/* DETAILS */}
+        <View style={{ flex: 1 }}>
+          <Text style={styles.name}>{item.name}</Text>
+          <Text style={styles.subText}>{item.businessName}</Text>
+          <Text style={styles.mobile}>{item.mobile}</Text>
+        </View>
+        <View style={styles.statusCol}>
+          {/* DELETE */}
           <TouchableOpacity
-            onPress={() =>
-              dispatch(
-                updateStatus({
-                  id: item._id, // use _id from MongoDB
-                  status: "APPROVED",
-                })
-              )
-            }
+            style={styles.deleteIcon}
+            onPress={() => dispatch(deleteDistributor(item._id))}
           >
-            <Text style={{ color: "green" }}>Approve</Text>
+            <Trash2 size={20} color="#e01616" />
           </TouchableOpacity>
 
+          {/* STATUS BADGE */}
+          <View
+            style={[
+              styles.badge,
+              item.status === 'APPROVED' && styles.badgeApproved,
+              item.status === 'REJECTED' && styles.badgeRejected,
+              item.status === 'PENDING' && styles.badgePending,
+            ]}
+          >
+            <Text
+              style={[
+                styles.badgeText,
+                item.status === 'APPROVED' && styles.badgeTextApproved,
+                item.status === 'REJECTED' && styles.badgeTextRejected,
+                item.status === 'PENDING' && styles.badgeTextPending,
+              ]}
+            >
+              {item.status}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {/* ACTION BUTTONS */}
+      {item.status === 'PENDING' && (
+        <View style={styles.actionRow}>
           <TouchableOpacity
+            style={styles.approveBtn}
             onPress={() =>
               dispatch(
                 updateStatus({
                   id: item._id,
-                  status: "REJECTED",
-                })
+                  status: 'APPROVED',
+                }),
               )
             }
           >
-            <Text style={{ color: "red" }}>Reject</Text>
+            <Text style={styles.btnText}>Approve</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.rejectBtn}
+            onPress={
+              () => {
+                setSelectedId(item._id);
+                setShowRejectModal(true);
+              }
+              // dispatch(
+              //   updateStatus({
+              //     id: item._id,
+              //     status: 'REJECTED',
+              //   }),
+              // )
+            }
+          >
+            <Text style={styles.btnText}>Reject</Text>
           </TouchableOpacity>
         </View>
       )}
-
-      {/* DELETE */}
-      <TouchableOpacity
-        onPress={() => dispatch(deleteDistributor(item._id))}
-      >
-        <Text style={{ color: "black" }}>Delete</Text>
-      </TouchableOpacity>
     </View>
   );
 
-
-  // const renderItem = ({ item }) => (
-  //   <TouchableOpacity
-  //     style={styles.card}
-  //     onPress={() =>
-  //       navigation.navigate('DistributorDetails', {
-  //         distributor: item,
-  //       })
-  //     }
-  //   >
-  //     <View style={styles.row}>
-  //       <View style={styles.iconCircle}>
-  //         <Store size={18} color="#D32F2F" />
-  //       </View>
-
-  //       <View style={{ flex: 1 }}>
-  //         <Text style={styles.name}>{item.name}</Text>
-  //         <Text style={styles.sub}>{item.firm}</Text>
-  //       </View>
-
-  //       <View
-  //         style={[
-  //           styles.badge,
-  //           tab === 'APPROVED' && styles.approved,
-  //           tab === 'PENDING' && styles.pending,
-  //           tab === 'REJECTED' && styles.rejected,
-  //         ]}
-  //       >
-  //         <Text style={styles.badgeText}>{tab}</Text>
-  //       </View>
-  //     </View>
-
-  //     <View style={styles.infoRow}>
-  //       <Text style={styles.label}>Mobile:</Text>
-  //       <Text style={styles.value}>{item.mobile}</Text>
-  //     </View>
-
-  //     <View style={styles.infoRow}>
-  //       <Text style={styles.label}>Territory:</Text>
-  //       <Text style={styles.value}>{item.territory}</Text>
-  //     </View>
-  //   </TouchableOpacity>
-  // );
-
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.container}>
       <Header title="Distributor Onboard List" />
 
       {/* TABS */}
       <View style={styles.tabs}>
-        {["PENDING", "APPROVED", "REJECTED"].map((t) => (
+        {['PENDING', 'APPROVED', 'REJECTED'].map(t => (
           <TouchableOpacity
             key={t}
-            style={[
-              styles.tab,
-              tab === t && styles.activeTab,
-            ]}
+            style={[styles.tab, tab === t && styles.activeTab]}
             onPress={() => setTab(t)}
           >
-            <Text
-              style={[
-                styles.tabText,
-                tab === t && styles.activeTabText,
-              ]}
-            >
+            <Text style={[styles.tabText, tab === t && styles.activeTabText]}>
               {t}
             </Text>
           </TouchableOpacity>
@@ -161,26 +158,37 @@ const DistributorOnboardList = ({ navigation }) => {
       </View>
 
       {/* LOADING */}
-      {loading && <Text style={{ textAlign: "center" }}>Loading...</Text>}
-
-      {/* ERROR */}
-      {error && (
-        <Text style={{ color: "red", textAlign: "center" }}>
-          {error}
+      {loading && (
+        <Text style={styles.center}>
+          <ActivityIndicator color={'blue'} />
         </Text>
       )}
+
+      {/* ERROR */}
+      {error && <Text style={styles.error}>{error}</Text>}
 
       {/* LIST */}
       <FlatList
         data={filtered}
-        keyExtractor={(item) => item._id}
+        keyExtractor={item => item._id}
         renderItem={renderItem}
         contentContainerStyle={{ padding: 16 }}
         ListEmptyComponent={
-          <Text style={{ textAlign: "center" }}>
-            No {tab.toLowerCase()} distributors
-          </Text>
+          !loading && (
+            <Text style={styles.center}>
+              No {tab.toLowerCase()} distributors
+            </Text>
+          )
         }
+      />
+      <PopupModal
+        visible={showRejectModal}
+        title="Reject Distributor"
+        description="Are you sure you want to reject this distributor?"
+        buttonText="Reject"
+        secondaryText="Cancel"
+        onPress={confirmReject}
+        onSecondaryPress={() => setShowRejectModal(false)}
       />
     </View>
   );

@@ -6,6 +6,7 @@ import otpReducer from '../services/features/auth/otpSlice';
 import productReducer from '../services/features/products/productSlice';
 import territoryReducer from '../services/features/Territory/TerritorySlice';
 import distributorReducer from "../services/features/distributor/distributorSlice";
+import fseReducer  from '../services/features/fse/fseSlice';
 // import verifyResetReducer from '../services/features/auth/resetOTPSlice';
 
 export const store = configureStore({
@@ -17,6 +18,7 @@ export const store = configureStore({
     products: productReducer,
     territory: territoryReducer,
     distributors: distributorReducer,
+    fse: fseReducer,
     // resetOtp:verifyResetReducer,
   },
 });

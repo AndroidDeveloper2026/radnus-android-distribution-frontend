@@ -31,64 +31,62 @@ const RetailerOnboarding = ({ navigation }) => {
   const [shopPhoto, setShopPhoto] = useState(null);
   const [loading, setLoading] = useState(false);
 
-const capturePhoto = () => {
-  launchCamera({ mediaType: 'photo', quality: 0.7 }, res => {
-    if (res.didCancel) return;
+  const capturePhoto = () => {
+    launchCamera({ mediaType: 'photo', quality: 0.7 }, res => {
+      if (res.didCancel) return;
 
-    if (res.errorCode) {
-      console.log('Camera Error:', res.errorMessage);
-      return;
-    }
+      if (res.errorCode) {
+        console.log('Camera Error:', res.errorMessage);
+        return;
+      }
 
-    if (res.assets && res.assets.length > 0) {
-      const uri = res.assets[0].uri;
+      if (res.assets && res.assets.length > 0) {
+        const uri = res.assets[0].uri;
 
-      console.log('IMAGE URI:', uri);
+        console.log('IMAGE URI:', uri);
 
-      // 🔥 Important fix for Android sometimes
-      // setShopPhoto(uri.startsWith('file://') ? uri : `file://${uri}`);
-       setShopPhoto(uri); 
-    }
-  });
-};
+        // 🔥 Important fix for Android sometimes
+        setShopPhoto(uri.startsWith('file://') ? uri : `file://${uri}`);
+        //  setShopPhoto(uri);
+      }
+    });
+  };
 
   /* 🚀 Submit */
   const submitForm = async values => {
-    const formData = new FormData();
-
-    formData.append('shopName', values.shopName);
-    formData.append('ownerName', values.ownerName);
-    formData.append('mobile', values.mobile);
-    formData.append('gps', values.gps);
-
-    if (shopPhoto) {
-      const fileName = shopPhoto.split('/').pop();
-
-      formData.append('shopPhoto', {
-        uri: shopPhoto,
-        type: 'image/jpeg',
-        name: fileName || 'shop.jpg',
-      });
-    }
-
-    // 🔍 Debug
-    formData._parts?.forEach(p => {
-      console.log('FORMDATA:', p[0], p[1]);
-    });
-
     try {
+      if (!shopPhoto) {
+        alert('Error', 'Please capture shop photo');
+        return;
+      }
+
+      const formData = new FormData();
+
+      formData.append('shopName', values.shopName);
+      formData.append('ownerName', values.ownerName);
+      formData.append('mobile', values.mobile);
+      formData.append('gps', values.gps);
+
+      const fileName = shopPhoto.split('/').pop();
+      const fileType = fileName.split('.').pop();
+
+      if (shopPhoto) {
+        formData.append('shopPhoto', {
+          uri: shopPhoto.uri,
+          type: shopPhoto.type || 'image/jpeg',
+          name: shopPhoto.fileName || 'shop.jpg',
+        });
+      }
+
       setLoading(true);
 
       const res = await dispatch(addRetailer(formData)).unwrap();
 
-      console.log('✅ SUCCESS:', res);
-      alert('Retailer added successfully');
-
+      alert('Success', 'Retailer added successfully');
       navigation.goBack();
-
     } catch (err) {
       console.log('❌ ERROR:', err);
-      alert(err || 'Failed to add retailer');
+      alert('Error', err || 'Failed to add retailer');
     } finally {
       setLoading(false);
     }
@@ -113,7 +111,6 @@ const capturePhoto = () => {
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
           >
-
             {/* DETAILS */}
             <View style={styles.card}>
               <Text style={styles.sectionTitle}>Retailer Details</Text>
@@ -166,10 +163,7 @@ const capturePhoto = () => {
 
             {/* PHOTO */}
             <View style={styles.photoSection}>
-              <TouchableOpacity
-                style={styles.photoBox}
-                onPress={capturePhoto}
-              >
+              <TouchableOpacity style={styles.photoBox} onPress={capturePhoto}>
                 {shopPhoto ? (
                   <Image source={{ uri: shopPhoto }} style={styles.photo} />
                 ) : (
@@ -191,7 +185,6 @@ const capturePhoto = () => {
                 {loading ? 'Submitting...' : 'Submit for Approval'}
               </Text>
             </TouchableOpacity>
-
           </ScrollView>
         )}
       </Formik>
@@ -199,8 +192,6 @@ const capturePhoto = () => {
   );
 };
 
-const Label = ({ text }) => (
-  <Text style={styles.label}>{text}</Text>
-);
+const Label = ({ text }) => <Text style={styles.label}>{text}</Text>;
 
 export default RetailerOnboarding;

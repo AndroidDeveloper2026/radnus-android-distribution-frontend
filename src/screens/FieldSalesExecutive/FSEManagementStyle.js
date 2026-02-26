@@ -34,6 +34,7 @@ export default StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 14,
     padding: 14,
+    marginHorizontal:16,
     marginBottom: 12,
     elevation: 2,
   },
@@ -63,6 +64,7 @@ export default StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 4,
+    gap:6
   },
 
   subText: {
@@ -73,7 +75,7 @@ export default StyleSheet.create({
 
   addButton: {
     position: "absolute",
-    bottom: 20,
+    bottom: 50,
     right: 20,
     backgroundColor: "#D32F2F",
     paddingHorizontal: 20,
@@ -87,5 +89,10 @@ export default StyleSheet.create({
     fontWeight: "700",
     fontSize: 14,
   },
+statusCol:{
+  flexDirection:'column',
+  alignItems:'flex-end',
+  gap:10,
+},
 });
 

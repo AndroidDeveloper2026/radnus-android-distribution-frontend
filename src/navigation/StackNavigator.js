@@ -44,6 +44,7 @@ import EditTerritory from '../screens/TerritoryManagement/EditTerritory';
 import Resetpassword from '../screens/Auth/ResetPassword';
 import DistributorOnboardList from '../screens/Distributor/DistributorOnboardList';
 import FSETracking from '../screens/FieldSalesExecutive/FSETracking';
+import FSEOnboarding from '../screens/FieldSalesExecutive/FSEOnboarding';
 //-- checking --
 import AdminDashboardScreen from '../screens/AdminDashboard/AdminDashboardScreen';
 import { useSelector } from 'react-redux';
@@ -151,10 +152,16 @@ const StackNavigator = () => {
             component={FSETracking}
             options={{ headerShown: false }}
           />
-          
+
           <Stack.Screen
             name="FSEDashboard"
             component={FSEDashboard}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="FSEOnboarding"
+            component={FSEOnboarding}
             options={{ headerShown: false }}
           />
 

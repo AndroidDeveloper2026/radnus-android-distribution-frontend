@@ -14,6 +14,7 @@ import {
   Users,
   Wallet,
   ClipboardList,
+  Plus
 } from "lucide-react-native";
 
 const DistributorDashboard = ({ navigation }) => {
@@ -72,6 +73,13 @@ const DistributorDashboard = ({ navigation }) => {
           icon={<Package size={18} color="#D32F2F" />}
           label="Stock Summary"
           onPress={() => navigation.navigate("StockVisibility")}
+        />
+
+        
+        <QuickAction
+          icon={<Plus size={18} color="#D32F2F" />}
+          label="FSE Onboading"
+          onPress={() => navigation.navigate("FSEOnboarding")}
         />
 
         <QuickAction
