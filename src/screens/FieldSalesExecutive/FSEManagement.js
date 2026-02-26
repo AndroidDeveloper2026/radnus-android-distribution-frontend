@@ -108,7 +108,7 @@ import {
   Image,
   ActivityIndicator,
 } from "react-native";
-import styles from "../Distributor/DistributorOnboardListStyle";
+import styles from "./FSEManagementStyle";
 import Header from "../../components/Header";
 import { User2Icon, Trash2 } from "lucide-react-native";
 
@@ -166,7 +166,7 @@ const FSEManagement = ({ navigation }) => {
         )}
 
         {/* DETAILS */}
-        <View style={{ flex: 1 }}>
+        <View style={styles.details}>
           <Text style={styles.name}>{item.name}</Text>
           <Text style={styles.subText}>{item.email}</Text>
           <Text style={styles.mobile}>{item.phone}</Text>
