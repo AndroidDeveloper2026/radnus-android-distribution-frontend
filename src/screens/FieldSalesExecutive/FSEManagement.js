@@ -1,104 +1,3 @@
-// import React, { useEffect } from 'react';
-// import { View, Text, FlatList, TouchableOpacity } from 'react-native';
-// import styles from './FSEManagementStyle';
-// import Header from '../../components/Header';
-// import {
-//   User,
-//   MapPin,
-//   Target,
-//   Ban,
-//   CheckCircle,
-//   PhoneCall,
-// } from 'lucide-react-native';
-
-// import { useSelector, useDispatch } from 'react-redux';
-// import { getFSEs, approveFSE } from '../../services/features/fse/fseSlice';
-
-// const FSEManagement = ({ navigation }) => {
-//   const dispatch = useDispatch();
-//   const fseList = useSelector(state => state.fse.list);
-
-//   useEffect(() => {
-//     dispatch(getFSEs());
-//   }, []);
-
-//   const total = fseList.length;
-//   const active = fseList.filter(f => f.status === 'APPROVED').length;
-
-//   const renderItem = ({ item, index }) => (
-//     <TouchableOpacity
-//       style={styles.card}
-//       onPress={() => navigation.navigate('FSEDetail', { fseId: item._id })}
-//     >
-//       <View style={styles.row}>
-//         <View style={styles.iconCircle}>
-//           <User size={18} color="#D32F2F" />
-//         </View>
-
-//         <View style={{ flex: 1 }}>
-//           <Text style={styles.name}>
-//             {index + 1}. {item.name}
-//           </Text>
-
-//           <View style={styles.subRow}>
-//             <MapPin size={12} />
-//             <Text>{item.address}</Text>
-//           </View>
-
-//           <View style={styles.subRow}>
-//             <PhoneCall size={12} />
-//             <Text>{item.phone}</Text>
-//           </View>
-//         </View>
-
-//         <View style={styles.statusCol}>
-//           {item.status === 'APPROVED' ? (
-//             <>
-//               <CheckCircle size={18} color="green" />
-//               <TouchableOpacity onPress={() => dispatch(approveFSE(item._id))}>
-//                 <Text style={{ color: '#0000',backgroundColor: '#91fe9a',borderRadius:20,padding:6, fontSize:12,}}>APPROVED</Text>
-//               </TouchableOpacity>
-//             </>
-//           ) : (
-//             <>
-//               <Ban size={18} color="red" />
-//               <TouchableOpacity onPress={() => dispatch(approveFSE(item._id))}>
-//                 <Text style={{ color: '#0000',backgroundColor:'#fcd088',borderRadius:20,padding:6, fontSize:12,}}>APPROVE</Text>
-//               </TouchableOpacity>
-//             </>
-//           )}
-//         </View>
-//       </View>
-//     </TouchableOpacity>
-//   );
-
-//   return (
-//     <View style={styles.container}>
-//       <Header title="FSE Management" />
-
-//       <View style={styles.summary}>
-//         <Text>Total: {total}</Text>
-//         <Text>Active: {active}</Text>
-//       </View>
-
-//       <FlatList
-//         data={fseList}
-//         keyExtractor={item => item._id}
-//         renderItem={renderItem}
-//       />
-
-//       <TouchableOpacity
-//         style={styles.addButton}
-//         onPress={() => navigation.navigate('AddFSE')}
-//       >
-//         <Text style={styles.addButtonText}>+ Add FSE</Text>
-//       </TouchableOpacity>
-//     </View>
-//   );
-// };
-
-// export default FSEManagement;
-
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -136,10 +35,10 @@ const FSEManagement = ({ navigation }) => {
     dispatch(getFSEs());
   }, []);
 
-  // ✅ FILTER BY STATUS
+  // FILTER BY STATUS
   const filtered = list.filter((f) => f.status === tab);
 
-  // ✅ REJECT
+  // REJECT
   const confirmReject = () => {
     dispatch(
       updateFSE({
@@ -151,14 +50,14 @@ const FSEManagement = ({ navigation }) => {
     setShowRejectModal(false);
   };
 
-  // ✅ RENDER ITEM
+  // RENDER ITEM
   const renderItem = ({ item }) => (
     <View style={styles.card}>
       <View style={styles.row}>
 
         {/* IMAGE */}
         {item.photo ? (
-          <Image source={{ uri: item.photo }} style={styles.avatar} />
+          <Image source={{ uri: item?.photo }} style={styles.avatar} />
         ) : (
           <View style={styles.avatarPlaceholder}>
             <User2Icon size={22} color="#999" />

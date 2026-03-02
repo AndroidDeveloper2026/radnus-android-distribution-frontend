@@ -2,10 +2,22 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import API from '../../API/api';
 
 // CREATE (FSE submits → PENDING)
-export const createFSE = createAsyncThunk('fse/create', async data => {
-  const res = await API.post('/api/fse', data);
-  return res.data;
-});
+// export const createFSE = createAsyncThunk('fse/create', async data => {
+//   const res = await API.post('/api/fse', data);
+//   return res.data;
+// });
+
+export const createFSE = createAsyncThunk(
+  "fse/create",
+  async (data) => {
+    const res = await API.post("/api/fse", data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return res.data;
+  }
+);
 
 // GET ALL
 export const getFSEs = createAsyncThunk('fse/getAll', async () => {

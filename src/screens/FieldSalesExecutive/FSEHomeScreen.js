@@ -9,10 +9,15 @@
 //   Linking,
 // } from 'react-native';
 // import Geolocation from '@react-native-community/geolocation';
-// import FSEHomeStyles from './FSEHomeStyle';
 // import Header from '../../components/Header';
+// import FSEHomeStyles from './FSEHomeStyle';
+// import { useDispatch } from "react-redux";
+// import { startTracking } from "../../services/features/fse/trackingSlice";
+// import API from '../../services/API/api';
 
 // const FSEHomeScreen = ({ navigation }) => {
+//   const dispatch = useDispatch();
+//   const userId = "user_123";
 //   const [location, setLocation] = useState(null);
 //   const [address, setAddress] = useState('');
 //   const [loading, setLoading] = useState(false);
@@ -22,135 +27,181 @@
 //     requestLocationPermission();
 //   }, []);
 
-//   // ✅ REQUEST PERMISSION
+//   /* ---------------- PERMISSION ---------------- */
 //   const requestLocationPermission = async () => {
-//     if (Platform.OS === 'android') {
-//       const granted = await PermissionsAndroid.request(
-//         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-//       );
+//     try {
+//       if (Platform.OS === 'android') {
+//         const granted = await PermissionsAndroid.request(
+//           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+//         );
 
-//       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-//         getCurrentLocation();
+//         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+//           getCurrentLocation();
+//         } else {
+//           Alert.alert(
+//             'Permission Required',
+//             'Location permission is required',
+//           );
+//         }
 //       } else {
-//         Alert.alert('Permission Required', 'Location permission is required');
+//         getCurrentLocation();
 //       }
-//     } else {
-//       getCurrentLocation();
+//     } catch (err) {
+//       console.log(err);
 //     }
 //   };
 
-//   // 🌍 FREE ADDRESS (FIXED VERSION)
-//   const getAddressFromOSM = async (lat, lng) => {
+//   /* ---------------- GET LOCATION ---------------- */
+//   const getCurrentLocation = () => {
+//     setLoading(true);
+
+//     Geolocation.getCurrentPosition(
+//       position => {
+//         const { latitude, longitude, accuracy } = position.coords;
+
+//         setLocation({ latitude, longitude, accuracy });
+//         setLoading(false);
+
+//         // 🔥 fetch address
+//         getAddress(latitude, longitude);
+//       },
+//       error => {
+//         setLoading(false);
+//         console.log('LOCATION ERROR:', error);
+
+//         if (error.code === 1) {
+//           Alert.alert('Permission Denied', 'Allow location permission');
+//         } else if (error.code === 2) {
+//           Alert.alert('GPS Off', 'Please enable GPS', [
+//             {
+//               text: 'Open Settings',
+//               onPress: () => Linking.openSettings(),
+//             },
+//           ]);
+//         } else if (error.code === 3) {
+//           Alert.alert('Timeout', 'Retrying location...');
+//           retryLocation();
+//         } else {
+//           Alert.alert('Error', 'Unable to fetch location');
+//         }
+//       },
+//       {
+//         enableHighAccuracy: false, // ✅ stable
+//         timeout: 30000, // ✅ important
+//         maximumAge: 10000,
+//       },
+//     );
+//   };
+
+//   /* ---------------- RETRY ---------------- */
+//   const retryLocation = () => {
+//     setTimeout(() => {
+//       getCurrentLocation();
+//     }, 2000);
+//   };
+
+//   /* ---------------- GET ADDRESS (FREE API) ---------------- */
+//   const getAddress = async (lat, lng) => {
 //     try {
 //       const response = await fetch(
 //         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
 //         {
 //           headers: {
-//             'User-Agent': 'FSEApp/1.0 (support@yourapp.com)', // ✅ IMPORTANT
-//             Accept: 'application/json',
+//             'User-Agent': 'FSEApp/1.0',
 //           },
 //         },
 //       );
 
 //       const data = await response.json();
 
-//       console.log('OSM DATA:', data);
-
-//       if (data && data.display_name) {
+//       if (data?.display_name) {
 //         setAddress(data.display_name);
 //       } else {
 //         setAddress('Address not found');
 //       }
 //     } catch (error) {
-//       console.log('OSM ERROR:', error);
+//       console.log('ADDRESS ERROR:', error);
 //       setAddress('Error fetching address');
 //     }
 //   };
 
-//   // GET LOCATION
-//   const getCurrentLocation = () => {
+//   const markAttendance = async () => {
+//   if (!location) {
+//     Alert.alert("Error", "Location not available");
+//     return;
+//   }
+
+//   try {
 //     setLoading(true);
 
-//     Geolocation.getCurrentPosition(
-//       position => {
-//         const lat = position.coords.latitude;
-//         const lng = position.coords.longitude;
-
-//         setLocation({
-//           latitude: lat,
-//           longitude: lng,
-//         });
-
-//         // ✅ SMALL DELAY (avoid rate-limit issues)
-//         setTimeout(() => {
-//           getAddressFromOSM(lat, lng);
-//         }, 1000);
-
-//         setLoading(false);
-//       },
-//       error => {
-//         setLoading(false);
-
-//         if (error.code === 1) {
-//           Alert.alert('Permission Denied', 'Enable location permission');
-//         } else if (error.code === 2) {
-//           Alert.alert('Location Disabled', 'Please turn ON GPS', [
-//             {
-//               text: 'Open Settings',
-//               onPress: () => Linking.openSettings(),
-//             },
-//             { text: 'Cancel', style: 'cancel' },
-//           ]);
-//         } else if (error.code === 3) {
-//           Alert.alert('Timeout', 'Fetching location is taking too long');
-//         }
-//       },
-//       {
-//         enableHighAccuracy: true,
-//         timeout: 20000,
-//         maximumAge: 10000,
-//       },
-//     );
-//   };
-
-//   // ✅ MARK ATTENDANCE
-//   const markAttendance = () => {
-//     if (!location) {
-//       Alert.alert('GPS Error', 'Location not captured');
-//       return;
-//     }
-
-//     const payload = {
+//     // ✅ START SESSION
+//     const res = await API.post("/session/start", {
+//       userId,
 //       latitude: location.latitude,
 //       longitude: location.longitude,
-//       address: address,
-//       time: new Date(),
-//     };
+//     });
 
-//     console.log('Attendance Payload:', payload);
+//     const sessionId = res.data._id;
 
-//     setLoading(true);
+//     // ✅ START TRACKING
+//     dispatch(startTracking(sessionId));
 
-//     setTimeout(() => {
-//       setAttendanceMarked(true);
-//       setLoading(false);
+//     setAttendanceMarked(true);
+//     setLoading(false);
 
-//       Alert.alert('Success', 'Attendance marked successfully', [
-//         {
-//           text: 'OK',
-//           onPress: () =>
-//             navigation.replace('MainTabs', {
-//               screen: 'Dashboard',
-//               params: { role: 'FSE' },
-//             }),
-//         },
-//       ]);
-//     }, 1000);
-//   };
+//     Alert.alert("Success", "Day Started", [
+//       {
+//         text: "OK",
+//         onPress: () =>
+//           navigation.replace("MainTabs", {
+//             screen: "Dashboard",
+//           }),
+//       },
+//     ]);
+//   } catch (err) {
+//     setLoading(false);
+//     Alert.alert("Error", "Failed to start day");
+//   }
+// };
+
+//   /* ---------------- MARK ATTENDANCE ---------------- */
+//   // const markAttendance = () => {
+//   //   if (!location) {
+//   //     Alert.alert('Error', 'Location not available');
+//   //     return;
+//   //   }
+
+//   //   const payload = {
+//   //     latitude: location.latitude,
+//   //     longitude: location.longitude,
+//   //     address,
+//   //     time: new Date(),
+//   //   };
+
+//   //   console.log('Attendance:', payload);
+
+//   //   setLoading(true);
+
+//   //   setTimeout(() => {
+//   //     setAttendanceMarked(true);
+//   //     setLoading(false);
+
+//   //     Alert.alert('Success', 'Attendance marked successfully', [
+//   //       {
+//   //         text: 'OK',
+//   //         onPress: () =>
+//   //           navigation.replace('MainTabs', {
+//   //             screen: 'Dashboard',
+//   //             params: { role: 'FSE' },
+//   //           }),
+//   //       },
+//   //     ]);
+//   //   }, 1000);
+//   // };
 
 //   return (
 //     <View style={FSEHomeStyles.container}>
-//       <Header title={'Start Day'} showBackArrow={false} />
+//       <Header title="Start Day" showBackArrow={false} />
 
 //       <View style={FSEHomeStyles.content}>
 //         <Text style={FSEHomeStyles.title}>Mark Attendance</Text>
@@ -171,9 +222,9 @@
 //           </Text>
 //         </View>
 
-//         {/* LOCATION + ADDRESS */}
+//         {/* LOCATION */}
 //         <View style={FSEHomeStyles.infoBox}>
-//           <Text style={FSEHomeStyles.infoLabel}>GPS Location</Text>
+//           <Text style={FSEHomeStyles.infoLabel}>Location</Text>
 
 //           {location ? (
 //             <>
@@ -189,11 +240,25 @@
 //               </Text>
 //             </>
 //           ) : (
-//             <Text style={FSEHomeStyles.gpsStatus}>Fetching location…</Text>
+//             <Text style={FSEHomeStyles.gpsStatus}>
+//               {loading ? 'Fetching location...' : 'Tap retry'}
+//             </Text>
 //           )}
 //         </View>
 
-//         {/* BUTTON */}
+//         {/* RETRY BUTTON */}
+//         {!location && (
+//           <TouchableOpacity
+//             style={FSEHomeStyles.secondaryBtn}
+//             onPress={getCurrentLocation}
+//           >
+//             <Text style={FSEHomeStyles.secondaryText}>
+//               Retry Location
+//             </Text>
+//           </TouchableOpacity>
+//         )}
+
+//         {/* START BUTTON */}
 //         <TouchableOpacity
 //           style={[
 //             FSEHomeStyles.button,
@@ -227,12 +292,24 @@ import {
 import Geolocation from '@react-native-community/geolocation';
 import Header from '../../components/Header';
 import FSEHomeStyles from './FSEHomeStyle';
+import { useDispatch, useSelector } from 'react-redux';
+import { startTracking } from '../../services/features/fse/trackingSlice';
+import API from '../../services/API/api'; // ✅ IMPORTANT
 
 const FSEHomeScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
+  const userId = 'user_123';
+  const user = useSelector(state => state.auth.user);
   const [location, setLocation] = useState(null);
   const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
   const [attendanceMarked, setAttendanceMarked] = useState(false);
+
+  const retryLocation = () => {
+    setTimeout(() => {
+      getCurrentLocation();
+    }, 2000);
+  };
 
   useEffect(() => {
     requestLocationPermission();
@@ -240,25 +317,18 @@ const FSEHomeScreen = ({ navigation }) => {
 
   /* ---------------- PERMISSION ---------------- */
   const requestLocationPermission = async () => {
-    try {
-      if (Platform.OS === 'android') {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        );
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      );
 
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          getCurrentLocation();
-        } else {
-          Alert.alert(
-            'Permission Required',
-            'Location permission is required',
-          );
-        }
-      } else {
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
         getCurrentLocation();
+      } else {
+        Alert.alert('Permission Required', 'Location permission is required');
       }
-    } catch (err) {
-      console.log(err);
+    } else {
+      getCurrentLocation();
     }
   };
 
@@ -268,107 +338,104 @@ const FSEHomeScreen = ({ navigation }) => {
 
     Geolocation.getCurrentPosition(
       position => {
-        const { latitude, longitude, accuracy } = position.coords;
+        const { latitude, longitude } = position.coords;
 
-        setLocation({ latitude, longitude, accuracy });
-        setLoading(false);
-
-        // 🔥 fetch address
+        setLocation({ latitude, longitude });
         getAddress(latitude, longitude);
+        setLoading(false);
       },
       error => {
         setLoading(false);
-        console.log('LOCATION ERROR:', error);
 
         if (error.code === 1) {
           Alert.alert('Permission Denied', 'Allow location permission');
         } else if (error.code === 2) {
           Alert.alert('GPS Off', 'Please enable GPS', [
-            {
-              text: 'Open Settings',
-              onPress: () => Linking.openSettings(),
-            },
+            { text: 'Open Settings', onPress: () => Linking.openSettings() },
           ]);
         } else if (error.code === 3) {
-          Alert.alert('Timeout', 'Retrying location...');
+          Alert.alert('Timeout', 'Retrying...');
           retryLocation();
         } else {
           Alert.alert('Error', 'Unable to fetch location');
         }
       },
+      // error => {
+      //   setLoading(false);
+      //   Alert.alert('Error', 'Unable to fetch location');
+      // },
       {
-        enableHighAccuracy: false, // ✅ stable
-        timeout: 30000, // ✅ important
-        maximumAge: 10000,
+        enableHighAccuracy: true,
+        timeout: 30000,
       },
     );
   };
 
-  /* ---------------- RETRY ---------------- */
-  const retryLocation = () => {
-    setTimeout(() => {
-      getCurrentLocation();
-    }, 2000);
-  };
-
-  /* ---------------- GET ADDRESS (FREE API) ---------------- */
   const getAddress = async (lat, lng) => {
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
         {
-          headers: {
-            'User-Agent': 'FSEApp/1.0',
-          },
+          headers: { 'User-Agent': 'FSEApp/1.0' },
         },
       );
 
       const data = await response.json();
 
-      if (data?.display_name) {
-        setAddress(data.display_name);
-      } else {
-        setAddress('Address not found');
-      }
+      setAddress(data?.display_name || 'Address not found');
     } catch (error) {
-      console.log('ADDRESS ERROR:', error);
       setAddress('Error fetching address');
     }
   };
 
-  /* ---------------- MARK ATTENDANCE ---------------- */
-  const markAttendance = () => {
+  /* ---------------- START DAY ---------------- */
+  const markAttendance = async () => {
     if (!location) {
       Alert.alert('Error', 'Location not available');
       return;
     }
 
-    const payload = {
-      latitude: location.latitude,
-      longitude: location.longitude,
-      address,
-      time: new Date(),
-    };
+    try {
+      setLoading(true);
 
-    console.log('Attendance:', payload);
+      console.log('Sending:', {
+        userId,
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
 
-    setLoading(true);
+      const res = await API.post('/api/session/start', {
+        userId,
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
 
-    setTimeout(() => {
+      console.log('Response:', res.data);
+
+      // if (!sessionId) return;
+
+      const sessionId = res.data._id;
+
+      dispatch(startTracking(sessionId));
+
       setAttendanceMarked(true);
-      setLoading(false);
 
-      Alert.alert('Success', 'Attendance marked successfully', [
+      Alert.alert('Success', 'Day Started', [
         {
           text: 'OK',
-          onPress: () =>
-            navigation.replace('MainTabs', {
-              screen: 'Dashboard',
-              params: { role: 'FSE' },
-            }),
+          onPress: () => navigation.navigate('Dashboard'),
         },
       ]);
-    }, 1000);
+    } catch (err) {
+      console.log('ERROR:', err?.response?.data || err.message);
+
+      Alert.alert(
+        'Error',
+        err?.response?.data?.message || 'Failed to start day',
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -376,61 +443,36 @@ const FSEHomeScreen = ({ navigation }) => {
       <Header title="Start Day" showBackArrow={false} />
 
       <View style={FSEHomeStyles.content}>
+        <Text style={FSEHomeStyles.title}>Welcome, {user?.name || 'User'}</Text>
         <Text style={FSEHomeStyles.title}>Mark Attendance</Text>
 
-        {/* DATE */}
         <View style={FSEHomeStyles.infoBox}>
-          <Text style={FSEHomeStyles.infoLabel}>Date</Text>
-          <Text style={FSEHomeStyles.infoValue}>
-            {new Date().toDateString()}
-          </Text>
+          <Text>Date</Text>
+          <Text>{new Date().toDateString()}</Text>
         </View>
 
-        {/* TIME */}
         <View style={FSEHomeStyles.infoBox}>
-          <Text style={FSEHomeStyles.infoLabel}>Time</Text>
-          <Text style={FSEHomeStyles.infoValue}>
-            {new Date().toLocaleTimeString()}
-          </Text>
+          <Text>Time</Text>
+          <Text>{new Date().toLocaleTimeString()}</Text>
         </View>
 
-        {/* LOCATION */}
         <View style={FSEHomeStyles.infoBox}>
-          <Text style={FSEHomeStyles.infoLabel}>Location</Text>
+          <Text>Location</Text>
 
           {location ? (
             <>
-              <Text style={FSEHomeStyles.infoValue}>
-                Lat: {location.latitude}
-              </Text>
-              <Text style={FSEHomeStyles.infoValue}>
-                Long: {location.longitude}
-              </Text>
+              <Text>Lat: {location.latitude}</Text>
+              <Text>Lng: {location.longitude}</Text>
 
               <Text style={FSEHomeStyles.infoAddressValue}>
                 {address || 'Fetching address...'}
               </Text>
             </>
           ) : (
-            <Text style={FSEHomeStyles.gpsStatus}>
-              {loading ? 'Fetching location...' : 'Tap retry'}
-            </Text>
+            <Text>{loading ? 'Fetching...' : 'Retry'}</Text>
           )}
         </View>
 
-        {/* RETRY BUTTON */}
-        {!location && (
-          <TouchableOpacity
-            style={FSEHomeStyles.secondaryBtn}
-            onPress={getCurrentLocation}
-          >
-            <Text style={FSEHomeStyles.secondaryText}>
-              Retry Location
-            </Text>
-          </TouchableOpacity>
-        )}
-
-        {/* START BUTTON */}
         <TouchableOpacity
           style={[
             FSEHomeStyles.button,
@@ -440,9 +482,7 @@ const FSEHomeScreen = ({ navigation }) => {
           onPress={markAttendance}
           disabled={!location || loading || attendanceMarked}
         >
-          <Text style={FSEHomeStyles.buttonText}>
-            {attendanceMarked ? 'ATTENDANCE MARKED' : 'START DAY'}
-          </Text>
+          <Text style={FSEHomeStyles.buttonText}>START DAY</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -450,5 +490,3 @@ const FSEHomeScreen = ({ navigation }) => {
 };
 
 export default FSEHomeScreen;
-
-

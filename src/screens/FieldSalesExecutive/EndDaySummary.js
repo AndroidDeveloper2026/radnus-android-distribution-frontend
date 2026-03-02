@@ -14,19 +14,43 @@ import {
   MapPin,
   CheckCircle,
 } from "lucide-react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { stopTracking } from "../../redux/trackingSlice";
+import API from "../../services/API/api";
 
 const EndDaySummary = ({ navigation }) => {
-  const summary = {
-    orders: 12,
-    sales: 154000,
-    collections: 98000,
-    visits: 15,
-  };
+  // const summary = {
+  //   orders: 12,
+  //   sales: 154000,
+  //   collections: 98000,
+  //   visits: 15,
+  // };
 
-  const submitEndDay = () => {
-    // 🔗 API CALL
-    console.log("End Day Submitted");
-    navigation.goBack();
+  // const submitEndDay = () => {
+  //   // 🔗 API CALL
+  //   console.log("End Day Submitted");
+  //   navigation.goBack();
+  // };
+
+    const dispatch = useDispatch();
+  const { sessionId } = useSelector((state) => state.tracking);
+
+  const submitEndDay = async () => {
+    try {
+      await API.post("/session/end", {
+        sessionId,
+      });
+
+      // ✅ STOP TRACKING
+      dispatch(stopTracking());
+
+      alert("Success", "End Day Submitted");
+
+      navigation.navigate("Dashboard");
+
+    } catch (err) {
+      alert("Error", "Failed to end day");
+    }
   };
 
   return (
@@ -38,7 +62,7 @@ const EndDaySummary = ({ navigation }) => {
         showsVerticalScrollIndicator={false}
       >
         {/* SUMMARY CARDS */}
-        <View style={styles.grid}>
+        {/* <View style={styles.grid}>
           <SummaryCard
             icon={<ShoppingCart size={20} color="#D32F2F" />}
             label="Orders"
@@ -62,7 +86,7 @@ const EndDaySummary = ({ navigation }) => {
             label="Visits"
             value={summary.visits}
           />
-        </View>
+        </View> */}
 
         {/* NOTES */}
         <View style={styles.card}>
@@ -86,12 +110,12 @@ const EndDaySummary = ({ navigation }) => {
   );
 };
 
-const SummaryCard = ({ icon, label, value }) => (
-  <View style={styles.summaryCard}>
-    <View style={styles.iconCircle}>{icon}</View>
-    <Text style={styles.value}>{value}</Text>
-    <Text style={styles.label}>{label}</Text>
-  </View>
-);
+// const SummaryCard = ({ icon, label, value }) => (
+//   <View style={styles.summaryCard}>
+//     <View style={styles.iconCircle}>{icon}</View>
+//     <Text style={styles.value}>{value}</Text>
+//     <Text style={styles.label}>{label}</Text>
+//   </View>
+// );
 
 export default EndDaySummary;

@@ -45,6 +45,7 @@ import Resetpassword from '../screens/Auth/ResetPassword';
 import DistributorOnboardList from '../screens/Distributor/DistributorOnboardList';
 import FSETracking from '../screens/FieldSalesExecutive/FSETracking';
 import FSEOnboarding from '../screens/FieldSalesExecutive/FSEOnboarding';
+import MapScreen from '../screens/FieldSalesExecutive/MapScreen';
 //-- checking --
 import AdminDashboardScreen from '../screens/AdminDashboard/AdminDashboardScreen';
 import { useSelector } from 'react-redux';
@@ -156,6 +157,11 @@ const StackNavigator = () => {
           <Stack.Screen
             name="FSEDashboard"
             component={FSEDashboard}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="MapScreen"
+            component={MapScreen}
             options={{ headerShown: false }}
           />
 

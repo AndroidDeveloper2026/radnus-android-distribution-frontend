@@ -9,6 +9,7 @@ import * as Yup from 'yup';
 import { useDispatch } from 'react-redux';
 import { loginUser } from '../../services/features/auth/authSlice';
 import { Eye, EyeOff } from 'lucide-react-native';
+import showToast from '../../utils/toast';
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string()
@@ -42,6 +43,7 @@ const LoginScreen = ({ navigation }) => {
       .unwrap()
       .catch(err => {
         console.log('-- login form (error) --', err);
+        showToast('Server Running Slow!','short')
         setErrors({ general: err?.message || err || 'Login failed' });
       })
       .finally(() => {

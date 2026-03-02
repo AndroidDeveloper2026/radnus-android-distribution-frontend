@@ -15,6 +15,8 @@ import Header from '../../components/Header';
 import { launchCamera } from 'react-native-image-picker';
 import { Camera, MapPin } from 'lucide-react-native';
 import { addRetailer } from '../../services/features/retailer/retailerSlice';
+import MessagePopup from '../../components/ModalPopup';
+import { openCamera } from '../../utils/cameraHelper';
 
 /* ---------------- VALIDATION ---------------- */
 const validationSchema = Yup.object().shape({
@@ -30,33 +32,35 @@ const RetailerOnboarding = ({ navigation }) => {
   const dispatch = useDispatch();
   const [shopPhoto, setShopPhoto] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [popup, setPopup] = useState({
+    visible: false,
+    type: 'success',
+    title: '',
+    description: '',
+  });
 
-  const capturePhoto = () => {
-    launchCamera({ mediaType: 'photo', quality: 0.7 }, res => {
-      if (res.didCancel) return;
+  const capturePhoto = async () => {
+    console.log('--- camera open via helper ---');
 
-      if (res.errorCode) {
-        console.log('Camera Error:', res.errorMessage);
-        return;
-      }
-
-      if (res.assets && res.assets.length > 0) {
-        const uri = res.assets[0].uri;
-
-        console.log('IMAGE URI:', uri);
-
-        // 🔥 Important fix for Android sometimes
-        setShopPhoto(uri.startsWith('file://') ? uri : `file://${uri}`);
-        //  setShopPhoto(uri);
-      }
-    });
+    try {
+      openCamera(image => {
+        setShopPhoto(image); // ✅ handle result here
+      });
+      // const image = await openCamera();   // 🔥 using your helper
+      // setShopPhoto(image);
+    } catch (err) {
+      console.log('Camera Error:', err);
+    }
   };
 
-  /* 🚀 Submit */
+  const closePopup = () => {
+    setPopup(prev => ({ ...prev, visible: false }));
+  };
+
   const submitForm = async values => {
     try {
       if (!shopPhoto) {
-        alert('Error', 'Please capture shop photo');
+        alert('Please capture shop photo');
         return;
       }
 
@@ -66,27 +70,38 @@ const RetailerOnboarding = ({ navigation }) => {
       formData.append('ownerName', values.ownerName);
       formData.append('mobile', values.mobile);
       formData.append('gps', values.gps);
+      formData.append('shopPhoto', {
+        uri: shopPhoto.uri,
+        type: shopPhoto.type || 'image/jpeg',
+        name: shopPhoto.fileName || 'shop.jpg',
+      });
 
-      const fileName = shopPhoto.split('/').pop();
-      const fileType = fileName.split('.').pop();
-
-      if (shopPhoto) {
-        formData.append('shopPhoto', {
-          uri: shopPhoto.uri,
-          type: shopPhoto.type || 'image/jpeg',
-          name: shopPhoto.fileName || 'shop.jpg',
-        });
-      }
+      // formData.append('shopPhoto', shopPhoto);
 
       setLoading(true);
+      console.log('---frontend (retailer) ---', formData);
+
+      console.log('---frontend (retailer) ---', formData);
 
       const res = await dispatch(addRetailer(formData)).unwrap();
 
-      alert('Success', 'Retailer added successfully');
-      navigation.goBack();
+      console.log('✅ SUCCESS:', res);
+
+      setPopup({
+        visible: true,
+        type: 'success',
+        title: 'Success',
+        description: 'Retailer added successfully',
+      });
     } catch (err) {
-      console.log('❌ ERROR:', err);
-      alert('Error', err || 'Failed to add retailer');
+      console.log(' ERROR FULL:', err);
+
+      setPopup({
+        visible: true,
+        type: 'error',
+        title: 'Error',
+        description: err?.message || 'Failed to add retailer',
+      });
     } finally {
       setLoading(false);
     }
@@ -165,7 +180,8 @@ const RetailerOnboarding = ({ navigation }) => {
             <View style={styles.photoSection}>
               <TouchableOpacity style={styles.photoBox} onPress={capturePhoto}>
                 {shopPhoto ? (
-                  <Image source={{ uri: shopPhoto }} style={styles.photo} />
+                  // <Image source={{ uri: shopPhoto }} style={styles.photo} />
+                  <Image source={{ uri: shopPhoto.uri }} style={styles.photo} />
                 ) : (
                   <View style={styles.photoIcon}>
                     <Camera size={26} color="#D32F2F" />
@@ -188,6 +204,18 @@ const RetailerOnboarding = ({ navigation }) => {
           </ScrollView>
         )}
       </Formik>
+      <MessagePopup
+        visible={popup.visible}
+        type={popup.type}
+        title={popup.title}
+        description={popup.description}
+        secondaryText="Cancel"
+        onSecondaryPress={closePopup}
+        onPress={() => {
+          closePopup();
+          navigation.goBack();
+        }}
+      />
     </View>
   );
 };

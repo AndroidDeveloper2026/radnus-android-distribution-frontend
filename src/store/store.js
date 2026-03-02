@@ -5,8 +5,11 @@ import adminReducer from '../services/features/auth/adminAuthSlice';
 import otpReducer from '../services/features/auth/otpSlice';
 import productReducer from '../services/features/products/productSlice';
 import territoryReducer from '../services/features/Territory/TerritorySlice';
-import distributorReducer from "../services/features/distributor/distributorSlice";
-import fseReducer  from '../services/features/fse/fseSlice';
+import distributorReducer from '../services/features/distributor/distributorSlice';
+import fseReducer from '../services/features/fse/fseSlice';
+import retailerReducer from '../services/features/retailer/retailerSlice';
+import locationReducer from '../services/features/fse/locationSlice';
+import trackingReducer from '../services/features/fse/trackingSlice';
 // import verifyResetReducer from '../services/features/auth/resetOTPSlice';
 
 export const store = configureStore({
@@ -19,6 +22,9 @@ export const store = configureStore({
     territory: territoryReducer,
     distributors: distributorReducer,
     fse: fseReducer,
+    retailer: retailerReducer,
+    location: locationReducer,
+    tracking: trackingReducer,
     // resetOtp:verifyResetReducer,
   },
 });

@@ -6,9 +6,8 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
-import LottieView from 'lottie-react-native';
 
-const PopupModal = ({
+const MessagePopup = ({
   visible,
   type = 'success', // success | error | warning
   title,
@@ -18,15 +17,7 @@ const PopupModal = ({
   onClose,
   secondaryText,
   onSecondaryPress,
-  animationSource,
 }) => {
-  // 🎬 Default animations
-  const animations = {
-    success: require('../assets/lottie/success.json'),
-    error: require('../assets/lottie/error.json'),
-    warning: require('../assets/lottie/warning.json'),
-  };
-
   // 🎨 Colors
   const colors = {
     success: '#4CAF50',
@@ -34,21 +25,12 @@ const PopupModal = ({
     warning: '#FF9800',
   };
 
-  const selectedAnimation = animationSource || animations[type];
   const buttonColor = colors[type];
 
   return (
     <Modal transparent visible={visible} animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.card}>
-
-          {/* 🎬 LOTTIE */}
-          <LottieView
-            source={selectedAnimation}
-            autoPlay
-            loop={false}
-            style={styles.lottie}
-          />
 
           {/* 🏷 TITLE */}
           {title && <Text style={styles.title}>{title}</Text>}
@@ -85,7 +67,7 @@ const PopupModal = ({
   );
 };
 
-export default PopupModal;
+export default MessagePopup;
 
 const styles = StyleSheet.create({
   overlay: {
@@ -105,16 +87,11 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
 
-  lottie: {
-    width: 130,
-    height: 130,
-  },
-
   title: {
     fontSize: 18,
     fontWeight: '700',
-    marginTop: 10,
     color: '#222',
+    textAlign: 'center',
   },
 
   description: {

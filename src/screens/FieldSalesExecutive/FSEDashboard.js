@@ -1,22 +1,14 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import FSEDashboardStyle from './FSEDashboardStyle';
 import Header from '../../components/Header';
 
 // You can replace these with SVG icons later
-const Icon = ({ label }) => (
-  <Text style={{ fontSize: 18 }}>{label}</Text>
-);
+const Icon = ({ label }) => <Text style={{ fontSize: 18 }}>{label}</Text>;
 
 const FSEDashboard = ({ navigation }) => {
   return (
     <View style={FSEDashboardStyle.container}>
-
       <Header title={'FSE Dashboard'} />
 
       <ScrollView>
@@ -51,7 +43,9 @@ const FSEDashboard = ({ navigation }) => {
                 <Icon label="💰" />
               </View>
               <Text style={FSEDashboardStyle.cardValue}>₹8,000</Text>
-              <Text style={FSEDashboardStyle.cardLabel}>Pending Collections</Text>
+              <Text style={FSEDashboardStyle.cardLabel}>
+                Pending Collections
+              </Text>
             </View>
 
             <View style={FSEDashboardStyle.card}>
@@ -59,7 +53,9 @@ const FSEDashboard = ({ navigation }) => {
                 <Icon label="🏪" />
               </View>
               <Text style={FSEDashboardStyle.cardValue}>12</Text>
-              <Text style={FSEDashboardStyle.cardLabel}>Retailers to Visit</Text>
+              <Text style={FSEDashboardStyle.cardLabel}>
+                Retailers to Visit
+              </Text>
             </View>
           </View>
 
@@ -90,6 +86,23 @@ const FSEDashboard = ({ navigation }) => {
             <Text style={FSEDashboardStyle.actionText}>Book Order</Text>
           </TouchableOpacity>
 
+          {/* Mapp screen */}
+          <TouchableOpacity
+            style={FSEDashboardStyle.actionItem}
+            onPress={() => navigation.navigate('MapScreen')}
+          >
+            <Icon label="🛒" />
+            <Text style={FSEDashboardStyle.actionText}>Mapscreen</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={FSEDashboardStyle.actionItem}
+            onPress={() => navigation.navigate('FSETracking')}
+          >
+            <Icon label="🛒" />
+            <Text style={FSEDashboardStyle.actionText}>FSETracking</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity
             style={FSEDashboardStyle.actionItem}
             onPress={() => navigation.navigate('EndDaySummary')}
@@ -97,7 +110,6 @@ const FSEDashboard = ({ navigation }) => {
             <Icon label="⏹️" />
             <Text style={FSEDashboardStyle.actionText}>End Day Summary</Text>
           </TouchableOpacity>
-
         </View>
       </ScrollView>
     </View>
@@ -105,4 +117,3 @@ const FSEDashboard = ({ navigation }) => {
 };
 
 export default FSEDashboard;
-

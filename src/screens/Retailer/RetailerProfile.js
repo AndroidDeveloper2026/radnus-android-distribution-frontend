@@ -9,22 +9,25 @@ import {
 } from "react-native";
 import styles from "./RetailerProfileStyle";
 import Header from "../../components/Header";
+import { useDispatch } from "react-redux";
+import { updateRetailer } from "../../services/features/retailer/retailerSlice";
 
 const RetailerProfile = ({ route, navigation }) => {
   // const { retailer } = route.params;
+const dispatch = useDispatch();
 
-  const defaultRetailer = {
-    id: "R0",
-    name: "Default Retail Shop",
-    owner: "Default Owner",
-    mobile: "9999999999",
-    area: "Default Area",
-    gst: "GSTIN0000",
-    status: "APPROVED",
-  };
+  // const defaultRetailer = {
+  //   id: "R0",
+  //   name: "Default Retail Shop",
+  //   owner: "Default Owner",
+  //   mobile: "9999999999",
+  //   area: "Default Area",
+  //   gst: "GSTIN0000",
+  //   status: "APPROVED",
+  // };
 
   // ✅ Use route params OR default
-  const retailer = route?.params?.retailer || defaultRetailer;
+  const retailer = route?.params?.retailer;
 
   const [editMode, setEditMode] = useState(false);
 
@@ -36,9 +39,9 @@ const RetailerProfile = ({ route, navigation }) => {
     gst: retailer.gst || "",
   });
 
-  var Status = "APPROVED";
+
   // BLOCK UNAPPROVED RETAILERS (retailer.status !== "APPROVED")
-  if (Status !== "APPROVED") {
+  if (retailer.status !== "APPROVED")  {
     Alert.alert("Access Denied", "Retailer not approved yet", [
       { text: "OK", onPress: () => navigation.goBack() },
     ]);
@@ -49,16 +52,22 @@ const RetailerProfile = ({ route, navigation }) => {
     setForm({ ...form, [key]: value });
   };
 
-  const saveProfile = () => {
-    if (!form.shopName || !form.ownerName || !form.mobile) {
-      Alert.alert("Error", "Please fill required fields");
-      return;
-    }
+const saveProfile = () => {
+  if (!form.shopName || !form.ownerName || !form.mobile) {
+    Alert.alert("Error", "Please fill required fields");
+    return;
+  }
 
-    console.log("Updated Retailer:", form);
-    Alert.alert("Success", "Profile updated");
-    setEditMode(false);
-  };
+  dispatch(
+    updateRetailer({
+      id: retailer._id,
+      data: form,
+    })
+  );
+
+  Alert.alert("Success", "Profile updated");
+  setEditMode(false);
+};
 
   return (
     <View style={styles.container}>
