@@ -72,8 +72,8 @@ const RetailerOnboarding = ({ navigation }) => {
       formData.append('gps', values.gps);
       formData.append('shopPhoto', {
         uri: shopPhoto.uri,
-        type: shopPhoto.type || 'image/jpeg',
-        name: shopPhoto.fileName || 'shop.jpg',
+        type: 'image/jpeg',
+        name: `photo_${Date.now()}.jpg`,
       });
 
       // formData.append('shopPhoto', shopPhoto);

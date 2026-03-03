@@ -1,12 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import API from '../../API/api';
 
-// CREATE (FSE submits → PENDING)
-// export const createFSE = createAsyncThunk('fse/create', async data => {
-//   const res = await API.post('/api/fse', data);
-//   return res.data;
-// });
 
+//create 
 export const createFSE = createAsyncThunk(
   "fse/create",
   async (data) => {
@@ -25,24 +21,7 @@ export const getFSEs = createAsyncThunk('fse/getAll', async () => {
   return res.data;
 });
 
-// // UPDATE
-// export const updateFSE = createAsyncThunk(
-//   "fse/update",
-//   async ({ id, data }) => {
-//     const res = await API.put(`${'/api/fse'}/${id}`, data);
-//     return res.data;
-//   }
-// );
-
-// // DELETE
-// export const deleteFSE = createAsyncThunk(
-//   "fse/delete",
-//   async (id) => {
-//     await API.delete(`${'/api/fse'}/${id}`);
-//     return id;
-//   }
-// );
-
+//Delete
 export const deleteFSE = createAsyncThunk('fse/delete', async id => {
   await API.delete(`/api/fse/${id}`);
   return id;

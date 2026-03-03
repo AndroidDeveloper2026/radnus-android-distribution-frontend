@@ -1,22 +1,17 @@
-import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
-import styles from "./EndDaySummaryStyle";
-import Header from "../../components/Header";
+import React from 'react';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import styles from './EndDaySummaryStyle';
+import Header from '../../components/Header';
 import {
   ShoppingCart,
   IndianRupee,
   Wallet,
   MapPin,
   CheckCircle,
-} from "lucide-react-native";
-import { useDispatch, useSelector } from "react-redux";
-import { stopTracking } from "../../redux/trackingSlice";
-import API from "../../services/API/api";
+} from 'lucide-react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { stopTracking } from '../../redux/trackingSlice';
+import API from '../../services/API/api';
 
 const EndDaySummary = ({ navigation }) => {
   // const summary = {
@@ -32,26 +27,40 @@ const EndDaySummary = ({ navigation }) => {
   //   navigation.goBack();
   // };
 
-    const dispatch = useDispatch();
-  const { sessionId } = useSelector((state) => state.tracking);
+  const dispatch = useDispatch();
+  const { sessionId } = useSelector(state => state.tracking);
+
+  // const submitEndDay = async () => {
+  //   try {
+  //     await API.post('/session/end', {
+  //       sessionId,
+  //     });
+
+  //     // ✅ STOP TRACKING
+  //     dispatch(stopTracking());
+
+  //     alert('Success', 'End Day Submitted');
+
+  //     navigation.navigate('Dashboard');
+  //   } catch (err) {
+  //     alert('Error', 'Failed to end day');
+  //   }
+  // };
 
   const submitEndDay = async () => {
-    try {
-      await API.post("/session/end", {
-        sessionId,
-      });
+  try {
+    await API.post('/api/session/end', {
+      sessionId,
+    });
 
-      // ✅ STOP TRACKING
-      dispatch(stopTracking());
+    dispatch(stopTracking()); // 🔥 STOP GPS
 
-      alert("Success", "End Day Submitted");
-
-      navigation.navigate("Dashboard");
-
-    } catch (err) {
-      alert("Error", "Failed to end day");
-    }
-  };
+    alert('End Day Submitted');
+    navigation.navigate('Dashboard');
+  } catch (err) {
+    alert('Error');
+  }
+};
 
   return (
     <View style={styles.container}>
@@ -92,16 +101,13 @@ const EndDaySummary = ({ navigation }) => {
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Remarks (Optional)</Text>
           <Text style={styles.note}>
-            All data is auto-captured from today’s activity.
-            Once submitted, this day will be locked.
+            All data is auto-captured from today’s activity. Once submitted,
+            this day will be locked.
           </Text>
         </View>
 
         {/* SUBMIT */}
-        <TouchableOpacity
-          style={styles.submitBtn}
-          onPress={submitEndDay}
-        >
+        <TouchableOpacity style={styles.submitBtn} onPress={submitEndDay}>
           <CheckCircle size={18} color="#FFF" />
           <Text style={styles.submitText}>Submit End Day</Text>
         </TouchableOpacity>

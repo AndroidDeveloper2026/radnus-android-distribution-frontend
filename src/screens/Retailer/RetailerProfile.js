@@ -16,15 +16,6 @@ const RetailerProfile = ({ route, navigation }) => {
   // const { retailer } = route.params;
 const dispatch = useDispatch();
 
-  // const defaultRetailer = {
-  //   id: "R0",
-  //   name: "Default Retail Shop",
-  //   owner: "Default Owner",
-  //   mobile: "9999999999",
-  //   area: "Default Area",
-  //   gst: "GSTIN0000",
-  //   status: "APPROVED",
-  // };
 
   // ✅ Use route params OR default
   const retailer = route?.params?.retailer;

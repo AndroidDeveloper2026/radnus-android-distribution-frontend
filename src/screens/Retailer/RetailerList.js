@@ -54,7 +54,6 @@
 //   };
 
 //   console.log('--- Retailer List (retaier) ---',retailers);
-  
 
 //   const renderItem = ({ item }) => {
 //     const isActive = activeCard === item.id;
@@ -140,9 +139,8 @@
 
 // export default RetailerList;
 
-
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native';
 import styles from './RetailerStyle';
 import RetailerApprovalModal from './RetailerApprovalModal';
 import Header from '../../components/Header';
@@ -189,6 +187,7 @@ const RetailerList = ({ navigation }) => {
       >
         <View style={styles.card}>
           <View style={styles.row}>
+            <Image source={{ uri: item.shopPhoto }} style={styles.shopImage} />
             <Text style={styles.name}>{item.shopName}</Text>
 
             <Text

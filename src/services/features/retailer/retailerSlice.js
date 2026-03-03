@@ -1,46 +1,19 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import API from "../../API/api";
 
-// export const addRetailer = createAsyncThunk(
-//   "retailer/add",
-//   async (data, { rejectWithValue }) => {
-//     try {
-//       const res = await API.post("/api/retailers", data, {
-//         headers: { "Content-Type": "multipart/form-data" },
-//       });
-//       return res.data;
-//     } catch (err) {
-//       return rejectWithValue(err.response?.data?.message);
-//     }
-//   }
-// );
-
 export const addRetailer = createAsyncThunk(
   "retailer/add",
   async (data, { rejectWithValue }) => {
     try {
-      const res = await API.post("/api/retailers", data); // ✅ no headers
+      const res = await API.post("/api/retailers", data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message);
     }
   }
 );
-
-// export const addRetailer = createAsyncThunk(
-//   'retailer/addRetailer',
-//   async (formData, { rejectWithValue }) => {
-//     console.log('--- add retailer ---',formData);
-    
-//     try {
-//       const response = await API.post('/api/retailers', formData);
-//   console.log('--- add retailer (resp) ---',response.data);
-//       return response.data; // ✅ MUST return
-//     } catch (error) {
-//       return rejectWithValue(error.response?.data || error.message);
-//     }
-//   }
-// );
 
 // GET
 export const fetchRetailers = createAsyncThunk(

@@ -144,171 +144,229 @@
 
 // ---------- alredy working code old---------
 
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+// import React, { useMemo } from 'react';
+// import { View, Text, StyleSheet } from 'react-native';
+// import MapLibreGL from '@maplibre/maplibre-react-native';
+// import Header from '../../components/Header';
+// import {
+//   SafeAreaView,
+//   useSafeAreaInsets,
+// } from 'react-native-safe-area-context';
+
+// MapLibreGL.setAccessToken(null);
+
+// const FSETracking = () => {
+//  const insets = useSafeAreaInsets();
+//   // SAMPLE ROUTE
+//   const routeCoords = [
+//     { latitude: 11.9416, longitude: 79.8083 },
+//     { latitude: 11.9450, longitude: 79.8150 },
+//     // { latitude: 11.9500, longitude: 79.8200 },
+//     // { latitude: 11.9550, longitude: 79.8250 },
+//     // { latitude: 11.9600, longitude: 79.8300 },
+//   ];
+
+//   // Convert to [lng, lat]
+//   const coordinates = routeCoords.map(p => [
+//     p.longitude,
+//     p.latitude,
+//   ]);
+
+//   // DISTANCE CALCULATION (KM)
+//   const distance = useMemo(() => {
+//     let total = 0;
+
+//     for (let i = 1; i < routeCoords.length; i++) {
+//       const prev = routeCoords[i - 1];
+//       const curr = routeCoords[i];
+
+//       const R = 6371;
+//       const dLat = ((curr.latitude - prev.latitude) * Math.PI) / 180;
+//       const dLon = ((curr.longitude - prev.longitude) * Math.PI) / 180;
+
+//       const a =
+//         Math.sin(dLat / 2) ** 2 +
+//         Math.cos((prev.latitude * Math.PI) / 180) *
+//           Math.cos((curr.latitude * Math.PI) / 180) *
+//           Math.sin(dLon / 2) ** 2;
+
+//       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+//       total += R * c;
+//     }
+
+//     return total.toFixed(2);
+//   }, []);
+
+//   return (
+//     <View style={styles.container}>
+//       <Header title={'FSE MapView'}/>
+//       <MapLibreGL.MapView
+//         style={styles.map}
+//         mapStyle={`https://api.maptiler.com/maps/streets/style.json?key=3gTrSf36y6oirRLmBYot`}
+//       >
+
+//         {/* Camera */}
+//         <MapLibreGL.Camera
+//           zoomLevel={14}
+//           centerCoordinate={coordinates[0]}
+//         />
+
+//         {/* ROUTE */}
+//         <MapLibreGL.ShapeSource
+//           id="route"
+//           shape={{
+//             type: 'Feature',
+//             geometry: {
+//               type: 'LineString',
+//               coordinates,
+//             },
+//           }}
+//         >
+//           <MapLibreGL.LineLayer
+//             id="routeLine"
+//             style={{
+//               lineWidth: 5,
+//               lineColor: '#ff3b30', // 🔥 RED (like Strava)
+//               lineCap: 'round',
+//               lineJoin: 'round',
+//             }}
+//           />
+//         </MapLibreGL.ShapeSource>
+
+//         {/* START */}
+//         <MapLibreGL.PointAnnotation
+//           id="start"
+//           coordinate={coordinates[0]}
+//         />
+
+//         {/* END */}
+//         <MapLibreGL.PointAnnotation
+//           id="end"
+//           coordinate={coordinates[coordinates.length - 1]}
+//         />
+
+//       </MapLibreGL.MapView>
+
+//       {/* 📊 BOTTOM CARD (STRAVA STYLE) */}
+//       <View style={[styles.card,{ paddingBottom: insets.bottom + 20 },]}>
+//         <Text style={styles.title}>Sunday Ride</Text>
+
+//         <View style={styles.row}>
+//           <View>
+//             <Text style={styles.label}>Distance</Text>
+//             <Text style={styles.value}>{distance} km</Text>
+//           </View>
+
+//           <View>
+//             <Text style={styles.label}>Points</Text>
+//             <Text style={styles.value}>{routeCoords.length}</Text>
+//           </View>
+//         </View>
+//       </View>
+//     </View>
+//   );
+// };
+
+// export default FSETracking;
+
+// const styles = StyleSheet.create({
+//   container: { flex: 1 },
+
+//   map: { flex: 1 },
+
+//   card: {
+//     position: 'absolute',
+//     bottom: 0,
+//     left: 0,
+//     right: 0,
+
+//     backgroundColor: '#fff',
+//     padding: 20,
+
+//     borderTopLeftRadius: 20,
+//     borderTopRightRadius: 20,
+
+//     elevation: 10,
+//   },
+
+//   title: {
+//     fontSize: 20,
+//     fontWeight: 'bold',
+//     marginBottom: 15,
+//   },
+
+//   row: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//   },
+
+//   label: {
+//     color: '#777',
+//     fontSize: 14,
+//   },
+
+//   value: {
+//     fontSize: 22,
+//     fontWeight: 'bold',
+//     marginTop: 5,
+//   },
+// });
+
+import React, { useEffect, useState } from 'react';
 import MapLibreGL from '@maplibre/maplibre-react-native';
-import Header from '../../components/Header';
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+import API from '../../services/API/api';
+import { Text, View } from 'react-native';
 
-MapLibreGL.setAccessToken(null);
+const FSETracking = ({ route }) => {
+  const sessionId = route?.params?.sessionId;
+  const [coords, setCoords] = useState([]);
 
-const FSETracking = () => {
- const insets = useSafeAreaInsets();
-  // SAMPLE ROUTE
-  const routeCoords = [
-    { latitude: 11.9416, longitude: 79.8083 },
-    { latitude: 11.9450, longitude: 79.8150 },
-    // { latitude: 11.9500, longitude: 79.8200 },
-    // { latitude: 11.9550, longitude: 79.8250 },
-    // { latitude: 11.9600, longitude: 79.8300 },
-  ];
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const res = await API.get(`/api/session/${sessionId}`);
 
-  // Convert to [lng, lat]
-  const coordinates = routeCoords.map(p => [
-    p.longitude,
-    p.latitude,
-  ]);
+      const routeData = res.data.route.map(p => [p.longitude, p.latitude]);
 
-  // DISTANCE CALCULATION (KM)
-  const distance = useMemo(() => {
-    let total = 0;
+      setCoords(routeData);
+    }, 5000);
 
-    for (let i = 1; i < routeCoords.length; i++) {
-      const prev = routeCoords[i - 1];
-      const curr = routeCoords[i];
-
-      const R = 6371;
-      const dLat = ((curr.latitude - prev.latitude) * Math.PI) / 180;
-      const dLon = ((curr.longitude - prev.longitude) * Math.PI) / 180;
-
-      const a =
-        Math.sin(dLat / 2) ** 2 +
-        Math.cos((prev.latitude * Math.PI) / 180) *
-          Math.cos((curr.latitude * Math.PI) / 180) *
-          Math.sin(dLon / 2) ** 2;
-
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      total += R * c;
-    }
-
-    return total.toFixed(2);
+    return () => clearInterval(interval);
   }, []);
 
+  if (!sessionId) {
+    return (
+      <View>
+        <Text>No session found</Text>
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <Header title={'FSE MapView'}/>
-      <MapLibreGL.MapView
-        style={styles.map}
-        mapStyle={`https://api.maptiler.com/maps/streets/style.json?key=3gTrSf36y6oirRLmBYot`}
-      >
+    <MapLibreGL.MapView style={{ flex: 1 }} mapStyle={`https://api.maptiler.com/maps/streets/style.json?key=3gTrSf36y6oirRLmBYot`}>
+      <MapLibreGL.Camera
+        zoomLevel={14}
+        centerCoordinate={coords.length ? coords[0] : [79.8289, 11.9352]}
+      />
 
-        {/* Camera */}
-        <MapLibreGL.Camera
-          zoomLevel={14}
-          centerCoordinate={coordinates[0]}
-        />
-
-        {/* ROUTE */}
+      {coords.length >= 2 && (
         <MapLibreGL.ShapeSource
           id="route"
           shape={{
             type: 'Feature',
             geometry: {
               type: 'LineString',
-              coordinates,
+              coordinates: coords,
             },
           }}
         >
           <MapLibreGL.LineLayer
-            id="routeLine"
-            style={{
-              lineWidth: 5,
-              lineColor: '#ff3b30', // 🔥 RED (like Strava)
-              lineCap: 'round',
-              lineJoin: 'round',
-            }}
+            id="line"
+            style={{ lineWidth: 4, lineColor: 'red' }}
           />
         </MapLibreGL.ShapeSource>
-
-        {/* START */}
-        <MapLibreGL.PointAnnotation
-          id="start"
-          coordinate={coordinates[0]}
-        />
-
-        {/* END */}
-        <MapLibreGL.PointAnnotation
-          id="end"
-          coordinate={coordinates[coordinates.length - 1]}
-        />
-
-      </MapLibreGL.MapView>
-
-      {/* 📊 BOTTOM CARD (STRAVA STYLE) */}
-      <View style={[styles.card,{ paddingBottom: insets.bottom + 20 },]}>
-        <Text style={styles.title}>Sunday Ride</Text>
-
-        <View style={styles.row}>
-          <View>
-            <Text style={styles.label}>Distance</Text>
-            <Text style={styles.value}>{distance} km</Text>
-          </View>
-
-          <View>
-            <Text style={styles.label}>Points</Text>
-            <Text style={styles.value}>{routeCoords.length}</Text>
-          </View>
-        </View>
-      </View>
-    </View>
+      )}
+    </MapLibreGL.MapView>
   );
 };
 
 export default FSETracking;
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-
-  map: { flex: 1 },
-
-  card: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-
-    backgroundColor: '#fff',
-    padding: 20,
-
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-
-    elevation: 10,
-  },
-
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 15,
-  },
-
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-
-  label: {
-    color: '#777',
-    fontSize: 14,
-  },
-
-  value: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginTop: 5,
-  },
-});
-
