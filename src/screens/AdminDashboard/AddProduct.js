@@ -126,14 +126,14 @@ const AddProduct = ({ navigation }) => {
             onValueChange={value => onChange('category', value)}
           >
             <Picker.Item label="Select Category" value=""  color='#757575'/>
-            <Picker.Item label="PD Chargers & Car Chargers" value="PD Chargers & Car Chargers" />
-            <Picker.Item label="Charger" value="Charger" />
-            <Picker.Item label="Data Cables" value="Data Cables" />
-            <Picker.Item label="Handsfree" value="Handsfree" />
-            <Picker.Item label="Bluetooth Neckband" value="Bluetooth Neckband" />
-            <Picker.Item label="Ear Buds" value="Ear Buds" />
-            <Picker.Item label="Speakers" value="Speakers" />
-            <Picker.Item label="Radnus Battery" value="Speakers" />
+            <Picker.Item label="PD Chargers & Car Chargers" value="PD Chargers & Car Chargers" color="#000000"/>
+            <Picker.Item label="Charger" value="Charger" color="#000000"/>
+            <Picker.Item label="Data Cables" value="Data Cables" color="#000000"/>
+            <Picker.Item label="Handsfree" value="Handsfree" color="#000000"/>
+            <Picker.Item label="Bluetooth Neckband" value="Bluetooth Neckband" color="#000000"/>
+            <Picker.Item label="Ear Buds" value="Ear Buds" color="#000000"/>
+            <Picker.Item label="Speakers" value="Speakers" color="#000000"/>
+            <Picker.Item label="Radnus Battery" value="Speakers" color="#000000"/>
           </Picker>
         </View>
 

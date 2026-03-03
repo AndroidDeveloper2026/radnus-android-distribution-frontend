@@ -143,10 +143,11 @@ export const styles = StyleSheet.create({
 
   image: {
     // flex:1,
-    width: 130,
-    height: 160,
+    width: 125,
+    height: 125,
     borderRadius: 14,
-    backgroundColor: '#F6F6F6',
+    backgroundColor: '#fff', //'#F6F6F6'
+    objectFit:'cover',
   },
 
   info: {

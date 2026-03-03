@@ -48,13 +48,8 @@ const DistributorOnboardList = () => {
       {/* TOP ROW */}
       <View style={styles.row}>
         {/* IMAGE */}
-        {item.profileImage ? (
-          <Image
-            source={{
-              uri: `data:image/*;base64,${item.profileImage}`,
-            }}
-            style={styles.avatar}
-          />
+        {item.images?.profile ? (
+          <Image source={{ uri: item.images.profile }} style={styles.avatar} />
         ) : (
           <View style={styles.avatarPlaceholder}>
             <User2Icon size={22} color="#999" />

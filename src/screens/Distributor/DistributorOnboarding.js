@@ -265,9 +265,9 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import styles from './DistributorOnboardingStyle';
 import Header from '../../components/Header';
-import { launchCamera } from 'react-native-image-picker';
 import { Camera } from 'lucide-react-native';
 import { addDistributor } from '../../services/features/distributor/distributorSlice';
+import { openCamera } from '../../utils/cameraHelper';
 
 /* ---------------- VALIDATION ---------------- */
 
@@ -297,11 +297,10 @@ const DistributorOnboarding = ({ navigation }) => {
   const [profile, setProfile] = useState(null);
 
   const captureImage = () => {
-    launchCamera({ mediaType: 'photo', quality: 0.7 }, res => {
-      if (!res.didCancel && res.assets && res.assets.length > 0) {
-        setProfile(res.assets[0]); // ✅ FULL OBJECT
-      }
-    });
+   openCamera((image) => {
+    console.log("📸 IMAGE:", image);
+    setProfile(image); // ✅ FULL OBJECT
+  });
   };
 
   return (
@@ -330,15 +329,8 @@ const DistributorOnboarding = ({ navigation }) => {
           });
 
           formData.append('status', 'PENDING');
-
-          // ✅ PROFILE IMAGE
-          if (profile) {
-            formData.append('profile', {
-              uri: profile.uri,
-              type: profile.type || 'image/jpeg',
-              name: profile.fileName || 'profile.jpg',
-            });
-          }
+          formData.append('profile',profile);
+          
 
           dispatch(addDistributor(formData));
           navigation.goBack();

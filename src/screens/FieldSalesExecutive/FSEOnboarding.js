@@ -9,11 +9,12 @@ import {
 } from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { launchCamera } from 'react-native-image-picker';
+// import { launchCamera } from 'react-native-image-picker';
 import styles from './FSEOnboardingStyle';
 import Header from '../../components/Header';
 import { useDispatch } from 'react-redux';
 import { createFSE } from '../../services/features/fse/fseSlice';
+import { openCamera } from '../../utils/cameraHelper';
 
 const schema = Yup.object().shape({
   name: Yup.string().required('Name required'),
@@ -32,10 +33,14 @@ const FSEOnboarding = ({ navigation }) => {
   const dispatch = useDispatch();
 
   const capturePhoto = () => {
-    launchCamera({ mediaType: 'photo', quality: 0.7 }, res => {
-      if (!res.didCancel && res.assets) {
-        setPhoto(res.assets[0].uri);
-      }
+    // launchCamera({ mediaType: 'photo', quality: 0.7 }, res => {
+    //   if (!res.didCancel && res.assets) {
+    //     setPhoto(res.assets[0].uri);
+    //   }
+    // });
+    openCamera((image) => {
+      console.log("📸 IMAGE:", image);
+      setPhoto(image); // ✅ FULL OBJECT
     });
   };
 
@@ -55,15 +60,38 @@ const FSEOnboarding = ({ navigation }) => {
           }}
           validationSchema={schema}
           onSubmit={async values => {
-            const payload = { ...values, photo };
-
             try {
-              await dispatch(createFSE(payload)).unwrap();
+              const formData = new FormData();
+
+              formData.append('name', values.name);
+              formData.append('dob', values.dob);
+              formData.append('email', values.email);
+              formData.append('phone', values.phone);
+              formData.append('altPhone', values.altPhone);
+              formData.append('address', values.address);
+              formData.append('altAddress', values.altAddress);
+               formData.append('photo',photo);
+              // if (photo) {
+              //   formData.append('photo',photo);
+              // }
+
+              await dispatch(createFSE(formData)).unwrap();
+
               navigation.goBack();
             } catch (err) {
               console.log('ERROR:', err);
             }
           }}
+          // onSubmit={async values => {
+          //   const payload = { ...values, photo };
+
+          //   try {
+          //     await dispatch(createFSE(payload)).unwrap();
+          //     navigation.goBack();
+          //   } catch (err) {
+          //     console.log('ERROR:', err);
+          //   }
+          // }}
         >
           {({ handleChange, handleSubmit, values, errors, touched }) => (
             <>
@@ -74,7 +102,8 @@ const FSEOnboarding = ({ navigation }) => {
                   onPress={capturePhoto}
                 >
                   {photo ? (
-                    <Image source={{ uri: photo }} style={styles.photo} />
+                    // <Image source={{ uri: photo }} style={styles.photo} />
+                    <Image source={{ uri: photo?.uri }} style={styles.photo} />
                   ) : (
                     <Text>Capture Photo</Text>
                   )}

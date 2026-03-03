@@ -14,38 +14,10 @@ import { stopTracking } from '../../redux/trackingSlice';
 import API from '../../services/API/api';
 
 const EndDaySummary = ({ navigation }) => {
-  // const summary = {
-  //   orders: 12,
-  //   sales: 154000,
-  //   collections: 98000,
-  //   visits: 15,
-  // };
-
-  // const submitEndDay = () => {
-  //   // 🔗 API CALL
-  //   console.log("End Day Submitted");
-  //   navigation.goBack();
-  // };
 
   const dispatch = useDispatch();
   const { sessionId } = useSelector(state => state.tracking);
 
-  // const submitEndDay = async () => {
-  //   try {
-  //     await API.post('/session/end', {
-  //       sessionId,
-  //     });
-
-  //     // ✅ STOP TRACKING
-  //     dispatch(stopTracking());
-
-  //     alert('Success', 'End Day Submitted');
-
-  //     navigation.navigate('Dashboard');
-  //   } catch (err) {
-  //     alert('Error', 'Failed to end day');
-  //   }
-  // };
 
   const submitEndDay = async () => {
   try {
@@ -53,7 +25,7 @@ const EndDaySummary = ({ navigation }) => {
       sessionId,
     });
 
-    dispatch(stopTracking()); // 🔥 STOP GPS
+    dispatch(stopTracking()); 
 
     alert('End Day Submitted');
     navigation.navigate('Dashboard');

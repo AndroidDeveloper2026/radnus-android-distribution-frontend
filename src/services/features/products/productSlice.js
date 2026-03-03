@@ -13,7 +13,7 @@ export const fetchProducts = createAsyncThunk(
 export const addProduct = createAsyncThunk( 
   "products/add",
   async (formData) => {
-    const res = await API.post("/api/products", formData, {
+    const res = await API.post("/api/products/add", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data;
