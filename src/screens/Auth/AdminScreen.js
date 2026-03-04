@@ -41,6 +41,12 @@ const AdminScreen = ({ navigation }) => {
     }
   }, [token, navigation]);
 
+  useEffect(() => {
+    if (error) {
+      showToast(error, 'short'); // or custom message
+    }
+  }, [error]);
+
   return (
     <View style={styles.container}>
       {/* HEADER */}
@@ -56,8 +62,8 @@ const AdminScreen = ({ navigation }) => {
         initialValues={{ emailID: '', password: '' }}
         validationSchema={AdminValidationSchema}
         onSubmit={async values => {
-          console.log('--- admin (login) ---',values);
-          
+          console.log('--- admin (login) ---', values);
+
           dispatch(adminLogin(values));
         }}
       >
@@ -85,10 +91,10 @@ const AdminScreen = ({ navigation }) => {
                 placeholderTextColor={'#000'}
                 autoCapitalize="none"
               />
-              {touched.emailID && errors.emailID && (
-                <Text style={styles.error}>{errors.emailID}</Text>
-              )}
             </View>
+            {touched.emailID && errors.emailID && (
+              <Text style={styles.error}>{errors.emailID}</Text>
+            )}
 
             {/* PASSWORD */}
             <View style={styles.inputGroup}>
@@ -111,7 +117,7 @@ const AdminScreen = ({ navigation }) => {
                 style={{
                   position: 'absolute',
                   right: 12,
-                  top: '65%',
+                  top: '73%',
                   transform: [{ translateY: -10 }],
                 }}
               >
@@ -121,10 +127,10 @@ const AdminScreen = ({ navigation }) => {
                   <Eye size={20} color="#555" />
                 )}
               </TouchableOpacity>
-              {touched.password && errors.password && (
-                <Text style={styles.error}>{errors.password}</Text>
-              )}
             </View>
+            {touched.password && errors.password && (
+              <Text style={styles.error}>{errors.password}</Text>
+            )}
 
             {/* LOGIN BUTTON */}
             <TouchableOpacity style={styles.button} onPress={handleSubmit}>

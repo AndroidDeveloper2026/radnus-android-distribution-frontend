@@ -34,7 +34,47 @@ export default StyleSheet.create({
     marginBottom: 20,
   },
 
+  kpiRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+
+    kpiBox: {
+    width: '48%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+
+    /* soft card shadow like reference */
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 5,
+  },
+
+  kpiLabel: {
+    fontSize: 13,
+    color: '#757575',
+    fontWeight: '500',
+  },
+
+  kpiValue: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#212121',
+  },
+
   statCard: {
+    justifyContent:'center',
+    alignItems:'center',
     backgroundColor: "#FFFFFF",
     width: "48%",
     borderRadius: 16,

@@ -14,10 +14,11 @@ import FSEHomeStyles from './FSEHomeStyle';
 import { useDispatch, useSelector } from 'react-redux';
 import { startTracking } from '../../services/features/fse/trackingSlice';
 import API from '../../services/API/api'; // ✅ IMPORTANT
+import {startTrackingService} from '../../utils/TrackingService';
 
 const FSEHomeScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const userId = 'user_123';
+  // const userId = 'user_123';
   const user = useSelector(state => state.auth.user);
   const [location, setLocation] = useState(null);
   const [address, setAddress] = useState('');
@@ -32,7 +33,22 @@ const FSEHomeScreen = ({ navigation }) => {
 
   useEffect(() => {
     requestLocationPermission();
+    checkTodaySession();
   }, []);
+
+  const checkTodaySession = async () => {
+    try {
+      const res = await API.get(`/api/session/today/${user._id}`);
+
+      if (res.data) {
+        setAttendanceMarked(true);
+
+        dispatch(startTracking(res.data._id));
+      }
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
 
   /* ---------------- PERMISSION ---------------- */
   const requestLocationPermission = async () => {
@@ -79,10 +95,6 @@ const FSEHomeScreen = ({ navigation }) => {
           Alert.alert('Error', 'Unable to fetch location');
         }
       },
-      // error => {
-      //   setLoading(false);
-      //   Alert.alert('Error', 'Unable to fetch location');
-      // },
       {
         enableHighAccuracy: true,
         timeout: 30000,
@@ -107,40 +119,7 @@ const FSEHomeScreen = ({ navigation }) => {
     }
   };
 
-  const markAttendance = async () => {
-  if (!location) {
-    Alert.alert('Error', 'Location not available');
-    return;
-  }
-
-  try {
-    setLoading(true);
-
-    const res = await API.post('/api/session/start', {
-      userId: user._id,
-      latitude: location.latitude,
-      longitude: location.longitude,
-    });
-
-    const sessionId = res.data._id;
-
-    dispatch(startTracking(sessionId)); // 🔥 START TRACKING
-
-    Alert.alert('Success', 'Day Started', [
-      {
-        text: 'OK',
-        onPress: () => navigation.navigate('FSETracking',{ sessionId }),
-      },
-    ]);
-
-  } catch (err) {
-    Alert.alert('Error', 'Failed to start day');
-  } finally {
-    setLoading(false);
-  }
-};
-
-  /* ---------------- START DAY ---------------- */
+  // mark attendeance
   // const markAttendance = async () => {
   //   if (!location) {
   //     Alert.alert('Error', 'Location not available');
@@ -148,47 +127,82 @@ const FSEHomeScreen = ({ navigation }) => {
   //   }
 
   //   try {
-  //     setLoading(true);
-
-  //     console.log('Sending:', {
-  //       userId,
-  //       latitude: location.latitude,
-  //       longitude: location.longitude,
-  //     });
-
   //     const res = await API.post('/api/session/start', {
-  //       userId,
+  //       userId: user._id,
   //       latitude: location.latitude,
   //       longitude: location.longitude,
   //     });
-
-  //     console.log('Response:', res.data);
-
-  //     // if (!sessionId) return;
 
   //     const sessionId = res.data._id;
 
   //     dispatch(startTracking(sessionId));
-
   //     setAttendanceMarked(true);
 
-  //     Alert.alert('Success', 'Day Started', [
-  //       {
-  //         text: 'OK',
-  //         onPress: () => navigation.navigate('Dashboard'),
-  //       },
-  //     ]);
+  //     navigation.navigate('FSETracking', { sessionId });
   //   } catch (err) {
-  //     console.log('ERROR:', err?.response?.data || err.message);
+  //     if (err?.response?.data?.message === 'Day already started') {
+  //       setAttendanceMarked(true);
 
-  //     Alert.alert(
-  //       'Error',
-  //       err?.response?.data?.message || 'Failed to start day',
-  //     );
-  //   } finally {
-  //     setLoading(false);
+  //       navigation.navigate('FSETracking', {
+  //         sessionId: err.response.data.sessionId,
+  //       });
+  //     } else {
+  //       Alert.alert('Error', 'Failed to start day');
+  //     }
   //   }
   // };
+
+//   const markAttendance = async () => {
+
+//  if (!location) {
+//    Alert.alert("Location not available");
+//    return;
+//  }
+
+//  try {
+
+//    const res = await API.post("/api/session/start", {
+//      userId: user._id,
+//      latitude: location.latitude,
+//      longitude: location.longitude
+//    });
+
+//    const sessionId = res.data._id;
+
+//    dispatch(startTracking(sessionId));
+
+//    navigation.navigate("FSETracking", { sessionId });
+
+//  } catch (err) {
+//    Alert.alert("Error starting session");
+//  }
+// };
+
+const markAttendance = async () => {
+
+ try {
+
+   const res = await API.post('/api/session/start', {
+     userId: user._id,
+     latitude: location.latitude,
+     longitude: location.longitude,
+   });
+
+   const sessionId = res.data._id;
+
+   if (!sessionId) {
+     alert("Session not created");
+     return;
+   }
+
+   navigation.navigate('FSETracking', { sessionId });
+
+ } catch (err) {
+   console.log(err);
+ }
+
+};
+
 
   return (
     <View style={FSEHomeStyles.container}>
@@ -234,7 +248,9 @@ const FSEHomeScreen = ({ navigation }) => {
           onPress={markAttendance}
           disabled={!location || loading || attendanceMarked}
         >
-          <Text style={FSEHomeStyles.buttonText}>START DAY</Text>
+          <Text style={FSEHomeStyles.buttonText}>
+            {attendanceMarked ? 'Day Already Started' : 'START DAY'}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>

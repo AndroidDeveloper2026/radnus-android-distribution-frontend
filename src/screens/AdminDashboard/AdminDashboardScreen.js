@@ -32,13 +32,13 @@ const AdminDashboard = ({ navigation }) => {
             <View style={styles.kpiBox}>
               <Icons name={"TrendingUp"} size={25} color={Color.success} circleSize={55} withCircle={true} backgroundColor="#c6ffe1a0"/>
               <Text style={styles.kpiLabel}>Today Sales</Text>
-              <Text style={styles.kpiValue}>₹ 1,25,000</Text>
+              <Text style={styles.kpiValue}>₹0</Text>
             </View>
 
             <View style={styles.kpiBox}>
                <Icons name={"CalendarDays"} size={25} color="#BB5cf6" circleSize={55} withCircle={true} backgroundColor="#edcfff78"/>
               <Text style={styles.kpiLabel}>This Month</Text>
-              <Text style={styles.kpiValue}>₹ 18,40,000</Text>
+              <Text style={styles.kpiValue}>₹ 0</Text>
             </View>
           </View>
 
@@ -46,13 +46,13 @@ const AdminDashboard = ({ navigation }) => {
             <TouchableOpacity style={styles.kpiBox} onPress={handleDistributorOnboarding}>
                 <Icons name={"UsersRound"} size={25} color="#4b4efc" circleSize={55} withCircle={true} backgroundColor="#bebffe92"/>
               <Text style={styles.kpiLabel}>Total Distributors</Text>
-              <Text style={styles.kpiValue}>32</Text>
+              <Text style={styles.kpiValue}>0</Text>
             </TouchableOpacity>
 
             <View style={styles.kpiBox}>
                 <Icons name={"UserCheck"} size={25} color="#F59E0B" circleSize={55} withCircle={true} backgroundColor="#fee7beb3"/>
               <Text style={styles.kpiLabel}>Active Retailers</Text>
-              <Text style={styles.kpiValue}>1,248</Text>
+              <Text style={styles.kpiValue}>0</Text>
             </View>
           </View>
 
@@ -63,13 +63,13 @@ const AdminDashboard = ({ navigation }) => {
             <View style={styles.kpiBox}>
               <Icons name={"UserCheck"} size={25} color="#0babf5" circleSize={55} withCircle={true} backgroundColor="#b4e7ffa6"/>
               <Text style={styles.kpiLabel}>Active FSE</Text>
-              <Text style={styles.kpiValue}>86</Text>
+              <Text style={styles.kpiValue}>0</Text>
             </View>
 
             <View style={styles.kpiBox}>
               <Icons name={"Timer"} size={25} color="#f55d0b" circleSize={55} withCircle={true} backgroundColor="#fac9ae71"/>
               <Text style={styles.kpiLabel}> Attendance Today</Text>
-              <Text style={styles.kpiValue}>92%</Text>
+              <Text style={styles.kpiValue}>0%</Text>
             </View>
           </View>
 
@@ -77,13 +77,13 @@ const AdminDashboard = ({ navigation }) => {
             <View style={styles.kpiBox}>
               <Icons name={"IndianRupee"} size={25} color="#07a37f" circleSize={55} withCircle={true} backgroundColor="#b4f8d865"/>
               <Text style={styles.kpiLabel}>Pending Collections</Text>
-              <Text style={styles.kpiValue}>₹ 3,40,000</Text>
+              <Text style={styles.kpiValue}>₹0</Text>
             </View>
 
             <View style={styles.kpiBox}>
               <Icons name={"Package"} size={25} color="#F59E0B" circleSize={55} withCircle={true} backgroundColor="#fee7beb3"/>
               <Text style={styles.kpiLabel}>Non-Moving Stock</Text>
-              <Text style={styles.kpiValue}>₹ 1,10,000</Text>
+              <Text style={styles.kpiValue}>₹0</Text>
             </View>
           </View>
 

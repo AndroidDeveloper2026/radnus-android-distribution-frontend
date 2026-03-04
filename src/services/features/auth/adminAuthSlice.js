@@ -46,10 +46,11 @@ const adminAuthSlice = createSlice({
         state.loading = false;
         state.admin = action.payload.admin;
         state.token = action.payload.token;
+        state.error = null;
       })
       .addCase(adminLogin.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload ||'Login failed';
       })
 
       .addCase(adminLogout.fulfilled, state => {

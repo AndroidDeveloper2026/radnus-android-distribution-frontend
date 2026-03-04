@@ -37,10 +37,48 @@ const FSEDashboardStyle = StyleSheet.create({
   },
 
   /* KPI GRID */
-  gridRow: {
+  // gridRow: {
+  //   flexDirection: 'row',
+  //   justifyContent: 'space-between',
+  //   marginBottom: 14,
+  // },
+
+    kpiRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 14,
+  },
+
+    kpiBox: {
+    width: '48%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+
+    /* soft card shadow like reference */
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 5,
+  },
+
+  kpiLabel: {
+    fontSize: 13,
+    color: '#757575',
+    fontWeight: '500',
+  },
+
+  kpiValue: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#212121',
   },
 
   card: {
@@ -50,27 +88,27 @@ const FSEDashboardStyle = StyleSheet.create({
     padding: 16,
   },
 
-  iconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FDECEC',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
+  // iconCircle: {
+  //   width: 40,
+  //   height: 40,
+  //   borderRadius: 20,
+  //   backgroundColor: '#FDECEC',
+  //   justifyContent: 'center',
+  //   alignItems: 'center',
+  //   marginBottom: 10,
+  // },
 
-  cardValue: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#212121',
-  },
+  // cardValue: {
+  //   fontSize: 22,
+  //   fontWeight: '700',
+  //   color: '#212121',
+  // },
 
-  cardLabel: {
-    fontSize: 13,
-    color: '#757575',
-    marginTop: 4,
-  },
+  // cardLabel: {
+  //   fontSize: 13,
+  //   color: '#757575',
+  //   marginTop: 4,
+  // },
 
   /* QUICK ACTION */
   sectionTitle: {

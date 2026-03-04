@@ -185,7 +185,7 @@ const FSEManagement = ({ navigation }) => {
       {/* ADD BUTTON */}
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => navigation.navigate("AddFSE")}
+        onPress={() => navigation.navigate("FSEOnboarding")}
       >
         <Text style={styles.addButtonText}>+ Add FSE</Text>
       </TouchableOpacity>

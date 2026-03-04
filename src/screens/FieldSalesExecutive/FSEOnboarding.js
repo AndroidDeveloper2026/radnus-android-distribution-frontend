@@ -33,11 +33,6 @@ const FSEOnboarding = ({ navigation }) => {
   const dispatch = useDispatch();
 
   const capturePhoto = () => {
-    // launchCamera({ mediaType: 'photo', quality: 0.7 }, res => {
-    //   if (!res.didCancel && res.assets) {
-    //     setPhoto(res.assets[0].uri);
-    //   }
-    // });
     openCamera((image) => {
       console.log("📸 IMAGE:", image);
       setPhoto(image); // ✅ FULL OBJECT
@@ -71,9 +66,7 @@ const FSEOnboarding = ({ navigation }) => {
               formData.append('address', values.address);
               formData.append('altAddress', values.altAddress);
                formData.append('photo',photo);
-              // if (photo) {
-              //   formData.append('photo',photo);
-              // }
+
 
               await dispatch(createFSE(formData)).unwrap();
 
@@ -82,16 +75,7 @@ const FSEOnboarding = ({ navigation }) => {
               console.log('ERROR:', err);
             }
           }}
-          // onSubmit={async values => {
-          //   const payload = { ...values, photo };
 
-          //   try {
-          //     await dispatch(createFSE(payload)).unwrap();
-          //     navigation.goBack();
-          //   } catch (err) {
-          //     console.log('ERROR:', err);
-          //   }
-          // }}
         >
           {({ handleChange, handleSubmit, values, errors, touched }) => (
             <>
@@ -103,7 +87,7 @@ const FSEOnboarding = ({ navigation }) => {
                 >
                   {photo ? (
                     // <Image source={{ uri: photo }} style={styles.photo} />
-                    <Image source={{ uri: photo?.uri }} style={styles.photo} />
+                    <Image source={{ uri: photo.uri }} style={styles.photo} />
                   ) : (
                     <Text>Capture Photo</Text>
                   )}

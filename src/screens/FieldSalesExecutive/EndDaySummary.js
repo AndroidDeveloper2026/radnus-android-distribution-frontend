@@ -10,8 +10,9 @@ import {
   CheckCircle,
 } from 'lucide-react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { stopTracking } from '../../redux/trackingSlice';
+import { stopTracking } from '../../services/features/fse/trackingSlice';
 import API from '../../services/API/api';
+import {stopTrackingService}  from '../../utils/TrackingService';
 
 const EndDaySummary = ({ navigation }) => {
 
@@ -19,19 +20,33 @@ const EndDaySummary = ({ navigation }) => {
   const { sessionId } = useSelector(state => state.tracking);
 
 
-  const submitEndDay = async () => {
-  try {
-    await API.post('/api/session/end', {
-      sessionId,
-    });
+//   const submitEndDay = async () => {
+//   try {
+//     await API.post('/api/session/end', {
+//       sessionId,
+//     });
 
-    dispatch(stopTracking()); 
+//     dispatch(stopTracking()); 
 
-    alert('End Day Submitted');
-    navigation.navigate('Dashboard');
-  } catch (err) {
-    alert('Error');
-  }
+//     alert('End Day Submitted');
+//     navigation.navigate('Dashboard');
+//   } catch (err) {
+//     alert('Error');
+//   }
+// };
+
+const submitEndDay = async () => {
+
+  await API.post("/api/session/end", {
+    sessionId
+  });
+
+  stopTrackingService();
+
+  dispatch(stopTracking());
+
+  navigation.navigate("Dashboard");
+
 };
 
   return (

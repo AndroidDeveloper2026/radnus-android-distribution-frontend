@@ -55,17 +55,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#030303',
     textAlign: 'center',
-    marginBottom: 20,
+    // marginBottom: 20,
   },
 
   inputGroup: {
-    marginBottom: 16,
+    marginBottom: 10,
   },
 
   label: {
     fontSize: 14,
     color: '#212121',
     marginBottom: 6,
+    marginTop: 20,
   },
 
   input: {
@@ -82,7 +83,7 @@ const styles = StyleSheet.create({
     color: '#D32F2F',
     fontSize: 13,
     textAlign: 'left',
-    marginVertical: 8,
+    // marginVertical: 8,
   },
 
   /* BUTTON */

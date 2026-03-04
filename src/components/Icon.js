@@ -8,7 +8,7 @@ const Icons = ({
   size = 20,
   color = "#000",
   withCircle = false,
-  backgroundColor = "#FDECEA",
+  backgroundColor = "#ffffff",
   circleSize = 36,
   style,
 }) => {

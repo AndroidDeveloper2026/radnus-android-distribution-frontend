@@ -15,15 +15,18 @@ export default StyleSheet.create({
     marginBottom: 20,
   },
 
-  photoBox: {
-    flexDirection: 'row',
-    paddingVertical: 16,
-    borderRadius: 20,
-    backgroundColor: '#ffffff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 3,
-  },
+photoBox: {
+  height: 160,
+  width: '100%',
+  paddingVertical: 16,
+  paddingHorizontal:16,
+  borderRadius: 20,
+  backgroundColor: '#ffffff',
+  justifyContent: 'center',
+  alignItems: 'center',
+  elevation: 3,
+  objectFit:'fill',
+},
 
   photo: {
     width: '100%',

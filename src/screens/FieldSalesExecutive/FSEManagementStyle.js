@@ -335,5 +335,22 @@ btnText:{
 details:{
   flex:1,
   paddingLeft:8,
-}
+},
+
+  addButton: {
+    position: "absolute",
+    bottom: 50,
+    right: 20,
+    backgroundColor: "#D32F2F",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 30,
+    elevation: 4,
+  },
+
+  addButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 14,
+  },
 });

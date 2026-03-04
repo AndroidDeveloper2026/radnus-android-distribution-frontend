@@ -2,9 +2,20 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import FSEDashboardStyle from './FSEDashboardStyle';
 import Header from '../../components/Header';
-
-// You can replace these with SVG icons later
-const Icon = ({ label }) => <Text style={{ fontSize: 18 }}>{label}</Text>;
+import Icons from '../../components/Icon';
+import {
+  Target,
+  TrendingUp,
+  IndianRupee,
+  Store,
+  Users,
+  Plus,
+  ShoppingCart,
+  Map,
+  MapPin,
+  Square,
+} from 'lucide-react-native';
+import colors from '../../utils/constants/colors';
 
 const FSEDashboard = ({ navigation }) => {
   return (
@@ -18,40 +29,61 @@ const FSEDashboard = ({ navigation }) => {
           <Text style={FSEDashboardStyle.subtitle}>Today’s Overview</Text>
 
           {/* KPI ROW 1 */}
-          <View style={FSEDashboardStyle.gridRow}>
-            <View style={FSEDashboardStyle.card}>
-              <View style={FSEDashboardStyle.iconCircle}>
-                <Icon label="🎯" />
-              </View>
+          {/* KPI ROW 1 */}
+          <View style={FSEDashboardStyle.kpiRow}>
+            <View style={FSEDashboardStyle.kpiBox}>
+              <Icons
+                name={'Target'}
+                size={25}
+                color="#D32F2F"
+                circleSize={55}
+                withCircle={true}
+                backgroundColor="#fed2d2"
+              />
               <Text style={FSEDashboardStyle.cardValue}>₹50,000</Text>
               <Text style={FSEDashboardStyle.cardLabel}>Today Target</Text>
             </View>
 
-            <View style={FSEDashboardStyle.card}>
-              <View style={FSEDashboardStyle.iconCircle}>
-                <Icon label="📈" />
-              </View>
+            <View style={FSEDashboardStyle.kpiBox}>
+              <Icons
+                name={'TrendingUp'}
+                size={25}
+                color="#2E7D32"
+                circleSize={55}
+                withCircle={true}
+                backgroundColor="#d2f5da"
+              />
               <Text style={FSEDashboardStyle.cardValue}>₹32,000</Text>
               <Text style={FSEDashboardStyle.cardLabel}>Achieved</Text>
             </View>
           </View>
 
           {/* KPI ROW 2 */}
-          <View style={FSEDashboardStyle.gridRow}>
-            <View style={FSEDashboardStyle.card}>
-              <View style={FSEDashboardStyle.iconCircle}>
-                <Icon label="💰" />
-              </View>
+          <View style={FSEDashboardStyle.kpiRow}>
+            <View style={FSEDashboardStyle.kpiBox}>
+              <Icons
+                name={'IndianRupee'}
+                size={25}
+                color="#F57C00"
+                circleSize={55}
+                withCircle={true}
+                backgroundColor="#ffe6c7"
+              />
               <Text style={FSEDashboardStyle.cardValue}>₹8,000</Text>
               <Text style={FSEDashboardStyle.cardLabel}>
                 Pending Collections
               </Text>
             </View>
 
-            <View style={FSEDashboardStyle.card}>
-              <View style={FSEDashboardStyle.iconCircle}>
-                <Icon label="🏪" />
-              </View>
+            <View style={FSEDashboardStyle.kpiBox}>
+              <Icons
+                name={'Store'}
+                size={25}
+                color="#1976D2"
+                circleSize={55}
+                withCircle={true}
+                backgroundColor="#d9eaff"
+              />
               <Text style={FSEDashboardStyle.cardValue}>12</Text>
               <Text style={FSEDashboardStyle.cardLabel}>
                 Retailers to Visit
@@ -59,14 +91,13 @@ const FSEDashboard = ({ navigation }) => {
             </View>
           </View>
 
-          {/* QUICK ACTIONS */}
           <Text style={FSEDashboardStyle.sectionTitle}>Quick Actions</Text>
 
           <TouchableOpacity
             style={FSEDashboardStyle.actionItem}
             onPress={() => navigation.navigate('RetailerList')}
           >
-            <Icon label="👥" />
+            <Users size={20} color="#1976D2" />
             <Text style={FSEDashboardStyle.actionText}>View Retailer List</Text>
           </TouchableOpacity>
 
@@ -74,7 +105,7 @@ const FSEDashboard = ({ navigation }) => {
             style={FSEDashboardStyle.actionItem}
             onPress={() => navigation.navigate('RetailerOnboarding')}
           >
-            <Icon label="➕" />
+            <Plus size={20} color="#2E7D32" />
             <Text style={FSEDashboardStyle.actionText}>Add New Retailer</Text>
           </TouchableOpacity>
 
@@ -82,16 +113,16 @@ const FSEDashboard = ({ navigation }) => {
             style={FSEDashboardStyle.actionItem}
             onPress={() => navigation.navigate('OrderBooking')}
           >
-            <Icon label="🛒" />
+            <ShoppingCart size={20} color="#F57C00" />
             <Text style={FSEDashboardStyle.actionText}>Book Order</Text>
           </TouchableOpacity>
 
-          {/* Mapp screen */}
+          {/* Map screen */}
           <TouchableOpacity
             style={FSEDashboardStyle.actionItem}
             onPress={() => navigation.navigate('MapScreen')}
           >
-            <Icon label="🛒" />
+            <Map size={20} color="#5E35B1" />
             <Text style={FSEDashboardStyle.actionText}>Mapscreen</Text>
           </TouchableOpacity>
 
@@ -99,15 +130,15 @@ const FSEDashboard = ({ navigation }) => {
             style={FSEDashboardStyle.actionItem}
             onPress={() => navigation.navigate('FSETracking')}
           >
-            <Icon label="🛒" />
-            <Text style={FSEDashboardStyle.actionText}>FSETracking</Text>
+            <MapPin size={20} color="#D32F2F" />
+            <Text style={FSEDashboardStyle.actionText}>FSE Tracking</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={FSEDashboardStyle.actionItem}
             onPress={() => navigation.navigate('EndDaySummary')}
           >
-            <Icon label="⏹️" />
+            <Square size={20} color="#455A64" />
             <Text style={FSEDashboardStyle.actionText}>End Day Summary</Text>
           </TouchableOpacity>
         </View>

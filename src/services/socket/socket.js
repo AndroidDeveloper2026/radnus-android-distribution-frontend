@@ -1,6 +1,7 @@
 import { io } from "socket.io-client";
-import API from '../API/api';
+// import API from '../../services/API/api';
+import { API_BASE_URL } from '@env';
 
-const socket = io(API);
+const socket = io(API_BASE_URL);
 
 export default socket;
