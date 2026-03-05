@@ -46,6 +46,10 @@ import DistributorOnboardList from '../screens/Distributor/DistributorOnboardLis
 import FSETracking from '../screens/FieldSalesExecutive/FSETracking';
 import FSEOnboarding from '../screens/FieldSalesExecutive/FSEOnboarding';
 import MapScreen from '../screens/FieldSalesExecutive/MapScreen';
+import ExecutiveDashboard from '../screens/MarketingExecutive/ExecutiveDashboard';
+import ExecutiveOnboarding from '../screens/MarketingExecutive/ExecutiveOnboarding';
+import ManagerDashboard from '../screens/MarketingManager/ManagerDashboard';
+import ManagerOnboarding from '../screens/MarketingManager/ManagerOnboarding';
 //-- checking --
 import AdminDashboardScreen from '../screens/AdminDashboard/AdminDashboardScreen';
 import { useSelector } from 'react-redux';
@@ -159,6 +163,31 @@ const StackNavigator = () => {
             component={FSEDashboard}
             options={{ headerShown: false }}
           />
+
+          <Stack.Screen
+            name="ManagerDashboard"
+            component={ManagerDashboard}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="ManagerOnboarding"
+            component={ManagerOnboarding}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="ExecutiveDashboard"
+            component={ExecutiveDashboard}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="ExecutiveOnboarding"
+            component={ExecutiveOnboarding}
+            options={{ headerShown: false }}
+          />
+
           <Stack.Screen
             name="MapScreen"
             component={MapScreen}

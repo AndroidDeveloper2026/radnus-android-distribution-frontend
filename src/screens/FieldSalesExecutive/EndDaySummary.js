@@ -45,7 +45,11 @@ const submitEndDay = async () => {
 
   dispatch(stopTracking());
 
-  navigation.navigate("Dashboard");
+  // navigation.navigate("Dashboard");
+  navigation.replace("MainTabs", {
+    role: "FSE",
+  });
+
 
 };
 

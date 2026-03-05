@@ -135,7 +135,7 @@ import styles from '../FieldSalesExecutive/FSETrackingStyle';
 import Header from '../../components/Header';
 
 const FSETracking = ({ route }) => {
-  const { sessionId } = route.params;
+  const sessionId = route?.params?.sessionId;
   const insets = useSafeAreaInsets();
   const [coords, setCoords] = useState([]);
   const [sessionData, setSessionData] = useState(null);

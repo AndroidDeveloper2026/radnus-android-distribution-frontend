@@ -15,9 +15,11 @@ import {
   MapPin,
   Square,
 } from 'lucide-react-native';
-import colors from '../../utils/constants/colors';
+// import colors from '../../utils/constants/colors';
+import { useSelector } from 'react-redux';
 
 const FSEDashboard = ({ navigation }) => {
+  const user = useSelector(state => state.auth.user);
   return (
     <View style={FSEDashboardStyle.container}>
       <Header title={'FSE Dashboard'} />
@@ -25,7 +27,7 @@ const FSEDashboard = ({ navigation }) => {
       <ScrollView>
         <View style={FSEDashboardStyle.content}>
           {/* WELCOME */}
-          <Text style={FSEDashboardStyle.welcome}>Welcome, FSE User</Text>
+          <Text style={FSEDashboardStyle.welcome}>👋 Hi, {user?.name || 'User'}</Text>
           <Text style={FSEDashboardStyle.subtitle}>Today’s Overview</Text>
 
           {/* KPI ROW 1 */}
@@ -40,7 +42,7 @@ const FSEDashboard = ({ navigation }) => {
                 withCircle={true}
                 backgroundColor="#fed2d2"
               />
-              <Text style={FSEDashboardStyle.cardValue}>₹50,000</Text>
+              <Text style={FSEDashboardStyle.cardValue}>₹0</Text>
               <Text style={FSEDashboardStyle.cardLabel}>Today Target</Text>
             </View>
 
@@ -53,7 +55,7 @@ const FSEDashboard = ({ navigation }) => {
                 withCircle={true}
                 backgroundColor="#d2f5da"
               />
-              <Text style={FSEDashboardStyle.cardValue}>₹32,000</Text>
+              <Text style={FSEDashboardStyle.cardValue}>₹0</Text>
               <Text style={FSEDashboardStyle.cardLabel}>Achieved</Text>
             </View>
           </View>
@@ -69,7 +71,7 @@ const FSEDashboard = ({ navigation }) => {
                 withCircle={true}
                 backgroundColor="#ffe6c7"
               />
-              <Text style={FSEDashboardStyle.cardValue}>₹8,000</Text>
+              <Text style={FSEDashboardStyle.cardValue}>₹0</Text>
               <Text style={FSEDashboardStyle.cardLabel}>
                 Pending Collections
               </Text>
@@ -84,7 +86,7 @@ const FSEDashboard = ({ navigation }) => {
                 withCircle={true}
                 backgroundColor="#d9eaff"
               />
-              <Text style={FSEDashboardStyle.cardValue}>12</Text>
+              <Text style={FSEDashboardStyle.cardValue}>0</Text>
               <Text style={FSEDashboardStyle.cardLabel}>
                 Retailers to Visit
               </Text>

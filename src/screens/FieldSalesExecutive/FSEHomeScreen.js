@@ -14,7 +14,8 @@ import FSEHomeStyles from './FSEHomeStyle';
 import { useDispatch, useSelector } from 'react-redux';
 import { startTracking } from '../../services/features/fse/trackingSlice';
 import API from '../../services/API/api'; // ✅ IMPORTANT
-import {startTrackingService} from '../../utils/TrackingService';
+import { startTrackingService } from '../../utils/TrackingService';
+import { CalendarDays, Clock, MapPin } from "lucide-react-native";
 
 const FSEHomeScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -24,6 +25,7 @@ const FSEHomeScreen = ({ navigation }) => {
   const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
   const [attendanceMarked, setAttendanceMarked] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
 
   const retryLocation = () => {
     setTimeout(() => {
@@ -42,7 +44,7 @@ const FSEHomeScreen = ({ navigation }) => {
 
       if (res.data) {
         setAttendanceMarked(true);
-
+        setSessionId(res.data._id);
         dispatch(startTracking(res.data._id));
       }
     } catch (err) {
@@ -119,136 +121,126 @@ const FSEHomeScreen = ({ navigation }) => {
     }
   };
 
-  // mark attendeance
-  // const markAttendance = async () => {
-  //   if (!location) {
-  //     Alert.alert('Error', 'Location not available');
-  //     return;
-  //   }
+  const markAttendance = async () => {
+    try {
+      const res = await API.post('/api/session/start', {
+        userId: user._id,
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
 
-  //   try {
-  //     const res = await API.post('/api/session/start', {
-  //       userId: user._id,
-  //       latitude: location.latitude,
-  //       longitude: location.longitude,
-  //     });
+      const sessionId = res.data._id;
 
-  //     const sessionId = res.data._id;
+      if (!sessionId) {
+        alert('Session not created');
+        return;
+      }
 
-  //     dispatch(startTracking(sessionId));
-  //     setAttendanceMarked(true);
+      setSessionId(sessionId);
+      setAttendanceMarked(true);
 
-  //     navigation.navigate('FSETracking', { sessionId });
-  //   } catch (err) {
-  //     if (err?.response?.data?.message === 'Day already started') {
-  //       setAttendanceMarked(true);
+      dispatch(startTracking(sessionId));
 
-  //       navigation.navigate('FSETracking', {
-  //         sessionId: err.response.data.sessionId,
-  //       });
-  //     } else {
-  //       Alert.alert('Error', 'Failed to start day');
-  //     }
-  //   }
-  // };
+      navigation.navigate('FSETracking', { sessionId });
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-//   const markAttendance = async () => {
-
-//  if (!location) {
-//    Alert.alert("Location not available");
-//    return;
-//  }
-
-//  try {
-
-//    const res = await API.post("/api/session/start", {
-//      userId: user._id,
-//      latitude: location.latitude,
-//      longitude: location.longitude
-//    });
-
-//    const sessionId = res.data._id;
-
-//    dispatch(startTracking(sessionId));
-
-//    navigation.navigate("FSETracking", { sessionId });
-
-//  } catch (err) {
-//    Alert.alert("Error starting session");
-//  }
-// };
-
-const markAttendance = async () => {
-
- try {
-
-   const res = await API.post('/api/session/start', {
-     userId: user._id,
-     latitude: location.latitude,
-     longitude: location.longitude,
-   });
-
-   const sessionId = res.data._id;
-
-   if (!sessionId) {
-     alert("Session not created");
-     return;
-   }
-
-   navigation.navigate('FSETracking', { sessionId });
-
- } catch (err) {
-   console.log(err);
- }
-
-};
-
+  const handleStartDaybtn = () => {
+    if (attendanceMarked && sessionId) {
+      navigation.navigate('FSETracking', { sessionId });
+    } else {
+      markAttendance();
+    }
+  };
 
   return (
     <View style={FSEHomeStyles.container}>
       <Header title="Start Day" showBackArrow={false} />
-
       <View style={FSEHomeStyles.content}>
-        <Text style={FSEHomeStyles.title}>Welcome, {user?.name || 'User'}</Text>
-        <Text style={FSEHomeStyles.title}>Mark Attendance</Text>
+        <Text style={FSEHomeStyles.title}>
+          👋 Welcome! {user?.name || 'User'}
+        </Text>
 
-        <View style={FSEHomeStyles.infoBox}>
-          <Text>Date</Text>
-          <Text>{new Date().toDateString()}</Text>
-        </View>
+        <Text style={FSEHomeStyles.sectionTitle}>Mark Attendance</Text>
 
-        <View style={FSEHomeStyles.infoBox}>
-          <Text>Time</Text>
-          <Text>{new Date().toLocaleTimeString()}</Text>
-        </View>
+        {/* DATE CARD */}
+        <View style={FSEHomeStyles.card}>
+          <View style={FSEHomeStyles.cardRow}>
+            <View style={FSEHomeStyles.iconBox}>
+              <CalendarDays size={22} color="#D32F2F" />
+            </View>
 
-        <View style={FSEHomeStyles.infoBox}>
-          <Text>Location</Text>
-
-          {location ? (
-            <>
-              <Text>Lat: {location.latitude}</Text>
-              <Text>Lng: {location.longitude}</Text>
-
-              <Text style={FSEHomeStyles.infoAddressValue}>
-                {address || 'Fetching address...'}
+            <View>
+              <Text style={FSEHomeStyles.cardLabel}>Date</Text>
+              <Text style={FSEHomeStyles.cardValue}>
+                {new Date().toDateString()}
               </Text>
-            </>
-          ) : (
-            <Text>{loading ? 'Fetching...' : 'Retry'}</Text>
-          )}
+            </View>
+          </View>
         </View>
 
+        {/* TIME CARD */}
+        <View style={FSEHomeStyles.card}>
+          <View style={FSEHomeStyles.cardRow}>
+            <View style={FSEHomeStyles.iconBox}>
+              <Clock size={22} color="#2563EB" />
+            </View>
+
+            <View>
+              <Text style={FSEHomeStyles.cardLabel}>Time</Text>
+              <Text style={FSEHomeStyles.cardValue}>
+                {new Date().toLocaleTimeString()}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* LOCATION CARD */}
+        <View style={FSEHomeStyles.card}>
+          <View style={FSEHomeStyles.cardRow}>
+            <View style={FSEHomeStyles.iconBox}>
+              <MapPin size={22} color="#16A34A" />
+            </View>
+
+            <View style={{ flex: 1 }}>
+              <Text style={FSEHomeStyles.cardLabel}>Location</Text>
+
+              {location ? (
+                <>
+                  <Text style={FSEHomeStyles.cardValue}>
+                    Lat: {location.latitude}
+                  </Text>
+
+                  <Text style={FSEHomeStyles.cardValue}>
+                    Lng: {location.longitude}
+                  </Text>
+
+                  <Text style={FSEHomeStyles.address}>
+                    {address || 'Fetching address...'}
+                  </Text>
+                </>
+              ) : (
+                <Text style={FSEHomeStyles.cardValue}>
+                  {loading ? 'Fetching...' : 'Retry'}
+                </Text>
+              )}
+            </View>
+          </View>
+        </View>
+
+        {/* START DAY BUTTON */}
         <TouchableOpacity
           style={[
-            FSEHomeStyles.button,
+            FSEHomeStyles.startButton,
             (!location || loading || attendanceMarked) &&
               FSEHomeStyles.buttonDisabled,
           ]}
-          onPress={markAttendance}
+          onPress={handleStartDaybtn}
           disabled={!location || loading || attendanceMarked}
         >
-          <Text style={FSEHomeStyles.buttonText}>
+          <Text style={FSEHomeStyles.startButtonText}>
             {attendanceMarked ? 'Day Already Started' : 'START DAY'}
           </Text>
         </TouchableOpacity>

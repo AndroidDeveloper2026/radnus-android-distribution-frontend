@@ -7,7 +7,7 @@ import {
   ScrollView,
   Image,
 } from "react-native";
-import styles from "./ExecutiveOnboardingStyle";
+import styles from "../MarketingExecutive/ExecutiveOnboardStyle";
 import Header from "../../components/Header";
 import { launchCamera } from "react-native-image-picker";
 import { Camera } from "lucide-react-native";
