@@ -9,14 +9,25 @@ export async function createChannel() {
 }
 
 export async function displayNotification(remoteMessage) {
+
   const channelId = await createChannel();
 
+  const title =
+    remoteMessage?.data?.title ||
+    remoteMessage?.notification?.title ||
+    'Notification';
+
+  const body =
+    remoteMessage?.data?.body ||
+    remoteMessage?.notification?.body ||
+    '';
+
   await notifee.displayNotification({
-    title: remoteMessage?.notification?.title || 'Notification',
-    body: remoteMessage?.notification?.body || '',
+    title,
+    body,
     android: {
       channelId,
-      smallIcon: 'ic_launcher', // REQUIRED
+      smallIcon: 'ic_launcher',
       pressAction: {
         id: 'default',
       },
