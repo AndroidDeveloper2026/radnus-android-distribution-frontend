@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import styles from './ForgotPasswordStyle';
-import API from '../../services/API/api';
+// import API from '../../services/API/api';
+import axios from 'axios';
+import { API_BASE_URL } from '@env';
 import LeftArrow from '../../assets/svg/white-left-arrow.svg';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -20,29 +22,65 @@ const ForgotPassword = ({ navigation }) => {
     navigation.goBack();
   };
 
+  // const handleSubmit = async values => {
+  //   try {
+  //     setLoading(true);
+
+  //    const res = await API.post('/api/auth/forgot-password', {
+  //       email: values.email,
+  //     });
+
+  //     if (res.data.success) {
+  //     navigation.navigate('OtpScreen', {
+  //       email: values.email,
+  //       type: 'reset',
+  //     });
+  //   }
+  //   } catch (err) {
+  //     Alert.alert(
+  //       'Error',
+  //       err?.response?.data?.message || 'Something went wrong',
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleSubmit = async values => {
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-     const res = await API.post('/api/auth/forgot-password', {
-        email: values.email,
-      });
+    console.log("EMAIL ENTERED:", values.email);
 
-      if (res.data.success) {
+    const res = await axios.post(`${API_BASE_URL}/api/auth/forgot-password`, {
+      email: values.email,
+    });
+
+    console.log("API RESPONSE:", res.data);
+
+    if (res.data.success) {
+      console.log("OTP SENT SUCCESSFULLY");
+
       navigation.navigate('OtpScreen', {
         email: values.email,
         type: 'reset',
       });
+    } else {
+      console.log("API RETURNED FALSE:", res.data.message);
     }
-    } catch (err) {
-      Alert.alert(
-        'Error',
-        err?.response?.data?.message || 'Something went wrong',
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+
+  } catch (err) {
+    console.log("FORGOT PASSWORD ERROR:", err);
+    console.log("SERVER ERROR RESPONSE:", err?.response?.data);
+
+    Alert.alert(
+      'Error',
+      err?.response?.data?.message || 'Something went wrong',
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <View style={styles.container}>

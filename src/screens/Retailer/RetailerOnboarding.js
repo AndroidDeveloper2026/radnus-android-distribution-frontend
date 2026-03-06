@@ -12,7 +12,6 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import styles from './RetailerOnboardingStyle';
 import Header from '../../components/Header';
-import { launchCamera } from 'react-native-image-picker';
 import { Camera, MapPin } from 'lucide-react-native';
 import { addRetailer } from '../../services/features/retailer/retailerSlice';
 import MessagePopup from '../../components/ModalPopup';
@@ -40,14 +39,10 @@ const RetailerOnboarding = ({ navigation }) => {
   });
 
   const capturePhoto = async () => {
-    console.log('--- camera open via helper ---');
-
     try {
       openCamera(image => {
         setShopPhoto(image); // ✅ handle result here
       });
-      // const image = await openCamera();   // 🔥 using your helper
-      // setShopPhoto(image);
     } catch (err) {
       console.log('Camera Error:', err);
     }

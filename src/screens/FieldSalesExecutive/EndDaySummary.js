@@ -19,22 +19,6 @@ const EndDaySummary = ({ navigation }) => {
   const dispatch = useDispatch();
   const { sessionId } = useSelector(state => state.tracking);
 
-
-//   const submitEndDay = async () => {
-//   try {
-//     await API.post('/api/session/end', {
-//       sessionId,
-//     });
-
-//     dispatch(stopTracking()); 
-
-//     alert('End Day Submitted');
-//     navigation.navigate('Dashboard');
-//   } catch (err) {
-//     alert('Error');
-//   }
-// };
-
 const submitEndDay = async () => {
 
   await API.post("/api/session/end", {
@@ -45,7 +29,6 @@ const submitEndDay = async () => {
 
   dispatch(stopTracking());
 
-  // navigation.navigate("Dashboard");
   navigation.replace("MainTabs", {
     role: "FSE",
   });

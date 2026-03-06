@@ -18,6 +18,8 @@ import FSEDashboard from '../screens/FieldSalesExecutive/FSEDashboard';
 import RetailerDashboard from '../screens/Retailer/RetailerDashboard';
 import FSEHomeScreen from '../screens/FieldSalesExecutive/FSEHomeScreen';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import ManagerDashboard from '../screens/MarketingManager/ManagerDashboard';
+import ExecutiveDashboard from '../screens/MarketingExecutive/ExecutiveDashboard';
 
 const Tab = createBottomTabNavigator();
 
@@ -35,14 +37,14 @@ const ROLE_TABS = {
   ],
 
   MarketingManager: [
-    { name: 'Dashboard', component: RetailerDashboard, icon: LayoutDashboard },
+    { name: 'Dashboard', component: ManagerDashboard, icon: LayoutDashboard },
     { name: 'Home', component: HomeScreen, icon: Home },
     { name: 'Reports', component: Report, icon: BarChart3 },
     { name: 'Profile', component: ProfileSettings, icon: CircleUserRound },
   ],
 
   MarketingExecutive: [
-    { name: 'Dashboard', component: RetailerDashboard, icon: LayoutDashboard },
+    { name: 'Dashboard', component: ExecutiveDashboard, icon: LayoutDashboard },
     { name: 'Home', component: HomeScreen, icon: Home },
     { name: 'Reports', component: Report, icon: BarChart3 },
     { name: 'Profile', component: ProfileSettings, icon: CircleUserRound },

@@ -15,11 +15,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { startTracking } from '../../services/features/fse/trackingSlice';
 import API from '../../services/API/api'; // ✅ IMPORTANT
 import { startTrackingService } from '../../utils/TrackingService';
-import { CalendarDays, Clock, MapPin } from "lucide-react-native";
+import { CalendarDays, Clock, MapPin } from 'lucide-react-native';
 
 const FSEHomeScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  // const userId = 'user_123';
   const user = useSelector(state => state.auth.user);
   const [location, setLocation] = useState(null);
   const [address, setAddress] = useState('');
@@ -121,6 +120,33 @@ const FSEHomeScreen = ({ navigation }) => {
     }
   };
 
+  // const markAttendance = async () => {
+  //   try {
+  //     const res = await API.post('/api/session/start', {
+  //       userId: user._id,
+  //       latitude: location.latitude,
+  //       longitude: location.longitude,
+  //     });
+
+  //     const sessionId = res.data._id;
+
+  //     if (!sessionId) {
+  //       alert('Session not created');
+  //       return;
+  //     }
+
+  //     setSessionId(sessionId);
+  //     setAttendanceMarked(true);
+
+  //     dispatch(startTracking(sessionId));
+  //     startTrackingService(user._id, sessionId);
+
+  //     navigation.navigate('FSETracking', { sessionId });
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
+
   const markAttendance = async () => {
     try {
       const res = await API.post('/api/session/start', {
@@ -131,15 +157,10 @@ const FSEHomeScreen = ({ navigation }) => {
 
       const sessionId = res.data._id;
 
-      if (!sessionId) {
-        alert('Session not created');
-        return;
-      }
-
-      setSessionId(sessionId);
-      setAttendanceMarked(true);
-
       dispatch(startTracking(sessionId));
+
+      // start GPS tracking
+      startTrackingService(user._id, sessionId);
 
       navigation.navigate('FSETracking', { sessionId });
     } catch (err) {
