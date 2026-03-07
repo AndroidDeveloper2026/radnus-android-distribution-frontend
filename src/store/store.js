@@ -10,7 +10,7 @@ import fseReducer from '../services/features/fse/fseSlice';
 import retailerReducer from '../services/features/retailer/retailerSlice';
 import locationReducer from '../services/features/fse/locationSlice';
 import trackingReducer from '../services/features/fse/trackingSlice';
-// import verifyResetReducer from '../services/features/auth/resetOTPSlice';
+import verifyResetReducer from '../services/features/auth/resetOTPSlice';
 
 export const store = configureStore({
   reducer: {
@@ -25,6 +25,6 @@ export const store = configureStore({
     retailer: retailerReducer,
     location: locationReducer,
     tracking: trackingReducer,
-    // resetOtp:verifyResetReducer,
-  },
+    resetOtp:verifyResetReducer,
+  }
 });

@@ -114,7 +114,6 @@ export const verifyOtp = createAsyncThunk(
   'auth/verifyOtp',
   async ({ type, mobile, email, otp }, { rejectWithValue }) => {
     try {
-
       let url = '';
       let payload = {};
 
@@ -133,46 +132,34 @@ export const verifyOtp = createAsyncThunk(
         message: res.data.message,
         type,
       };
-
     } catch (err) {
-
       return rejectWithValue(
-        err.response?.data?.message || 'OTP verification failed'
+        err.response?.data?.message || 'OTP verification failed',
       );
-
     }
-  }
+  },
 );
-
 
 /* ---------------- RESEND OTP ---------------- */
 export const resendOtp = createAsyncThunk(
   'auth/resendOtp',
   async ({ type, mobile, email }, { rejectWithValue }) => {
     try {
-
       const payload =
         type === 'register'
           ? { mobile, type: 'register' }
           : { email, type: 'reset' };
 
-      const res = await API.post(
-        '/api/auth/resend-otp',
-        payload
-      );
+      const res = await API.post('/api/auth/resend-otp', payload);
 
       return res.data;
-
     } catch (err) {
-
       return rejectWithValue(
-        err.response?.data?.message || 'Failed to resend OTP'
+        err.response?.data?.message || 'Failed to resend OTP',
       );
-
     }
-  }
+  },
 );
-
 
 /* ---------------- SLICE ---------------- */
 const otpSlice = createSlice({
@@ -187,7 +174,6 @@ const otpSlice = createSlice({
   },
 
   reducers: {
-
     resetOtpState: state => {
       state.loading = false;
       state.error = null;
@@ -195,11 +181,9 @@ const otpSlice = createSlice({
       state.type = null;
       state.message = null;
     },
-
   },
 
   extraReducers: builder => {
-
     builder
 
       /* ---------- VERIFY OTP ---------- */
@@ -210,28 +194,21 @@ const otpSlice = createSlice({
       })
 
       .addCase(verifyOtp.fulfilled, (state, action) => {
-
         state.loading = false;
 
         if (action.payload.success) {
-
           state.verified = true;
           state.type = action.payload.type;
           state.message = action.payload.message;
-
         } else {
-
           state.error = action.payload.message;
-
         }
-
       })
 
       .addCase(verifyOtp.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-
 
       /* ---------- RESEND OTP ---------- */
 
@@ -249,9 +226,7 @@ const otpSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       });
-
   },
-
 });
 
 export const { resetOtpState } = otpSlice.actions;
