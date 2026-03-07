@@ -199,15 +199,25 @@ const ExecutiveDashboard = ({ navigation }) => {
             </Text>
           </TouchableOpacity> */}
 
-          {/* <TouchableOpacity
+          <TouchableOpacity
             style={styles.navItem}
-            onPress={() => navigation.navigate("ProductMaster")}
+            onPress={() => navigation.navigate("ExecutiveOnboarding")}
           >
-            <Text style={styles.navTitle}>Product Master</Text>
+            <Text style={styles.navTitle}>ExecutiveOnboarding</Text>
             <Text style={styles.navSubTitle}>
-              Products · Pricing · MOQ
+              ExecutiveOnboarding
             </Text>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
+
+                    <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => navigation.navigate("ManagerOnboarding")}
+          >
+            <Text style={styles.navTitle}>ManagerOnboarding</Text>
+            <Text style={styles.navSubTitle}>
+              ManagerOnboarding
+            </Text>
+          </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.navItem}

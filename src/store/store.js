@@ -11,6 +11,8 @@ import retailerReducer from '../services/features/retailer/retailerSlice';
 import locationReducer from '../services/features/fse/locationSlice';
 import trackingReducer from '../services/features/fse/trackingSlice';
 import verifyResetReducer from '../services/features/auth/resetOTPSlice';
+import executiveReducer from '../services/features/executive/executiveSlice';
+import managerReducer from '../services/features/manager/managerSlice';
 
 export const store = configureStore({
   reducer: {
@@ -25,6 +27,8 @@ export const store = configureStore({
     retailer: retailerReducer,
     location: locationReducer,
     tracking: trackingReducer,
-    resetOtp:verifyResetReducer,
-  }
+    resetOtp: verifyResetReducer,
+    executive: executiveReducer,
+    manager: managerReducer,
+  },
 });

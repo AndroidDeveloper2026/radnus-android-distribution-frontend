@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,110 +6,203 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
-} from "react-native";
-import styles from "../MarketingManager/ManagerOnboardStyle";
-import Header from "../../components/Header";
-import { launchCamera } from "react-native-image-picker";
-import { Camera } from "lucide-react-native";
+} from 'react-native';
+import { useDispatch } from 'react-redux';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
+import styles from '../MarketingExecutive/ExecutiveOnboardStyle';
+import Header from '../../components/Header';
+import { Camera } from 'lucide-react-native';
+import { openCamera } from '../../utils/cameraHelper';
+import { addManager } from '../../services/features/manager/managerSlice';
+
+/* ---------------- VALIDATION ---------------- */
+
+const validationSchema = Yup.object().shape({
+  name: Yup.string().required('Name is required'),
+  dob: Yup.string().required('DOB is required'),
+  email: Yup.string().email('Invalid email').required('Email is required'),
+  phone: Yup.string()
+    .matches(/^[0-9]{10}$/, 'Enter valid 10-digit phone')
+    .required('Phone number is required'),
+  alternatePhone: Yup.string().matches(
+    /^[0-9]{10}$/,
+    'Enter valid phone number',
+  ),
+  address: Yup.string().required('Address is required'),
+});
+
+/* ---------------- COMPONENT ---------------- */
 
 const ManagerOnboarding = ({ navigation }) => {
-  const [images, setImages] = useState({
-    shop: null,
-    aadhaar: null,
-    passport: null,
-  });
+  const dispatch = useDispatch();
 
-  const [form, setForm] = useState({
-    name: "",
-    businessName: "",
-    mobile: "",
-    alternateMobile: "",
-    gst: "",
-    msme: "",
-    address: "",
-    communicationAddress: "",
-    bankDetails: "",
-    fseAadhaar: "",
-  });
+  const [profile, setProfile] = useState(null);
 
-  const onChange = (key, value) => {
-    setForm({ ...form, [key]: value });
-  };
-
-  const captureImage = (type) => {
-    launchCamera({ mediaType: "photo", quality: 0.7 }, (res) => {
-      if (!res.didCancel && res.assets) {
-        setImages({ ...images, [type]: res.assets[0].uri });
-      }
+  const captureImage = () => {
+    openCamera(image => {
+      console.log('📸 IMAGE:', image);
+      setProfile(image);
     });
-  };
-
-  const submit = () => {
-    console.log("DATA:", form, images);
-    navigation.goBack();
   };
 
   return (
     <View style={styles.container}>
       <Header title="Manager Onboarding" />
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <Formik
+        initialValues={{
+          name: '',
+          dob: '',
+          email: '',
+          phone: '',
+          alternatePhone: '',
+          address: '',
+        }}
+        validationSchema={validationSchema}
+        // onSubmit={(values) => {
+        //   const formData = new FormData();
 
-        {/* BASIC DETAILS */}
-        <Section title="Basic Details">
-          <Input label="Name *" value={form.name} onChangeText={(v) => onChange("name", v)} />
-          <Input label="Business Name *" value={form.businessName} onChangeText={(v) => onChange("businessName", v)} />
-          <Input label="Mobile Number *" value={form.mobile} keyboardType="phone-pad" />
-          <Input label="Alternate Mobile" value={form.alternateMobile} />
-          <Input label="GST Number" value={form.gst} />
-          <Input label="MSME" value={form.msme} />
-        </Section>
+        //   Object.keys(values).forEach((key) => {
+        //     formData.append(key, values[key]);
+        //   });
 
-        {/* ADDRESS */}
-        <Section title="Address Details">
-          <Input label="Residential Address" value={form.address} />
-          <Input label="Communication Address" value={form.communicationAddress} />
-        </Section>
+        //   formData.append("profile", profile);
 
-        {/* BANK */}
-        <Section title="Bank Details">
-          <Input label="Bank Details" value={form.bankDetails} />
-        </Section>
+        //   console.log("MANAGER DATA:", formData);
 
-        {/* KYC */}
-        <Section title="KYC Details">
-          <Input label="FSE Aadhaar Number" value={form.fseAadhaar} />
-        </Section>
+        //   // dispatch(addManager(formData));
 
-        {/* IMAGES */}
-        <Section title="Upload Documents">
+        //   navigation.goBack();
+        // }}
 
-          <ImagePicker
-            label="Shop Photo"
-            image={images.shop}
-            onPress={() => captureImage("shop")}
-          />
+        onSubmit={values => {
+          const formData = new FormData();
 
-          <ImagePicker
-            label="Aadhaar Photo"
-            image={images.aadhaar}
-            onPress={() => captureImage("aadhaar")}
-          />
+          Object.keys(values).forEach(key => {
+            formData.append(key, values[key]);
+          });
 
-          <ImagePicker
-            label="Passport Photo"
-            image={images.passport}
-            onPress={() => captureImage("passport")}
-          />
+          if (profile) {
+            formData.append('photo', {
+              uri: profile.uri,
+              type: profile.type,
+              name: profile.name,
+            });
+          }
 
-        </Section>
+          dispatch(addManager(formData));
 
-        {/* SUBMIT */}
-        <TouchableOpacity style={styles.submitBtn} onPress={submit}>
-          <Text style={styles.submitText}>Submit for Approval</Text>
-        </TouchableOpacity>
+          navigation.goBack();
+        }}
+      >
+        {({
+          handleChange,
+          handleSubmit,
+          handleBlur,
+          values,
+          errors,
+          touched,
+        }) => (
+          <ScrollView contentContainerStyle={styles.content}>
+            {/* PROFILE PHOTO */}
 
-      </ScrollView>
+            <View style={{ alignItems: 'center', marginVertical: 20 }}>
+              <TouchableOpacity onPress={captureImage}>
+                {profile ? (
+                  <Image
+                    source={{ uri: profile.uri }}
+                    style={{
+                      width: 110,
+                      height: 110,
+                      borderRadius: 55,
+                    }}
+                  />
+                ) : (
+                  <View
+                    style={{
+                      width: 110,
+                      height: 110,
+                      borderRadius: 55,
+                      backgroundColor: '#eee',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Camera size={28} color="#D32F2F" />
+                    <Text>Take Photo</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            </View>
+
+            {/* BASIC DETAILS */}
+
+            <Section title="Basic Details">
+              <Input
+                label="Name *"
+                value={values.name}
+                onChangeText={handleChange('name')}
+                onBlur={handleBlur('name')}
+                error={touched.name && errors.name}
+              />
+
+              <Input
+                label="Date of Birth *"
+                value={values.dob}
+                onChangeText={handleChange('dob')}
+                onBlur={handleBlur('dob')}
+                error={touched.dob && errors.dob}
+              />
+
+              <Input
+                label="Email *"
+                value={values.email}
+                onChangeText={handleChange('email')}
+                onBlur={handleBlur('email')}
+                keyboardType="email-address"
+                error={touched.email && errors.email}
+              />
+
+              <Input
+                label="Phone Number *"
+                value={values.phone}
+                onChangeText={handleChange('phone')}
+                keyboardType="phone-pad"
+                onBlur={handleBlur('phone')}
+                error={touched.phone && errors.phone}
+              />
+
+              <Input
+                label="Alternate Phone Number"
+                value={values.alternatePhone}
+                onChangeText={handleChange('alternatePhone')}
+                keyboardType="phone-pad"
+                onBlur={handleBlur('alternatePhone')}
+                error={touched.alternatePhone && errors.alternatePhone}
+              />
+            </Section>
+
+            {/* ADDRESS */}
+
+            <Section title="Address Details">
+              <Input
+                label="Address *"
+                value={values.address}
+                onChangeText={handleChange('address')}
+                onBlur={handleBlur('address')}
+                error={touched.address && errors.address}
+              />
+            </Section>
+
+            {/* SUBMIT */}
+
+            <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
+              <Text style={styles.submitText}>Submit for Approval</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        )}
+      </Formik>
     </View>
   );
 };
@@ -123,26 +216,11 @@ const Section = ({ title, children }) => (
   </View>
 );
 
-const Input = ({ label, ...props }) => (
+const Input = ({ label, error, ...props }) => (
   <>
     <Text style={styles.label}>{label}</Text>
     <TextInput style={styles.input} {...props} />
-  </>
-);
-
-const ImagePicker = ({ label, image, onPress }) => (
-  <>
-    <Text style={styles.label}>{label}</Text>
-    <TouchableOpacity style={styles.photoBox} onPress={onPress}>
-      {image ? (
-        <Image source={{ uri: image }} style={styles.photo} />
-      ) : (
-        <View style={styles.photoIcon}>
-          <Camera size={24} color="#D32F2F" />
-          <Text style={styles.photoText}>Capture</Text>
-        </View>
-      )}
-    </TouchableOpacity>
+    {error && <Text style={{ color: 'red' }}>{error}</Text>}
   </>
 );
 
