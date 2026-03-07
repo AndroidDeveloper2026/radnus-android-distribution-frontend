@@ -52,6 +52,7 @@ import ManagerDashboard from '../screens/MarketingManager/ManagerDashboard';
 import ManagerOnboarding from '../screens/MarketingManager/ManagerOnboarding';
 //-- checking --
 import AdminDashboardScreen from '../screens/AdminDashboard/AdminDashboardScreen';
+import DistributorList from '../screens/MarketingExecutive/DistributorList';
 import { useSelector } from 'react-redux';
 import { selectAuthState } from '../store/selectors/authSelector';
 
@@ -179,6 +180,12 @@ const StackNavigator = () => {
           <Stack.Screen
             name="ExecutiveDashboard"
             component={ExecutiveDashboard}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="DistributorList"
+            component={DistributorList}
             options={{ headerShown: false }}
           />
 
