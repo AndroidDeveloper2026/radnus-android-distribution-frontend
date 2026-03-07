@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,46 +6,62 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
-} from "react-native";
-import styles from "./FSEManagementStyle";
-import Header from "../../components/Header";
-import { User2Icon, Trash2 } from "lucide-react-native";
+} from 'react-native';
+import styles from './FSEManagementStyle';
+import Header from '../../components/Header';
+import { User2Icon, Trash2 } from 'lucide-react-native';
 
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector } from 'react-redux';
 import {
   getFSEs,
   deleteFSE,
   approveFSE,
   updateFSE,
-} from "../../services/features/fse/fseSlice";
+} from '../../services/features/fse/fseSlice';
 
-
-import PopupModal from "../../components/PopupModal";
+import PopupModal from '../../components/PopupModal';
 
 const FSEManagement = ({ navigation }) => {
   const dispatch = useDispatch();
 
-  const [tab, setTab] = useState("PENDING");
+  const [tab, setTab] = useState('PENDING');
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-
-  const { list, loading } = useSelector((state) => state.fse);
+  const [modalType, setModalType] = useState(null);
+  const { list, loading } = useSelector(state => state.fse);
 
   useEffect(() => {
     dispatch(getFSEs());
   }, []);
 
   // FILTER BY STATUS
-  const filtered = list.filter((f) => f.status === tab);
+  const filtered = list.filter(f => f.status === tab);
 
   // REJECT
-  const confirmReject = () => {
-    dispatch(
-      updateFSE({
-        id: selectedId,
-        data: { status: "REJECTED" },
-      })
-    );
+  // const confirmReject = () => {
+  //   dispatch(
+  //     updateFSE({
+  //       id: selectedId,
+  //       data: { status: "REJECTED" },
+  //     })
+  //   );
+
+  //   setShowRejectModal(false);
+  // };
+
+  const confirmAction = () => {
+    if (modalType === 'reject') {
+      dispatch(
+        updateFSE({
+          id: selectedId,
+          data: { status: 'REJECTED' },
+        }),
+      );
+    }
+
+    if (modalType === 'delete') {
+      dispatch(deleteFSE(selectedId));
+    }
 
     setShowRejectModal(false);
   };
@@ -54,7 +70,6 @@ const FSEManagement = ({ navigation }) => {
   const renderItem = ({ item }) => (
     <View style={styles.card}>
       <View style={styles.row}>
-
         {/* IMAGE */}
         {item.photo ? (
           <Image source={{ uri: item?.photo }} style={styles.avatar} />
@@ -73,11 +88,14 @@ const FSEManagement = ({ navigation }) => {
 
         {/* RIGHT SIDE */}
         <View style={styles.statusCol}>
-
           {/* DELETE */}
           <TouchableOpacity
             style={styles.deleteIcon}
-            onPress={() => dispatch(deleteFSE(item._id))}
+            onPress={() => {
+              setSelectedId(item._id);
+              setModalType('delete');
+              setShowRejectModal(true);
+            }}
           >
             <Trash2 size={20} color="#e01616" />
           </TouchableOpacity>
@@ -86,21 +104,19 @@ const FSEManagement = ({ navigation }) => {
           <View
             style={[
               styles.badge,
-              item.status === "APPROVED" && styles.badgeApproved,
-              item.status === "REJECTED" && styles.badgeRejected,
-              item.status === "PENDING" && styles.badgePending,
+              item.status === 'APPROVED' && styles.badgeApproved,
+              item.status === 'REJECTED' && styles.badgeRejected,
+              item.status === 'PENDING' && styles.badgePending,
             ]}
           >
             <Text style={styles.badgeText}>{item.status}</Text>
           </View>
-
         </View>
       </View>
 
       {/* ACTION BUTTONS */}
-      {item.status === "PENDING" && (
+      {item.status === 'PENDING' && (
         <View style={styles.actionRow}>
-
           {/* APPROVE */}
           <TouchableOpacity
             style={styles.approveBtn}
@@ -114,12 +130,12 @@ const FSEManagement = ({ navigation }) => {
             style={styles.rejectBtn}
             onPress={() => {
               setSelectedId(item._id);
+              setModalType('reject');
               setShowRejectModal(true);
             }}
           >
             <Text style={styles.btnText}>Reject</Text>
           </TouchableOpacity>
-
         </View>
       )}
     </View>
@@ -131,18 +147,13 @@ const FSEManagement = ({ navigation }) => {
 
       {/* ✅ TABS */}
       <View style={styles.tabs}>
-        {["PENDING", "APPROVED", "REJECTED"].map((t) => (
+        {['PENDING', 'APPROVED', 'REJECTED'].map(t => (
           <TouchableOpacity
             key={t}
             style={[styles.tab, tab === t && styles.activeTab]}
             onPress={() => setTab(t)}
           >
-            <Text
-              style={[
-                styles.tabText,
-                tab === t && styles.activeTabText,
-              ]}
-            >
+            <Text style={[styles.tabText, tab === t && styles.activeTabText]}>
               {t}
             </Text>
           </TouchableOpacity>
@@ -159,14 +170,12 @@ const FSEManagement = ({ navigation }) => {
       {/* LIST */}
       <FlatList
         data={filtered}
-        keyExtractor={(item) => item._id}
+        keyExtractor={item => item._id}
         renderItem={renderItem}
         contentContainerStyle={{ padding: 16 }}
         ListEmptyComponent={
           !loading && (
-            <Text style={styles.center}>
-              No {tab.toLowerCase()} FSE
-            </Text>
+            <Text style={styles.center}>No {tab.toLowerCase()} FSE</Text>
           )
         }
       />
@@ -174,18 +183,22 @@ const FSEManagement = ({ navigation }) => {
       {/* REJECT MODAL */}
       <PopupModal
         visible={showRejectModal}
-        title="Reject FSE"
-        description="Are you sure you want to reject this FSE?"
-        buttonText="Reject"
+        title={modalType === 'delete' ? 'Delete FSE' : 'Reject FSE'}
+        description={
+          modalType === 'delete'
+            ? 'Are you sure you want to delete this FSE?'
+            : 'Are you sure you want to reject this FSE?'
+        }
+        buttonText={modalType === 'delete' ? 'Delete' : 'Reject'}
         secondaryText="Cancel"
-        onPress={confirmReject}
+        onPress={confirmAction}
         onSecondaryPress={() => setShowRejectModal(false)}
       />
 
       {/* ADD BUTTON */}
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => navigation.navigate("FSEOnboarding")}
+        onPress={() => navigation.navigate('FSEOnboarding')}
       >
         <Text style={styles.addButtonText}>+ Add FSE</Text>
       </TouchableOpacity>
