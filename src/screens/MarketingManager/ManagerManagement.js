@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,27 +6,26 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
-} from "react-native";
+} from 'react-native';
 
-import styles from "./ManagerManagementStyle";
-import Header from "../../components/Header";
+import styles from '../FieldSalesExecutive/FSEManagementStyle';
+import Header from '../../components/Header';
 
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector } from 'react-redux';
 
 import {
   getManagers,
   deleteManager,
   approveManager,
   updateManager,
-} from "../../services/features/manager/managerSlice";
+} from '../../services/features/manager/managerSlice';
 
-import { Trash2, User2Icon } from "lucide-react-native";
+import { Trash2, User2Icon } from 'lucide-react-native';
 
 const ManagerManagement = ({ navigation }) => {
-
   const dispatch = useDispatch();
 
-  const [tab, setTab] = useState("PENDING");
+  const [tab, setTab] = useState('PENDING');
 
   const { list, loading } = useSelector(state => state.manager);
 
@@ -37,11 +36,8 @@ const ManagerManagement = ({ navigation }) => {
   const filtered = list.filter(i => i.status === tab);
 
   const renderItem = ({ item }) => (
-
     <View style={styles.card}>
-
       <View style={styles.row}>
-
         {item.photo ? (
           <Image source={{ uri: item.photo }} style={styles.avatar} />
         ) : (
@@ -57,7 +53,6 @@ const ManagerManagement = ({ navigation }) => {
         </View>
 
         <View style={styles.statusCol}>
-
           <TouchableOpacity
             style={styles.deleteIcon}
             onPress={() => dispatch(deleteManager(item._id))}
@@ -68,15 +63,11 @@ const ManagerManagement = ({ navigation }) => {
           <View style={styles.badge}>
             <Text>{item.status}</Text>
           </View>
-
         </View>
-
       </View>
 
-      {item.status === "PENDING" && (
-
+      {item.status === 'PENDING' && (
         <View style={styles.actionRow}>
-
           <TouchableOpacity
             style={styles.approveBtn}
             onPress={() => dispatch(approveManager(item._id))}
@@ -90,31 +81,26 @@ const ManagerManagement = ({ navigation }) => {
               dispatch(
                 updateManager({
                   id: item._id,
-                  data: { status: "REJECTED" },
-                })
+                  data: { status: 'REJECTED' },
+                }),
               )
             }
           >
             <Text style={styles.btnText}>Reject</Text>
           </TouchableOpacity>
-
         </View>
-
       )}
-
     </View>
-
   );
 
   return (
     <View style={styles.container}>
-
       <Header title="Manager Management" />
 
       {/* Tabs */}
 
       <View style={styles.tabs}>
-        {["PENDING", "APPROVED", "REJECTED"].map(t => (
+        {['PENDING', 'APPROVED', 'REJECTED'].map(t => (
           <TouchableOpacity
             key={t}
             style={[styles.tab, tab === t && styles.activeTab]}
@@ -125,21 +111,35 @@ const ManagerManagement = ({ navigation }) => {
         ))}
       </View>
 
-      {loading && <ActivityIndicator />}
-
-      <FlatList
-        data={filtered}
-        keyExtractor={item => item._id}
-        renderItem={renderItem}
-      />
-
+      {/* LOADING */}
+      {loading ? (
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
+          <ActivityIndicator size="large" color="blue" />
+        </View>
+      ) : filtered.length === 0 ? (
+        /* NO DATA */
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
+          <Text style={{ fontSize: 16, color: '#666' }}>No data found</Text>
+        </View>
+      ) : (
+        /* DATA LIST */
+        <FlatList
+          data={filtered}
+          keyExtractor={item => item._id}
+          renderItem={renderItem}
+          contentContainerStyle={{ padding: 16 }}
+        />
+      )}
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => navigation.navigate("ManagerOnboarding")}
+        onPress={() => navigation.navigate('ManagerOnboarding')}
       >
         <Text style={styles.addButtonText}>+ Add Manager</Text>
       </TouchableOpacity>
-
     </View>
   );
 };

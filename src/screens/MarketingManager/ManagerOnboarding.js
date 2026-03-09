@@ -60,40 +60,31 @@ const ManagerOnboarding = ({ navigation }) => {
           address: '',
         }}
         validationSchema={validationSchema}
-        // onSubmit={(values) => {
-        //   const formData = new FormData();
+        onSubmit={async (values) => {
+          try {
+            const formData = new FormData();
 
-        //   Object.keys(values).forEach((key) => {
-        //     formData.append(key, values[key]);
-        //   });
-
-        //   formData.append("profile", profile);
-
-        //   console.log("MANAGER DATA:", formData);
-
-        //   // dispatch(addManager(formData));
-
-        //   navigation.goBack();
-        // }}
-
-        onSubmit={values => {
-          const formData = new FormData();
-
-          Object.keys(values).forEach(key => {
-            formData.append(key, values[key]);
-          });
-
-          if (profile) {
-            formData.append('photo', {
-              uri: profile.uri,
-              type: profile.type,
-              name: profile.name,
+            Object.keys(values).forEach(key => {
+              formData.append(key, values[key]);
             });
+
+            if (profile) {
+              formData.append('photo', {
+                uri: profile.uri,
+                name: 'photo.jpg',
+                type: 'image/jpeg',
+              });
+            }
+
+            await dispatch(addManager(formData)).unwrap();
+
+            alert('Manager created successfully');
+
+            navigation.goBack();
+          } catch (error) {
+            console.log('ADD MANAGER ERROR:', error);
+            alert('Failed to create manager');
           }
-
-          dispatch(addManager(formData));
-
-          navigation.goBack();
         }}
       >
         {({

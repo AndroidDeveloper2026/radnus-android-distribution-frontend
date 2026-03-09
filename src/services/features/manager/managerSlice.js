@@ -1,89 +1,161 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import API from "../../API/api";
 
-
-
-/* CREATE */
-export const addManager = createAsyncThunk(
-  "manager/add",
-  async (data) => {
-    const res = await API.post("/api/managers", data, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-    return res.data;
-  }
-);
-
-/* GET */
 export const getManagers = createAsyncThunk(
-  "manager/get",
-  async () => {
-    const res = await API.get("/api/managers");
-    return res.data;
+  "manager/getManagers",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await API.get("/api/managers");
+
+      console.log("GET MANAGERS:", res.data);
+
+      return res.data;
+    } catch (error) {
+      console.log(
+        "GET MANAGERS ERROR:",
+        error.response?.data || error.message
+      );
+
+      return rejectWithValue(error.response?.data);
+    }
   }
 );
 
-/* DELETE */
+
+export const addManager = createAsyncThunk(
+  "manager/addManager",
+  async (data, { rejectWithValue }) => {
+    try {
+      const res = await API.post("/api/managers", data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log("ADD MANAGER SUCCESS:", res.data);
+
+      return res.data;
+    } catch (error) {
+      console.log(
+        "ADD MANAGER ERROR:",
+        error.response?.data || error.message
+      );
+
+      return rejectWithValue(error.response?.data);
+    }
+  }
+);
+
+
 export const deleteManager = createAsyncThunk(
-  "manager/delete",
-  async (id) => {
-    await API.delete(`${"/api/managers"}/${id}`);
-    return id;
+  "manager/deleteManager",
+  async (id, { rejectWithValue }) => {
+    try {
+      await API.delete(`/api/managers/${id}`);
+
+      console.log("DELETE MANAGER:", id);
+
+      return id;
+    } catch (error) {
+      console.log(
+        "DELETE MANAGER ERROR:",
+        error.response?.data || error.message
+      );
+
+      return rejectWithValue(error.response?.data);
+    }
   }
 );
 
-/* UPDATE */
+
 export const updateManager = createAsyncThunk(
-  "manager/update",
-  async ({ id, data }) => {
-    const res = await API.put(`${"/api/managers"}/${id}`, data);
-    return res.data;
+  "manager/updateManager",
+  async ({ id, data }, { rejectWithValue }) => {
+    try {
+      const res = await API.put(`/api/managers/${id}`, data);
+
+      console.log("UPDATE MANAGER:", res.data);
+
+      return res.data;
+    } catch (error) {
+      console.log(
+        "UPDATE MANAGER ERROR:",
+        error.response?.data || error.message
+      );
+
+      return rejectWithValue(error.response?.data);
+    }
   }
 );
 
-/* APPROVE */
-export const approveManager = createAsyncThunk(
-  "manager/approve",
-  async (id) => {
-    const res = await API.put(`${"/api/managers"}/${id}`, {
-      status: "APPROVED",
-    });
-    return res.data;
-  }
-);
+
 
 const managerSlice = createSlice({
   name: "manager",
+
   initialState: {
     list: [],
     loading: false,
+    error: null,
   },
-  extraReducers: builder => {
+
+  reducers: {},
+
+  extraReducers: (builder) => {
     builder
-      .addCase(getManagers.pending, state => {
+
+      .addCase(getManagers.pending, (state) => {
         state.loading = true;
       })
+
       .addCase(getManagers.fulfilled, (state, action) => {
         state.loading = false;
         state.list = action.payload;
       })
+
+      .addCase(getManagers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      .addCase(addManager.pending, (state) => {
+        state.loading = true;
+      })
+
       .addCase(addManager.fulfilled, (state, action) => {
-        state.list.unshift(action.payload);
+        state.loading = false;
+        state.list.push(action.payload);
       })
+
+      .addCase(addManager.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      .addCase(deleteManager.pending, (state) => {
+        state.loading = true;
+      })
+
       .addCase(deleteManager.fulfilled, (state, action) => {
-        state.list = state.list.filter(i => i._id !== action.payload);
+        state.loading = false;
+        state.list = state.list.filter(
+          (manager) => manager._id !== action.payload
+        );
       })
+
+      .addCase(deleteManager.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
       .addCase(updateManager.fulfilled, (state, action) => {
         const index = state.list.findIndex(
-          i => i._id === action.payload._id
+          (m) => m._id === action.payload._id
         );
-        if (index !== -1) state.list[index] = action.payload;
-      })
-      .addCase(approveManager.fulfilled, (state, action) => {
-        const index = state.list.findIndex(
-          i => i._id === action.payload._id
-        );
-        if (index !== -1) state.list[index] = action.payload;
+
+        if (index !== -1) {
+          state.list[index] = action.payload;
+        }
       });
   },
 });

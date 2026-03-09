@@ -50,6 +50,8 @@ import ExecutiveDashboard from '../screens/MarketingExecutive/ExecutiveDashboard
 import ExecutiveOnboarding from '../screens/MarketingExecutive/ExecutiveOnboarding';
 import ManagerDashboard from '../screens/MarketingManager/ManagerDashboard';
 import ManagerOnboarding from '../screens/MarketingManager/ManagerOnboarding';
+import ManagerManagement from '../screens/MarketingManager/ManagerManagement';
+import ExecutiveManagement from '../screens/MarketingExecutive/ExecutiveManagement';
 //-- checking --
 import AdminDashboardScreen from '../screens/AdminDashboard/AdminDashboardScreen';
 import DistributorList from '../screens/MarketingExecutive/DistributorList';
@@ -174,6 +176,18 @@ const StackNavigator = () => {
           <Stack.Screen
             name="ManagerOnboarding"
             component={ManagerOnboarding}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="ManagerManagement"
+            component={ManagerManagement}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="ExecutiveManagement"
+            component={ExecutiveManagement}
             options={{ headerShown: false }}
           />
 

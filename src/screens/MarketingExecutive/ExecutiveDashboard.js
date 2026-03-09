@@ -79,7 +79,9 @@ const ExecutiveDashboard = ({ navigation }) => {
                 backgroundColor="#bebffe92"
               />
               <Text style={styles.kpiLabel}>Total Distributors</Text>
-              <Text style={styles.kpiValue}>{loading ? "..." : distributorCount}</Text>
+              <Text style={styles.kpiValue}>
+                {loading ? '...' : distributorCount}
+              </Text>
             </TouchableOpacity>
 
             <View style={styles.kpiBox}>
@@ -201,22 +203,34 @@ const ExecutiveDashboard = ({ navigation }) => {
 
           <TouchableOpacity
             style={styles.navItem}
-            onPress={() => navigation.navigate("ExecutiveOnboarding")}
+            onPress={() => navigation.navigate('ExecutiveOnboarding')}
           >
             <Text style={styles.navTitle}>ExecutiveOnboarding</Text>
-            <Text style={styles.navSubTitle}>
-              ExecutiveOnboarding
-            </Text>
+            <Text style={styles.navSubTitle}>ExecutiveOnboarding</Text>
           </TouchableOpacity>
 
-                    <TouchableOpacity
+          <TouchableOpacity
             style={styles.navItem}
-            onPress={() => navigation.navigate("ManagerOnboarding")}
+            onPress={() => navigation.navigate('ManagerOnboarding')}
           >
             <Text style={styles.navTitle}>ManagerOnboarding</Text>
-            <Text style={styles.navSubTitle}>
-              ManagerOnboarding
-            </Text>
+            <Text style={styles.navSubTitle}>ManagerOnboarding</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => navigation.navigate('ExecutiveManagement')}
+          >
+            <Text style={styles.navTitle}>ExecutiveManagement</Text>
+            <Text style={styles.navSubTitle}>ExecutiveManagement</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => navigation.navigate('ManagerManagement')}
+          >
+            <Text style={styles.navTitle}>ManagerManagement</Text>
+            <Text style={styles.navSubTitle}>ManagerManagement</Text>
           </TouchableOpacity>
 
           <TouchableOpacity

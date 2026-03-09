@@ -74,20 +74,27 @@ const ExecutiveOnboarding = ({ navigation }) => {
 
         //   navigation.goBack();
         // }}
-        onSubmit={values => {
-          const formData = new FormData();
+        onSubmit={async values => {
+          try {
+            console.log('--- executive ---', values);
 
-          Object.keys(values).forEach(key => {
-            formData.append(key, values[key]);
-          });
+            const formData = new FormData();
 
-          if (profile) {
-            formData.append('photo', profile);
+            Object.keys(values).forEach(key => {
+              formData.append(key, values[key]);
+            });
+
+            if (profile) {
+              formData.append('photo', profile);
+            }
+
+            await dispatch(addExecutive(formData));
+            alert('success !')
+            navigation.goBack();
+          } catch (error) {
+            alert('failed !', error)
+            console.log('Error while adding executive:', error);
           }
-
-          dispatch(addExecutive(formData));
-
-          navigation.goBack();
         }}
       >
         {({

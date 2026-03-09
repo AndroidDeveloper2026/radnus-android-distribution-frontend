@@ -36,18 +36,6 @@ export const openCamera = async (onSuccess) => {
     return;
   }
 
-//   launchCamera({ mediaType: 'photo' }, (response) => {
-//     if (response.didCancel) return;
-
-//     const asset = response.assets[0];
-
-//     callback({
-//       uri: asset.uri,
-//       type: asset.type,
-//       fileName: asset.fileName,
-//     });
-//   });
-
   launchCamera(
     {
       mediaType: 'photo',

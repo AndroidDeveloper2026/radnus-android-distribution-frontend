@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 
 import {
   View,
@@ -7,52 +7,50 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
-} from "react-native";
+} from 'react-native';
 
-import styles from "./ExecutiveManagementStyle";
-import Header from "../../components/Header";
-import { User2Icon, Trash2 } from "lucide-react-native";
+import styles from '../FieldSalesExecutive/FSEManagementStyle';
+import Header from '../../components/Header';
+import { User2Icon, Trash2 } from 'lucide-react-native';
 
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector } from 'react-redux';
 
 import {
   getExecutives,
   deleteExecutive,
   approveExecutive,
   updateExecutive,
-} from "../../services/features/executive/executiveSlice";
+} from '../../services/features/executive/executiveSlice';
 
-import PopupModal from "../../components/PopupModal";
+import PopupModal from '../../components/PopupModal';
 
 const ExecutiveManagement = ({ navigation }) => {
-
   const dispatch = useDispatch();
 
-  const [tab, setTab] = useState("PENDING");
+  const [tab, setTab] = useState('PENDING');
   const [showModal, setShowModal] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [modalType, setModalType] = useState(null);
 
-  const { list, loading } = useSelector((state) => state.executive);
+  const { list, loading } = useSelector(state => state.executive);
 
   useEffect(() => {
     dispatch(getExecutives());
   }, []);
 
-  const filtered = list.filter((e) => e.status === tab);
+  const filtered = list.filter(e => e.status === tab);
 
   const confirmAction = () => {
-
-    if (modalType === "reject") {
+    if (modalType === 'reject') {
       dispatch(
         updateExecutive({
           id: selectedId,
-          data: { status: "REJECTED" },
-        })
+          data: { status: 'REJECTED' },
+        }),
       );
     }
 
-    if (modalType === "delete") {
+    if (modalType === 'delete') {
       dispatch(deleteExecutive(selectedId));
     }
 
@@ -61,9 +59,7 @@ const ExecutiveManagement = ({ navigation }) => {
 
   const renderItem = ({ item }) => (
     <View style={styles.card}>
-
       <View style={styles.row}>
-
         {item.photo ? (
           <Image source={{ uri: item.photo }} style={styles.avatar} />
         ) : (
@@ -79,12 +75,11 @@ const ExecutiveManagement = ({ navigation }) => {
         </View>
 
         <View style={styles.statusCol}>
-
           <TouchableOpacity
             style={styles.deleteIcon}
             onPress={() => {
               setSelectedId(item._id);
-              setModalType("delete");
+              setModalType('delete');
               setShowModal(true);
             }}
           >
@@ -94,21 +89,18 @@ const ExecutiveManagement = ({ navigation }) => {
           <View
             style={[
               styles.badge,
-              item.status === "APPROVED" && styles.badgeApproved,
-              item.status === "REJECTED" && styles.badgeRejected,
-              item.status === "PENDING" && styles.badgePending,
+              item.status === 'APPROVED' && styles.badgeApproved,
+              item.status === 'REJECTED' && styles.badgeRejected,
+              item.status === 'PENDING' && styles.badgePending,
             ]}
           >
             <Text style={styles.badgeText}>{item.status}</Text>
           </View>
-
         </View>
       </View>
 
-      {item.status === "PENDING" && (
-
+      {item.status === 'PENDING' && (
         <View style={styles.actionRow}>
-
           <TouchableOpacity
             style={styles.approveBtn}
             onPress={() => dispatch(approveExecutive(item._id))}
@@ -120,29 +112,25 @@ const ExecutiveManagement = ({ navigation }) => {
             style={styles.rejectBtn}
             onPress={() => {
               setSelectedId(item._id);
-              setModalType("reject");
+              setModalType('reject');
               setShowModal(true);
             }}
           >
             <Text style={styles.btnText}>Reject</Text>
           </TouchableOpacity>
-
         </View>
       )}
-
     </View>
   );
 
   return (
     <View style={styles.container}>
-
       <Header title="Executive Management" />
 
       {/* Tabs */}
 
       <View style={styles.tabs}>
-        {["PENDING", "APPROVED", "REJECTED"].map((t) => (
-
+        {['PENDING', 'APPROVED', 'REJECTED'].map(t => (
           <TouchableOpacity
             key={t}
             style={[styles.tab, tab === t && styles.activeTab]}
@@ -151,28 +139,36 @@ const ExecutiveManagement = ({ navigation }) => {
             <Text style={[styles.tabText, tab === t && styles.activeTabText]}>
               {t}
             </Text>
-
           </TouchableOpacity>
         ))}
       </View>
 
-      {loading && <ActivityIndicator size="large" color="blue" />}
-
-      <FlatList
-        data={filtered}
-        keyExtractor={(item) => item._id}
-        renderItem={renderItem}
-        contentContainerStyle={{ padding: 16 }}
-        ListEmptyComponent={
-          !loading && <Text style={styles.center}>No {tab} Executives</Text>
-        }
-      />
+      {loading ? (
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
+          <ActivityIndicator size="large" color="blue" />
+        </View>
+      ) : filtered.length === 0 ? (
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
+          <Text style={{ fontSize: 16, color: '#777' }}>No data found</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={filtered}
+          keyExtractor={item => item._id}
+          renderItem={renderItem}
+          contentContainerStyle={{ padding: 16 }}
+        />
+      )}
 
       <PopupModal
         visible={showModal}
-        title={modalType === "delete" ? "Delete Executive" : "Reject Executive"}
+        title={modalType === 'delete' ? 'Delete Executive' : 'Reject Executive'}
         description="Are you sure?"
-        buttonText={modalType === "delete" ? "Delete" : "Reject"}
+        buttonText={modalType === 'delete' ? 'Delete' : 'Reject'}
         secondaryText="Cancel"
         onPress={confirmAction}
         onSecondaryPress={() => setShowModal(false)}
@@ -180,11 +176,10 @@ const ExecutiveManagement = ({ navigation }) => {
 
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => navigation.navigate("ExecutiveOnboarding")}
+        onPress={() => navigation.navigate('ExecutiveOnboarding')}
       >
         <Text style={styles.addButtonText}>+ Add Executive</Text>
       </TouchableOpacity>
-
     </View>
   );
 };
