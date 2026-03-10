@@ -1,174 +1,88 @@
-// import Geolocation from "@react-native-community/geolocation";
-// import socket from "../services/socket/socket";
-// import API from "../services/API/api";
-
-// let watchId = null;
-
-// export const startTrackingService = (userId, sessionId) => {
-
-//   watchId = Geolocation.watchPosition(
-
-//     async position => {
-
-//       const { latitude, longitude } = position.coords;
-
-//       socket.emit("send-location", {
-//         userId,
-//         sessionId,
-//         latitude,
-//         longitude
-//       });
-
-//       await API.post("/api/session/location/update", {
-//         userId,
-//         sessionId,
-//         latitude,
-//         longitude
-//       });
-
-//     },
-
-//     error => console.log(error),
-
-//     {
-//       enableHighAccuracy: true,
-//       distanceFilter: 10,
-//       interval: 10000
-//     }
-
-//   );
-
-// };
-
-// export const stopTrackingService = () => {
-
-//   if (watchId !== null) {
-//     Geolocation.clearWatch(watchId);
-//   }
-
-// };
-
-// import Geolocation from "@react-native-community/geolocation";
-// import io from "socket.io-client";
-// import { Platform, PermissionsAndroid } from "react-native";
-
-// let watchId = null;
-// let socket = null;
-
-// const SERVER = "http://YOUR_SERVER_IP:5000";
-
-// export const startTrackingService = async (userId, sessionId) => {
-
-//  socket = io(SERVER);
-
-//  if (Platform.OS === "android") {
-//    await PermissionsAndroid.request(
-//      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-//    );
-//  }
-
-//  watchId = Geolocation.watchPosition(
-//    position => {
-
-//      const { latitude, longitude } = position.coords;
-
-//      socket.emit("send-location", {
-//        userId,
-//        sessionId,
-//        latitude,
-//        longitude,
-//      });
-
-//    },
-//    error => {
-//      console.log("GPS error", error);
-//    },
-//    {
-//      enableHighAccuracy: true,
-//      distanceFilter: 5,
-//      interval: 5000,
-//      fastestInterval: 2000,
-//      maximumAge: 0,
-//    }
-//  );
-// };
-
-// export const stopTrackingService = () => {
-
-//  if (watchId !== null) {
-//    Geolocation.clearWatch(watchId);
-//    watchId = null;
-//  }
-
-//  if (socket) {
-//    socket.disconnect();
-//  }
-
-// };
-
 import Geolocation from "@react-native-community/geolocation";
-import io from "socket.io-client";
-import { PermissionsAndroid, Platform } from "react-native";
+import API from "../services/API/api";
+import socket from "../services/socket/socket";
 
-let watchId = null;
-let socket = null;
+let intervalId = null;
 
-const SERVER_URL = "https://radnus-android-distribution-backend.onrender.com"; // 🔴 change to your backend IP
+// ✅ REAL-TIME LOCATION TRACKING SERVICE
+export const startTrackingService = (userId, sessionId) => {
+  
+  // ✅ Clear any existing interval
+  if (intervalId) {
+    clearInterval(intervalId);
+  }
 
-export const startTrackingService = async (userId, sessionId) => {
+  // ✅ Fetch GPS location every 5 seconds
+  intervalId = setInterval(() => {
+    
+    Geolocation.getCurrentPosition(
+      async (position) => {
+        
+        const { latitude, longitude } = position.coords;
+        const timestamp = new Date();
 
- if (Platform.OS === "android") {
-   await PermissionsAndroid.request(
-     PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-   );
- }
+        try {
+          // ✅ Send location to backend via API
+          await API.post("/api/location/update", {
+            userId,
+            sessionId,
+            latitude,
+            longitude,
+            timestamp
+          });
 
- socket = io(SERVER_URL, {
-   transports: ["websocket"],
- });
+          // ✅ Also emit via Socket.io for real-time updates
+          socket.emit("send-location", {
+            sessionId,
+            latitude,
+            longitude,
+            timestamp
+          });
 
- socket.on("connect", () => {
-   console.log("Socket connected:", socket.id);
- });
+          console.log(
+            `✅ Location updated: [${latitude.toFixed(4)}, ${longitude.toFixed(4)}]`
+          );
 
- watchId = Geolocation.watchPosition(
-   position => {
+        } catch (error) {
+          console.log("❌ Location update error:", error.message);
+        }
+      },
+      
+      (error) => {
+        console.log("❌ GPS error:", error);
+      },
+      
+      {
+        enableHighAccuracy: true, // ✅ High accuracy mode
+        timeout: 15000,
+        maximumAge: 0, // ✅ Don't use cached location
+      }
+    );
 
-     const { latitude, longitude } = position.coords;
+  }, 5000); // ✅ Every 5 seconds
 
-     console.log("GPS:", latitude, longitude);
-
-     socket.emit("send-location", {
-       userId,
-       sessionId,
-       latitude,
-       longitude,
-     });
-
-   },
-   error => {
-     console.log("GPS error:", error);
-   },
-   {
-     enableHighAccuracy: true,
-     distanceFilter: 5,
-     interval: 5000,
-     fastestInterval: 2000,
-     maximumAge: 0,
-   }
- );
+  console.log("🚀 Tracking service started for session:", sessionId);
 };
 
+// ✅ STOP LOCATION TRACKING SERVICE
 export const stopTrackingService = () => {
+  
+  if (intervalId) {
+    clearInterval(intervalId);
+    intervalId = null;
+    console.log("🛑 Tracking service stopped");
+  }
+};
 
- if (watchId !== null) {
-   Geolocation.clearWatch(watchId);
-   watchId = null;
- }
+// ✅ PAUSE/RESUME TRACKING (optional)
+export const pauseTrackingService = () => {
+  if (intervalId) {
+    clearInterval(intervalId);
+    intervalId = null;
+    console.log("⏸️  Tracking service paused");
+  }
+};
 
- if (socket) {
-   socket.disconnect();
-   socket = null;
- }
-
+export const resumeTrackingService = (userId, sessionId) => {
+  startTrackingService(userId, sessionId);
 };

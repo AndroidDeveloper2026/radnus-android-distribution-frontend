@@ -1,264 +1,229 @@
-// import React, { useEffect, useState } from 'react';
-// import MapLibreGL from '@maplibre/maplibre-react-native';
-// import API from '../../services/API/api';
-// import { Text, View } from 'react-native';
-// import { useSafeAreaInsets } from 'react-native-safe-area-context';
-// import styles from '../FieldSalesExecutive/FSETrackingStyle';
-// import Header from '../../components/Header';
-
-// const FSETracking = ({ route }) => {
-//   const sessionId = route?.params?.sessionId;
-//   const insets = useSafeAreaInsets();
-//   const [coords, setCoords] = useState([]);
-//   const [sessionData, setSessionData] = useState(null);
-//   const [distanceKm, setDistanceKm] = useState(0);
-
-//   useEffect(() => {
-//     if (!sessionId) return;
-
-//     const fetchRoute = async () => {
-//       try {
-//         const res = await API.get(`/api/session/${sessionId}`);
-
-//         const data = res.data;
-
-//         setSessionData(data);
-
-//         if (!data?.route) return;
-
-//         const routeData = data.route.map(p => [p.longitude, p.latitude]);
-
-//         setCoords(routeData);
-
-//         setDistanceKm(data.totalDistanceKm || 0);
-//       } catch (err) {
-//         console.log('Route error:', err.message);
-//       }
-//     };
-
-//     fetchRoute();
-
-//     // const interval = setInterval(fetchRoute, 5000);
-
-//     // return () => clearInterval(interval);
-//   }, [sessionId]);
-
-//   const center = coords.length ? coords[coords.length - 1] : [79.8289, 11.9352];
-
-//   const startTime = sessionData?.startTime
-//     ? new Date(sessionData.startTime)
-//     : null;
-
-//   const endTime = sessionData?.endTime ? new Date(sessionData.endTime) : null;
-
-//   const status = endTime ? 'Completed' : 'Active';
-
-//   return (
-//     <View style={styles.container}>
-//       <Header title={'FSE Tracking'} />
-
-//       <MapLibreGL.MapView
-//         style={styles.map}
-//         mapStyle="https://api.maptiler.com/maps/streets/style.json?key=3gTrSf36y6oirRLmBYot"
-//       >
-//         <MapLibreGL.Camera zoomLevel={16} centerCoordinate={center} />
-
-//         {/* Start Marker */}
-//         {coords.length > 0 && (
-//           <MapLibreGL.PointAnnotation id="start" coordinate={coords[0]} />
-//         )}
-
-//         {/* Current Marker */}
-//         {coords.length > 0 && (
-//           <MapLibreGL.PointAnnotation
-//             id="current"
-//             coordinate={coords[coords.length - 1]}
-//           />
-//         )}
-
-//         {/* Route Line */}
-//         {coords.length >= 2 && (
-//           <MapLibreGL.ShapeSource
-//             id="route"
-//             shape={{
-//               type: 'Feature',
-//               geometry: {
-//                 type: 'LineString',
-//                 coordinates: coords,
-//               },
-//             }}
-//           >
-//             <MapLibreGL.LineLayer
-//               id="line"
-//               style={{
-//                 lineWidth: 5,
-//                 lineColor: '#ff3b30',
-//                 lineJoin: 'round',
-//                 lineCap: 'round',
-//               }}
-//             />
-//           </MapLibreGL.ShapeSource>
-//         )}
-//       </MapLibreGL.MapView>
-
-//       {/* Bottom Card */}
-//       <View style={[styles.bottomCard,{ paddingBottom: insets.bottom + 10 },]}>
-//         <Text style={styles.title}>Today's Travel</Text>
-
-//         <Text style={styles.mainDistance}>
-//           {distanceKm.toFixed(2)} KM
-//         </Text>
-
-//         <View style={styles.infoRow}>
-//           <View style={styles.infoBox}>
-//             <Text style={styles.label}>Distance</Text>
-//             <Text style={styles.value}>{distanceKm.toFixed(2)} KM</Text>
-//           </View>
-
-//           <View style={styles.infoBox}>
-//             <Text style={styles.label}>Start Time</Text>
-//             <Text style={styles.value}>
-//               {startTime?.toLocaleTimeString()}
-//             </Text>
-//           </View>
-
-//           <View style={styles.infoBox}>
-//             <Text style={styles.label}>Status</Text>
-
-//             <View style={styles.statusRow}>
-//               <View style={styles.statusDot} />
-//               <Text style={styles.statusText}>{status}</Text>
-//             </View>
-//           </View>
-//         </View>
-
-//         <Text style={styles.date}>{startTime?.toDateString()}</Text>
-//       </View>
-//     </View>
-//   );
-// };
-
-// export default FSETracking;
-//--------------------------------
-
-import React, { useEffect, useState } from "react";
-import MapLibreGL from "@maplibre/maplibre-react-native";
-import { View } from "react-native";
-import Header from "../../components/Header";
-import styles from "./FSETrackingStyle";
-import io from "socket.io-client";
-import { API_BASE_URL } from "@env";
-
-MapLibreGL.setAccessToken(null);
+import React, { useEffect, useState } from 'react';
+import MapLibreGL from '@maplibre/maplibre-react-native';
+import API from '../../services/API/api';
+import { Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import styles from '../FieldSalesExecutive/FSETrackingStyle';
+import Header from '../../components/Header';
+import socket from '../../services/socket/socket';
 
 const FSETracking = ({ route }) => {
+  const sessionId = route?.params?.sessionId;
+  const insets = useSafeAreaInsets();
+  const [coords, setCoords] = useState([]);
+  const [sessionData, setSessionData] = useState(null);
+  const [distanceKm, setDistanceKm] = useState(0);
+  const [isLive, setIsLive] = useState(true);
 
- const sessionId = route?.params?.sessionId;
+  // ✅ FETCH SESSION DATA INITIALLY & REAL-TIME UPDATES
+  useEffect(() => {
+    if (!sessionId) {
+      console.log('❌ No sessionId provided');
+      return;
+    }
 
- const [points, setPoints] = useState([]);
+    const fetchRoute = async () => {
+      try {
+        const res = await API.get(`/api/session/${sessionId}`);
+        const data = res.data;
 
- useEffect(() => {
+        if (!data) {
+          console.log('❌ No session data found');
+          return;
+        }
 
-   const socket = io(API_BASE_URL, {
-     transports: ["websocket"]
-   });
+        setSessionData(data);
 
-   socket.on("connect", () => {
-     console.log("Socket connected:", socket.id);
-   });
+        // ✅ Extract route coordinates [longitude, latitude] format for MapLibre
+        if (data?.route && data.route.length > 0) {
+          const routeData = data.route.map(p => [p.longitude, p.latitude]);
+          setCoords(routeData);
+        }
 
-   socket.on("users-location", data => {
+        // ✅ Set total distance
+        setDistanceKm(data.totalDistanceKm || 0);
 
-     console.log("LOCATION RECEIVED:", data);
+        console.log('✅ Session data fetched:', data._id);
+      } catch (err) {
+        console.log('❌ Route fetch error:', err.message);
+      }
+    };
 
-     if (data.sessionId !== sessionId) return;
+    // ✅ Initial fetch
+    fetchRoute();
 
-     const newPoint = [data.longitude, data.latitude];
+    // ✅ Refresh every 5 seconds (aligned with tracking service)
+    const interval = setInterval(fetchRoute, 5000);
 
-     setPoints(prev => [...prev, newPoint]);
+    return () => clearInterval(interval);
+  }, [sessionId]);
 
-   });
+  // ✅ REAL-TIME SOCKET UPDATES
+  useEffect(() => {
+    const handleLocationUpdate = (data) => {
+      console.log('📍 Real-time location received:', data);
 
-   return () => socket.disconnect();
+      setCoords(prevCoords => [
+        ...prevCoords,
+        [data.longitude, data.latitude]
+      ]);
 
- }, []);
+      setIsLive(true);
+    };
 
- const safeCoords = points.filter(
-   c => Array.isArray(c) && c.length === 2
- );
+    socket.on('users-location', handleLocationUpdate);
 
- const center = safeCoords.length
-   ? safeCoords[safeCoords.length - 1]
-   : [79.8289, 11.9352];
+    return () => {
+      socket.off('users-location', handleLocationUpdate);
+    };
+  }, []);
 
- return (
-   <View style={styles.container}>
+  // ✅ DETERMINE MAP CENTER
+  const center = coords.length > 0 
+    ? coords[coords.length - 1] 
+    : [79.8289, 11.9352]; // Default center
 
-     <Header title="FSE Tracking" />
+  // ✅ FORMAT START TIME
+  const startTime = sessionData?.startTime
+    ? new Date(sessionData.startTime)
+    : null;
 
-     <MapLibreGL.MapView
-       style={styles.map}
-       mapStyle="https://api.maptiler.com/maps/streets/style.json?key=3gTrSf36y6oirRLmBYot"
-     >
+  // ✅ FORMAT END TIME
+  const endTime = sessionData?.endTime 
+    ? new Date(sessionData.endTime) 
+    : null;
 
-       <MapLibreGL.Camera
-         zoomLevel={16}
-         centerCoordinate={center}
-       />
+  // ✅ DETERMINE STATUS
+  const status = endTime ? 'Completed' : 'Active';
 
-       {/* START MARKER */}
-       {safeCoords.length > 0 && (
-         <MapLibreGL.PointAnnotation id="start" coordinate={safeCoords[0]}>
-           <View style={{
-             width:16,
-             height:16,
-             borderRadius:10,
-             backgroundColor:"green"
-           }}/>
-         </MapLibreGL.PointAnnotation>
-       )}
+  // ✅ CALCULATE DURATION
+  const getDuration = () => {
+    if (!startTime) return '—';
 
-       {/* CURRENT MARKER */}
-       {safeCoords.length > 0 && (
-         <MapLibreGL.PointAnnotation
-           id="current"
-           coordinate={safeCoords[safeCoords.length - 1]}
-         >
-           <View style={{
-             width:18,
-             height:18,
-             borderRadius:10,
-             backgroundColor:"red"
-           }}/>
-         </MapLibreGL.PointAnnotation>
-       )}
+    const end = endTime || new Date();
+    const diffMs = end - startTime;
+    const diffMins = Math.floor(diffMs / 60000);
+    const hours = Math.floor(diffMins / 60);
+    const mins = diffMins % 60;
 
-       {/* ROUTE LINE */}
-       {safeCoords.length >= 2 && (
-         <MapLibreGL.ShapeSource
-           id="routeSource"
-           shape={{
-             type: "Feature",
-             geometry: {
-               type: "LineString",
-               coordinates: safeCoords
-             }
-           }}
-         >
-           <MapLibreGL.LineLayer
-             id="routeLine"
-             style={{
-               lineColor: "#2563EB",
-               lineWidth: 5
-             }}
-           />
-         </MapLibreGL.ShapeSource>
-       )}
+    return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+  };
 
-     </MapLibreGL.MapView>
+  return (
+    <View style={styles.container}>
+      <Header title="FSE Tracking" />
 
-   </View>
- );
+      <MapLibreGL.MapView
+        style={styles.map}
+        mapStyle="https://api.maptiler.com/maps/streets/style.json?key=3gTrSf36y6oirRLmBYot"
+      >
+        {/* ✅ CAMERA - FOLLOW CURRENT LOCATION */}
+        <MapLibreGL.Camera 
+          zoomLevel={16} 
+          centerCoordinate={center}
+          animationDuration={500}
+        />
+
+        {/* ✅ START MARKER */}
+        {coords.length > 0 && (
+          <MapLibreGL.PointAnnotation 
+            id="start" 
+            coordinate={coords[0]}
+          />
+        )}
+
+        {/* ✅ CURRENT LOCATION MARKER */}
+        {coords.length > 0 && (
+          <MapLibreGL.PointAnnotation
+            id="current"
+            coordinate={coords[coords.length - 1]}
+          />
+        )}
+
+        {/* ✅ ROUTE LINE */}
+        {coords.length >= 2 && (
+          <MapLibreGL.ShapeSource
+            id="route"
+            shape={{
+              type: 'Feature',
+              geometry: {
+                type: 'LineString',
+                coordinates: coords,
+              },
+            }}
+          >
+            <MapLibreGL.LineLayer
+              id="line"
+              style={{
+                lineWidth: 5,
+                lineColor: '#FF5722',
+                lineJoin: 'round',
+                lineCap: 'round',
+              }}
+            />
+          </MapLibreGL.ShapeSource>
+        )}
+      </MapLibreGL.MapView>
+
+      {/* ✅ BOTTOM SUMMARY CARD */}
+      <View style={[styles.bottomCard, { paddingBottom: insets.bottom + 10 }]}>
+        
+        <View style={styles.headerRow}>
+          <Text style={styles.title}>Today's Travel</Text>
+          {isLive && <View style={styles.liveBadge} />}
+        </View>
+
+        {/* ✅ MAIN DISTANCE DISPLAY */}
+        <Text style={styles.mainDistance}>
+          {distanceKm.toFixed(2)} KM
+        </Text>
+
+        {/* ✅ INFO BOXES */}
+        <View style={styles.infoRow}>
+          
+          {/* Distance */}
+          <View style={styles.infoBox}>
+            <Text style={styles.label}>Distance</Text>
+            <Text style={styles.value}>{distanceKm.toFixed(2)} KM</Text>
+          </View>
+
+          {/* Start Time */}
+          <View style={styles.infoBox}>
+            <Text style={styles.label}>Start Time</Text>
+            <Text style={styles.value}>
+              {startTime?.toLocaleTimeString() || '—'}
+            </Text>
+          </View>
+
+          {/* Duration */}
+          <View style={styles.infoBox}>
+            <Text style={styles.label}>Duration</Text>
+            <Text style={styles.value}>{getDuration()}</Text>
+          </View>
+
+          {/* Status */}
+          <View style={styles.infoBox}>
+            <Text style={styles.label}>Status</Text>
+            <View style={styles.statusRow}>
+              <View 
+                style={[
+                  styles.statusDot, 
+                  { backgroundColor: status === 'Active' ? '#4CAF50' : '#F44336' }
+                ]} 
+              />
+              <Text style={styles.statusText}>{status}</Text>
+            </View>
+          </View>
+
+        </View>
+
+        {/* ✅ DATE */}
+        <Text style={styles.date}>
+          {startTime?.toDateString() || new Date().toDateString()}
+        </Text>
+      </View>
+    </View>
+  );
 };
 
 export default FSETracking;
