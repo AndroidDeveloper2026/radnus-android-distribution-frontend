@@ -10,7 +10,6 @@ import {
 import styles from './OrderCartStyle';
 import Header from '../../components/Header';
 
-// 🔐 Replace with login role later
 const userRole = 'fse';
 
 const OrderCart = ({ navigation }) => {
@@ -41,23 +40,19 @@ const OrderCart = ({ navigation }) => {
     },
   ]);
 
-  /* 🔐 PRICE BASED ON ROLE */
   const getPrice = item => {
     return item.retailerPrice;
   };
 
-  /* ➕➖ UPDATE QUANTITY */
   const updateQty = (id, type) => {
     setCart(prev =>
       prev.map(item => {
         if (item.id === id) {
           let newQty = type === 'inc' ? item.qty + 1 : item.qty - 1;
-
           if (newQty < item.moq) {
             Alert.alert('MOQ Rule', `Minimum order quantity is ${item.moq}`);
             return item;
           }
-
           return { ...item, qty: newQty };
         }
         return item;
@@ -65,29 +60,24 @@ const OrderCart = ({ navigation }) => {
     );
   };
 
-  /* 🧮 TOTAL */
   const totalAmount = cart.reduce(
     (sum, item) => sum + getPrice(item) * item.qty,
     0,
   );
 
+  // ✅ FIXED - pass full cart as items with all fields intact
   const placeOrder = () => {
-    const payload = {
+    navigation.navigate('OrderSuccess', {
+      invoiceNumber: 'INV-' + Date.now(),
       items: cart,
-      totalAmount,
-    };
-
-    console.log('Order Payload:', payload);
-
-    Alert.alert('Success', 'Order placed successfully');
+      grandTotal: totalAmount,
+      paymentMode: 'cash',
+      date: new Date().toISOString(),
+    });
   };
 
   return (
     <View style={styles.container}>
-      {/* <View style={styles.header}>
-        <Text style={styles.headerTitle}>Order Cart</Text>
-      </View> */}
-
       <Header title={'Order Cart'} />
 
       <ScrollView>
@@ -95,7 +85,6 @@ const OrderCart = ({ navigation }) => {
           {cart.map(item => (
             <View key={item.id} style={styles.card}>
               <View style={styles.cardRow}>
-                {/* IMAGE */}
                 <View style={styles.imageBox}>
                   <Image
                     source={{ uri: item.image }}
@@ -103,17 +92,15 @@ const OrderCart = ({ navigation }) => {
                   />
                 </View>
 
-                {/* PRODUCT INFO */}
                 <View style={styles.infoContainer}>
                   <Text style={styles.productName}>{item.name}</Text>
                   <Text style={styles.sku}>SKU: {item.sku}</Text>
-
                   <View style={styles.row}>
                     <Text style={styles.price}>₹{getPrice(item)}</Text>
                   </View>
-
                   <Text style={styles.moqText}>MOQ: {item.moq} units</Text>
                 </View>
+
                 <View style={styles.stepperBtn}>
                   <View style={styles.qtyBox}>
                     <TouchableOpacity
@@ -139,7 +126,6 @@ const OrderCart = ({ navigation }) => {
         </View>
       </ScrollView>
 
-      {/* FOOTER */}
       <View style={styles.footer}>
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>Total</Text>

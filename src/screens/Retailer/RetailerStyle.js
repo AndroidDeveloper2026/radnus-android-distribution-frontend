@@ -22,9 +22,9 @@ const styles = StyleSheet.create({
   },
 
   row: {
-    flexDirection: 'column',
+    flexDirection: 'row',
     justifyContent: 'space-between',
-    gap:2,
+    alignItems: 'center',
   },
 
   name: {
@@ -143,6 +143,18 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 10,
     marginBottom: 10,
+  },
+
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
+  },
+
+  infoText: {
+    fontSize: 13,
+    color: '#616161',
+    marginLeft: 6,
   },
 });
 

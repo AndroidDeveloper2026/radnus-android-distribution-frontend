@@ -113,7 +113,7 @@ const FSEDashboard = ({ navigation }) => {
 
           <TouchableOpacity
             style={FSEDashboardStyle.actionItem}
-            onPress={() => navigation.navigate('OrderBooking')}
+            onPress={() => navigation.navigate('OrderCart')}
           >
             <ShoppingCart size={20} color="#F57C00" />
             <Text style={FSEDashboardStyle.actionText}>Book Order</Text>

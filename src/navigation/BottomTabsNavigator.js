@@ -20,6 +20,7 @@ import FSEHomeScreen from '../screens/FieldSalesExecutive/FSEHomeScreen';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ManagerDashboard from '../screens/MarketingManager/ManagerDashboard';
 import ExecutiveDashboard from '../screens/MarketingExecutive/ExecutiveDashboard';
+import EmployeeDashboard from '../screens/RadnusEmployee/EmployeeDashboard';
 
 const Tab = createBottomTabNavigator();
 
@@ -74,6 +75,13 @@ const ROLE_TABS = {
     { name: 'Reports', component: Report, icon: BarChart3 },
     { name: 'Profile', component: ProfileSettings, icon: CircleUserRound },
   ],
+
+  RadnusEmp: [
+    { name: 'Dashboard', component: EmployeeDashboard, icon: LayoutDashboard },
+    { name: 'HomeScreen', component: HomeScreen, icon: Home },
+    { name: 'Reports', component: Report, icon: BarChart3 },
+    { name: 'Profile', component: ProfileSettings, icon: CircleUserRound },
+  ],
 };
 
 const BottomTabs = ({ route }) => {
@@ -95,7 +103,7 @@ const BottomTabs = ({ route }) => {
         tabBarInactiveTintColor: '#757575',
         tabBarStyle: {
           height: 60 + insets.bottom, //old value 85
-          paddingBottom:insets.bottom, //old value 8
+          paddingBottom: insets.bottom, //old value 8
           paddingTop: 6, //old value 8
         },
         tabBarLabelStyle: {

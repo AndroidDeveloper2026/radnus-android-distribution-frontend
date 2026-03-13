@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,35 +6,35 @@ import {
   TouchableOpacity,
   Alert,
   ScrollView,
-} from "react-native";
-import styles from "./RetailerProfileStyle";
-import Header from "../../components/Header";
-import { useDispatch } from "react-redux";
-import { updateRetailer } from "../../services/features/retailer/retailerSlice";
+} from 'react-native';
+import styles from './RetailerProfileStyle';
+import Header from '../../components/Header';
+import { useDispatch } from 'react-redux';
+import { updateRetailer } from '../../services/features/retailer/retailerSlice';
 
 const RetailerProfile = ({ route, navigation }) => {
   // const { retailer } = route.params;
-const dispatch = useDispatch();
-
+  const dispatch = useDispatch();
 
   // ✅ Use route params OR default
   const retailer = route?.params?.retailer;
 
+  console.log('-- retailer --', retailer);
+
   const [editMode, setEditMode] = useState(false);
 
   const [form, setForm] = useState({
-    shopName: retailer.name,
-    ownerName: retailer.owner,
-    mobile: retailer.mobile || "",
-    area: retailer.area,
-    gst: retailer.gst || "",
+    shopName: retailer.shopName || '', 
+    ownerName: retailer.ownerName || '', 
+    mobile: retailer.mobile || '', 
+    area: retailer.area || '', 
+    gst: retailer.gst || '', 
   });
 
-
   // BLOCK UNAPPROVED RETAILERS (retailer.status !== "APPROVED")
-  if (retailer.status !== "APPROVED")  {
-    Alert.alert("Access Denied", "Retailer not approved yet", [
-      { text: "OK", onPress: () => navigation.goBack() },
+  if (retailer.status !== 'APPROVED') {
+    Alert.alert('Access Denied', 'Retailer not approved yet', [
+      { text: 'OK', onPress: () => navigation.goBack() },
     ]);
     return null;
   }
@@ -43,29 +43,27 @@ const dispatch = useDispatch();
     setForm({ ...form, [key]: value });
   };
 
-const saveProfile = () => {
-  if (!form.shopName || !form.ownerName || !form.mobile) {
-    Alert.alert("Error", "Please fill required fields");
-    return;
-  }
+  const saveProfile = () => {
+    if (!form.shopName || !form.ownerName || !form.mobile) {
+      Alert.alert('Error', 'Please fill required fields');
+      return;
+    }
 
-  dispatch(
-    updateRetailer({
-      id: retailer._id,
-      data: form,
-    })
-  );
+    dispatch(
+      updateRetailer({
+        id: retailer._id,
+        data: form,
+      }),
+    );
 
-  Alert.alert("Success", "Profile updated");
-  setEditMode(false);
-};
+    Alert.alert('Success', 'Profile updated');
+    setEditMode(false);
+  };
 
   return (
     <View style={styles.container}>
-      
-        <Header  title={'Retailer Profile'}/>
+      <Header title={'Retailer Profile'} />
       <ScrollView contentContainerStyle={styles.scroll}>
-
         {/* PROFILE CARD */}
         <View style={styles.card}>
           <Text style={styles.label}>Shop Name</Text>
@@ -73,7 +71,7 @@ const saveProfile = () => {
             style={styles.input}
             value={form.shopName}
             editable={editMode}
-            onChangeText={(v) => onChange("shopName", v)}
+            onChangeText={v => onChange('shopName', v)}
           />
 
           <Text style={styles.label}>Owner Name</Text>
@@ -81,7 +79,7 @@ const saveProfile = () => {
             style={styles.input}
             value={form.ownerName}
             editable={editMode}
-            onChangeText={(v) => onChange("ownerName", v)}
+            onChangeText={v => onChange('ownerName', v)}
           />
 
           <Text style={styles.label}>Mobile Number</Text>
@@ -90,7 +88,7 @@ const saveProfile = () => {
             value={form.mobile}
             keyboardType="phone-pad"
             editable={editMode}
-            onChangeText={(v) => onChange("mobile", v)}
+            onChangeText={v => onChange('mobile', v)}
           />
 
           <Text style={styles.label}>Area</Text>
@@ -98,7 +96,7 @@ const saveProfile = () => {
             style={styles.input}
             value={form.area}
             editable={editMode}
-            onChangeText={(v) => onChange("area", v)}
+            onChangeText={v => onChange('area', v)}
           />
 
           <Text style={styles.label}>GST Number</Text>
@@ -106,7 +104,7 @@ const saveProfile = () => {
             style={styles.input}
             value={form.gst}
             editable={editMode}
-            onChangeText={(v) => onChange("gst", v)}
+            onChangeText={v => onChange('gst', v)}
           />
         </View>
 
@@ -116,7 +114,7 @@ const saveProfile = () => {
           onPress={editMode ? saveProfile : () => setEditMode(true)}
         >
           <Text style={styles.btnText}>
-            {editMode ? "Save Changes" : "Edit Profile"}
+            {editMode ? 'Save Changes' : 'Edit Profile'}
           </Text>
         </TouchableOpacity>
       </ScrollView>

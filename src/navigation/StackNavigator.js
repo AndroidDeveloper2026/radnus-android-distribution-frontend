@@ -52,6 +52,7 @@ import ManagerDashboard from '../screens/MarketingManager/ManagerDashboard';
 import ManagerOnboarding from '../screens/MarketingManager/ManagerOnboarding';
 import ManagerManagement from '../screens/MarketingManager/ManagerManagement';
 import ExecutiveManagement from '../screens/MarketingExecutive/ExecutiveManagement';
+import InvoiceScreen from '../screens/OrderProduct/InvoiceScreen';
 //-- checking --
 import AdminDashboardScreen from '../screens/AdminDashboard/AdminDashboardScreen';
 import DistributorList from '../screens/MarketingExecutive/DistributorList';
@@ -254,6 +255,12 @@ const StackNavigator = () => {
           <Stack.Screen
             name="OrderSuccess"
             component={OrderSuccess}
+            options={{ headerShown: false }}
+          />
+
+                    <Stack.Screen
+            name="InvoiceScreen"
+            component={InvoiceScreen}
             options={{ headerShown: false }}
           />
 

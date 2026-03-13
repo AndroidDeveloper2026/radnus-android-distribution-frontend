@@ -5,11 +5,11 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import styles from "./DistributorDashboardStyle";
+import styles from "./EmployeeDashboardStyle";
 import Header from "../../components/Header";
 import Icons from "../../components/Icon";
 
-const DistributorDashboard = ({ navigation }) => {
+const EmployeeDashboard = ({ navigation }) => {
 
   const stats = {
     todaySales: 0,
@@ -20,7 +20,7 @@ const DistributorDashboard = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Header title="Distributor Dashboard" showBackArrow={false} />
+      <Header title="Radnus Employee Dashboard" showBackArrow={false} />
 
       <ScrollView
         contentContainerStyle={styles.content}
@@ -29,7 +29,7 @@ const DistributorDashboard = ({ navigation }) => {
 
         {/* WELCOME */}
         <View style={styles.welcomeBox}>
-          <Text style={styles.welcome}>Welcome, Distributor</Text>
+          <Text style={styles.welcome}>Welcome, Employee</Text>
           <Text style={styles.subWelcome}>Business Overview</Text>
         </View>
 
@@ -212,4 +212,4 @@ const QuickAction = ({ icon, label, onPress }) => (
   </TouchableOpacity>
 );
 
-export default DistributorDashboard;
+export default EmployeeDashboard;

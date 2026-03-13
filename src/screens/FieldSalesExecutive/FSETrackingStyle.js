@@ -34,8 +34,10 @@ export default StyleSheet.create({
 
   infoRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-evenly',
     marginBottom: 15,
+    // backgroundColor:'green',
+    gap:25,
   },
 
   infoBox: {
