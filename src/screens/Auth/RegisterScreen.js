@@ -207,6 +207,7 @@ const RegisterScreen = ({ navigation }) => {
                       value="Retailer"
                       color="#000"
                     />
+                    <Picker.Item label="Radnus" value="Radnus" color="#000" />
                   </Picker>
                 </View>
                 {touched.role && errors.role && (

@@ -1,15 +1,12 @@
-import React from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
-import styles from "./EmployeeDashboardStyle";
-import Header from "../../components/Header";
-import Icons from "../../components/Icon";
+import React from 'react';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import styles from './EmployeeDashboardStyle';
+import Header from '../../components/Header';
+import Icons from '../../components/Icon';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const EmployeeDashboard = ({ navigation }) => {
+  const insets = useSafeAreaInsets();
 
   const stats = {
     todaySales: 0,
@@ -20,28 +17,28 @@ const EmployeeDashboard = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Header title="Radnus Employee Dashboard" showBackArrow={false} />
+      <Header title="Radnus Sales Dashboard" showBackArrow={false} />
 
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: insets.bottom + 10 }, // 80 = tab bar height
+        ]}
         showsVerticalScrollIndicator={false}
       >
-
         {/* WELCOME */}
         <View style={styles.welcomeBox}>
           <Text style={styles.welcome}>Welcome, Employee</Text>
           <Text style={styles.subWelcome}>Business Overview</Text>
         </View>
 
-
         {/* STATS GRID */}
 
         <View style={styles.grid}>
-
           <StatCard
             icon={
               <Icons
-                name={"IndianRupee"}
+                name={'IndianRupee'}
                 size={20}
                 color="#2E7D32"
                 circleSize={50}
@@ -56,7 +53,7 @@ const EmployeeDashboard = ({ navigation }) => {
           <StatCard
             icon={
               <Icons
-                name={"Package"}
+                name={'Package'}
                 size={20}
                 color="#D32F2F"
                 circleSize={50}
@@ -71,7 +68,7 @@ const EmployeeDashboard = ({ navigation }) => {
           <StatCard
             icon={
               <Icons
-                name={"Wallet"}
+                name={'Wallet'}
                 size={20}
                 color="#F9A825"
                 circleSize={50}
@@ -86,7 +83,7 @@ const EmployeeDashboard = ({ navigation }) => {
           <StatCard
             icon={
               <Icons
-                name={"Users"}
+                name={'Users'}
                 size={20}
                 color="#1976D2"
                 circleSize={50}
@@ -97,19 +94,16 @@ const EmployeeDashboard = ({ navigation }) => {
             value={stats.activeFSE}
             label="Active FSE"
           />
-
         </View>
-
 
         {/* QUICK ACTIONS */}
 
         <Text style={styles.sectionTitle}>Quick Actions</Text>
 
-
         <QuickAction
           icon={
             <Icons
-              name={"Package"}
+              name={'Package'}
               size={20}
               color="#D32F2F"
               circleSize={40}
@@ -118,14 +112,13 @@ const EmployeeDashboard = ({ navigation }) => {
             />
           }
           label="Stock Summary"
-          onPress={() => navigation.navigate("StockVisibility")}
+          onPress={() => navigation.navigate('StockVisibility')}
         />
-
 
         <QuickAction
           icon={
             <Icons
-              name={"Plus"}
+              name={'Plus'}
               size={20}
               color="#2E7D32"
               circleSize={40}
@@ -133,15 +126,14 @@ const EmployeeDashboard = ({ navigation }) => {
               // backgroundColor="#d9f5df"
             />
           }
-          label="FSE Onboading"
-          onPress={() => navigation.navigate("FSEOnboarding")}
+          label="Order Cart"
+          onPress={() => navigation.navigate('OrderCart')}
         />
-
 
         <QuickAction
           icon={
             <Icons
-              name={"Users"}
+              name={'Users'}
               size={20}
               color="#1976D2"
               circleSize={40}
@@ -149,15 +141,14 @@ const EmployeeDashboard = ({ navigation }) => {
               // backgroundColor="#d6e8ff"
             />
           }
-          label="Manage FSE"
-          onPress={() => navigation.navigate("FSEManagement")}
+          label="RetailerSalesTab"
+          onPress={() => navigation.navigate('RetailerSalesTab')}
         />
-
 
         <QuickAction
           icon={
             <Icons
-              name={"ClipboardList"}
+              name={'ClipboardList'}
               size={20}
               color="#6A1B9A"
               circleSize={40}
@@ -165,15 +156,14 @@ const EmployeeDashboard = ({ navigation }) => {
               // backgroundColor="#f1e0ff"
             />
           }
-          label="Retailer Orders"
-          onPress={() => navigation.navigate("OrderSuccess")}
+          label="CentralStock"
+          onPress={() => navigation.navigate('CentralStock')}
         />
-
 
         <QuickAction
           icon={
             <Icons
-              name={"Wallet"}
+              name={'Wallet'}
               size={20}
               color="#F9A825"
               circleSize={40}
@@ -181,15 +171,13 @@ const EmployeeDashboard = ({ navigation }) => {
               backgroundColor="#fff3cd"
             />
           }
-          label="Collections"
-          onPress={() => navigation.navigate("Collections")}
+          label="OrderBilling"
+          onPress={() => navigation.navigate('OrderBilling')}
         />
-
       </ScrollView>
     </View>
   );
 };
-
 
 /* COMPONENTS */
 
@@ -200,7 +188,6 @@ const StatCard = ({ icon, value, label }) => (
     <Text style={styles.kpiLabel}>{label}</Text>
   </View>
 );
-
 
 const QuickAction = ({ icon, label, onPress }) => (
   <TouchableOpacity style={styles.actionRow} onPress={onPress}>
