@@ -11,6 +11,7 @@ export default StyleSheet.create({
     paddingBottom: 40,
   },
 
+  /* ── Image / Avatar Section ── */
   imageSection: {
     alignItems: "center",
     marginBottom: 20,
@@ -18,6 +19,7 @@ export default StyleSheet.create({
 
   imageWrapper: {
     position: "relative",
+    marginBottom: 6,
   },
 
   profileImage: {
@@ -25,6 +27,15 @@ export default StyleSheet.create({
     height: 96,
     borderRadius: 48,
     backgroundColor: "#EEE",
+  },
+
+  iconAvatar: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: "#FDECEA",
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   cameraButton: {
@@ -43,9 +54,28 @@ export default StyleSheet.create({
   imageHint: {
     fontSize: 12,
     color: "#777",
-    marginTop: 6,
+    marginTop: 4,
   },
 
+  roleBadge: {
+    marginTop: 8,
+    backgroundColor: "#FFF3F3",
+    borderColor: "#D32F2F",
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 4,
+  },
+
+  roleBadgeText: {
+    fontSize: 11,
+    color: "#D32F2F",
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+  },
+
+  /* ── Form Card ── */
   card: {
     backgroundColor: "#FFFFFF",
     borderRadius: 14,
@@ -68,6 +98,10 @@ export default StyleSheet.create({
     marginBottom: 6,
   },
 
+  labelDisabled: {
+    color: "#AAAAAA",
+  },
+
   input: {
     backgroundColor: "#F9F9F9",
     borderRadius: 10,
@@ -76,6 +110,7 @@ export default StyleSheet.create({
     fontSize: 14,
     borderWidth: 1,
     borderColor: "#E0E0E0",
+    color: "#212121",
   },
 
   disabled: {
@@ -83,6 +118,13 @@ export default StyleSheet.create({
     color: "#999",
   },
 
+  multilineInput: {
+    height: 80,
+    textAlignVertical: "top",
+    paddingTop: 10,
+  },
+
+  /* ── Action Buttons ── */
   actionRow: {
     flexDirection: "row",
     marginTop: 10,

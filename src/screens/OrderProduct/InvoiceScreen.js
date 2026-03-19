@@ -14,43 +14,71 @@ import styles from "./InvoiceStyle";
 import Header from "../../components/Header";
 
 const InvoiceScreen = ({ route }) => {
-  const { invoiceNumber, items, total, paymentMode, date } = route.params;
+  const {
+    invoiceNumber,
+    items,
+    total,
+    paymentMode,
+    date,
+    // ✅ Dynamic fields from OrderSuccessScreen
+    buyerName     = "—",
+    buyerPhone    = "",
+    buyerAddress  = "—",
+    buyerCity     = "",
+    buyerState    = "",
+    courierCharge = 80,   // ✅ no longer hardcoded
+    salesperson   = "",
+  } = route.params;
 
-  const courierCharge = 80;
+  // ✅ Use passed courierCharge, not hardcoded 80
   const grandTotal = total + courierCharge;
-  const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
+  const totalQty   = items.reduce((sum, item) => sum + item.qty, 0);
+
+  // ── Buyer display helpers ────────────────────────────────────
+  const buyerLine1 = buyerName + (buyerPhone ? ` - ${buyerPhone}` : "");
+  const buyerLine2 = buyerAddress || "";
+  const buyerLine3 = [buyerCity, buyerState].filter(Boolean).join(" - ");
 
   const amountInWords = (num) => {
-    const ones = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine',
-      'Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen',
-      'Seventeen','Eighteen','Nineteen'];
-    const tens = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
-    if (num === 0) return 'Zero';
-    if (num < 20) return ones[num];
-    if (num < 100) return tens[Math.floor(num/10)] + (num % 10 ? ' ' + ones[num % 10] : '');
-    if (num < 1000) return ones[Math.floor(num/100)] + ' Hundred' + (num % 100 ? ' ' + amountInWords(num % 100) : '');
-    if (num < 100000) return amountInWords(Math.floor(num/1000)) + ' Thousand' + (num % 1000 ? ' ' + amountInWords(num % 1000) : '');
-    return amountInWords(Math.floor(num/100000)) + ' Lakh' + (num % 100000 ? ' ' + amountInWords(num % 100000) : '');
+    const ones = [
+      "", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight",
+      "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen",
+      "Sixteen", "Seventeen", "Eighteen", "Nineteen",
+    ];
+    const tens = [
+      "", "", "Twenty", "Thirty", "Forty", "Fifty",
+      "Sixty", "Seventy", "Eighty", "Ninety",
+    ];
+    if (num === 0) return "Zero";
+    if (num < 20)  return ones[num];
+    if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 ? " " + ones[num % 10] : "");
+    if (num < 1000)
+      return ones[Math.floor(num / 100)] + " Hundred" + (num % 100 ? " " + amountInWords(num % 100) : "");
+    if (num < 100000)
+      return amountInWords(Math.floor(num / 1000)) + " Thousand" + (num % 1000 ? " " + amountInWords(num % 1000) : "");
+    return amountInWords(Math.floor(num / 100000)) + " Lakh" + (num % 100000 ? " " + amountInWords(num % 100000) : "");
   };
 
   const grandTotalWords = `INR ${amountInWords(grandTotal)} Only`;
 
+
   const generateInvoiceHTML = () => {
-    const rows = items.map((item, index) => {
-      const price = item.retailerPrice;
-      const amount = item.qty * price;
-      return `
-      <tr>
-        <td style="text-align:center;padding:6px;border:1px solid #000">${index + 1}</td>
-        <td style="padding:6px;border:1px solid #000">${item.name}</td>
-        <td style="text-align:center;padding:6px;border:1px solid #000">-</td>
-        <td style="text-align:center;padding:6px;border:1px solid #000">${item.qty} NOS</td>
-        <td style="text-align:right;padding:6px;border:1px solid #000">&#8377;${price}</td>
-        <td style="text-align:center;padding:6px;border:1px solid #000">NOS</td>
-        <td style="text-align:right;padding:6px;border:1px solid #000">&#8377;${amount}.00</td>
-      </tr>
-      `;
-    }).join("");
+    const rows = items
+      .map((item, index) => {
+        const price  = item.retailerPrice;
+        const amount = item.qty * price;
+        return `
+        <tr>
+          <td style="text-align:center;padding:6px;border:1px solid #000">${index + 1}</td>
+          <td style="padding:6px;border:1px solid #000">${item.name}</td>
+          <td style="text-align:center;padding:6px;border:1px solid #000">-</td>
+          <td style="text-align:center;padding:6px;border:1px solid #000">${item.qty} NOS</td>
+          <td style="text-align:right;padding:6px;border:1px solid #000">&#8377;${price}</td>
+          <td style="text-align:center;padding:6px;border:1px solid #000">NOS</td>
+          <td style="text-align:right;padding:6px;border:1px solid #000">&#8377;${amount}.00</td>
+        </tr>`;
+      })
+      .join("");
 
     return `
     <html>
@@ -90,15 +118,13 @@ const InvoiceScreen = ({ route }) => {
       <div class="two-col">
         <div class="col-left">
           <div class="section-title">Consignee (Ship to)</div>
-          <p style="margin:2px 0">HANNYA MOBILES - 9944157879</p>
-          <p style="margin:2px 0">No 5, Thendral Nagar</p>
-          <p style="margin:2px 0">Thanjavur - Tamil Nadu</p>
-          <p style="margin:2px 0">State Name: Tamil Nadu, Code: 33</p>
+          <p style="margin:2px 0">${buyerLine1}</p>
+          ${buyerLine2 ? `<p style="margin:2px 0">${buyerLine2}</p>` : ""}
+          ${buyerLine3 ? `<p style="margin:2px 0">${buyerLine3}</p>` : ""}
           <div class="section-title" style="margin-top:10px">Buyer (Bill to)</div>
-          <p style="margin:2px 0">HANNYA MOBILES - 9944157879</p>
-          <p style="margin:2px 0">No 5, Thendral Nagar</p>
-          <p style="margin:2px 0">Thanjavur - Tamil Nadu</p>
-          <p style="margin:2px 0">State Name: Tamil Nadu, Code: 33</p>
+          <p style="margin:2px 0">${buyerLine1}</p>
+          ${buyerLine2 ? `<p style="margin:2px 0">${buyerLine2}</p>` : ""}
+          ${buyerLine3 ? `<p style="margin:2px 0">${buyerLine3}</p>` : ""}
         </div>
         <div class="col-right">
           <table>
@@ -106,10 +132,11 @@ const InvoiceScreen = ({ route }) => {
             <tr><td style="border:1px solid #000;padding:4px"><b>Dated</b></td><td style="border:1px solid #000;padding:4px">${new Date(date).toDateString()}</td></tr>
             <tr><td style="border:1px solid #000;padding:4px"><b>Delivery Note</b></td><td style="border:1px solid #000;padding:4px"></td></tr>
             <tr><td style="border:1px solid #000;padding:4px"><b>Mode/Terms of Payment</b></td><td style="border:1px solid #000;padding:4px">${paymentMode.toUpperCase()}</td></tr>
+            <tr><td style="border:1px solid #000;padding:4px"><b>Salesperson</b></td><td style="border:1px solid #000;padding:4px">${salesperson}</td></tr>
             <tr><td style="border:1px solid #000;padding:4px"><b>Reference No. & Date</b></td><td style="border:1px solid #000;padding:4px"></td></tr>
             <tr><td style="border:1px solid #000;padding:4px"><b>Buyer's Order No.</b></td><td style="border:1px solid #000;padding:4px"></td></tr>
             <tr><td style="border:1px solid #000;padding:4px"><b>Dispatched through</b></td><td style="border:1px solid #000;padding:4px"></td></tr>
-            <tr><td style="border:1px solid #000;padding:4px"><b>Destination</b></td><td style="border:1px solid #000;padding:4px"></td></tr>
+            <tr><td style="border:1px solid #000;padding:4px"><b>Destination</b></td><td style="border:1px solid #000;padding:4px">${buyerLine3}</td></tr>
             <tr><td style="border:1px solid #000;padding:4px"><b>Terms of Delivery</b></td><td style="border:1px solid #000;padding:4px"></td></tr>
           </table>
         </div>
@@ -157,8 +184,7 @@ const InvoiceScreen = ({ route }) => {
       <div class="footer">This is a Computer Generated Invoice</div>
     </div>
     </body>
-    </html>
-    `;
+    </html>`;
   };
 
   const generatePDF = async () => {
@@ -199,33 +225,32 @@ const InvoiceScreen = ({ route }) => {
           {/* CONSIGNEE + BUYER + META */}
           <View style={styles.twoCol}>
 
-            {/* LEFT */}
+            {/* LEFT — ✅ Dynamic buyer details */}
             <View style={styles.colLeft}>
               <Text style={styles.sectionTitle}>Consignee (Ship To)</Text>
-              <Text style={styles.bodyText}>HANNYA MOBILES - 9944157879</Text>
-              <Text style={styles.bodyText}>No 5, Thendral Nagar</Text>
-              <Text style={styles.bodyText}>Thanjavur - Tamil Nadu</Text>
-              <Text style={styles.bodyText}>State Name: Tamil Nadu, Code: 33</Text>
+              <Text style={styles.bodyText}>{buyerLine1}</Text>
+              {buyerLine2 ? <Text style={styles.bodyText}>{buyerLine2}</Text> : null}
+              {buyerLine3 ? <Text style={styles.bodyText}>{buyerLine3}</Text> : null}
 
               <Text style={[styles.sectionTitle, { marginTop: 10 }]}>Buyer (Bill To)</Text>
-              <Text style={styles.bodyText}>HANNYA MOBILES - 9944157879</Text>
-              <Text style={styles.bodyText}>No 5, Thendral Nagar</Text>
-              <Text style={styles.bodyText}>Thanjavur - Tamil Nadu</Text>
-              <Text style={styles.bodyText}>State Name: Tamil Nadu, Code: 33</Text>
+              <Text style={styles.bodyText}>{buyerLine1}</Text>
+              {buyerLine2 ? <Text style={styles.bodyText}>{buyerLine2}</Text> : null}
+              {buyerLine3 ? <Text style={styles.bodyText}>{buyerLine3}</Text> : null}
             </View>
 
             {/* RIGHT - META TABLE */}
             <View style={styles.colRight}>
               {[
-                ['Invoice No.', invoiceNumber],
-                ['Dated', new Date(date).toDateString()],
-                ['Delivery Note', ''],
-                ['Mode/Terms of Payment', paymentMode?.toUpperCase()],
-                ['Reference No. & Date', ''],
-                ["Buyer's Order No.", ''],
-                ['Dispatched through', ''],
-                ['Destination', ''],
-                ['Terms of Delivery', ''],
+                ["Invoice No.",           invoiceNumber],
+                ["Dated",                 new Date(date).toDateString()],
+                ["Delivery Note",         ""],
+                ["Mode/Terms of Payment", paymentMode?.toUpperCase()],
+                ["Salesperson",           salesperson],       // ✅ new
+                ["Reference No. & Date",  ""],
+                ["Buyer's Order No.",     ""],
+                ["Dispatched through",    ""],
+                ["Destination",           buyerLine3],        // ✅ dynamic
+                ["Terms of Delivery",     ""],
               ].map(([label, value], i) => (
                 <View key={i} style={styles.metaRow}>
                   <Text style={styles.metaLabel}>{label}</Text>
@@ -233,7 +258,6 @@ const InvoiceScreen = ({ route }) => {
                 </View>
               ))}
             </View>
-
           </View>
 
           {/* TABLE HEADER */}
@@ -249,22 +273,22 @@ const InvoiceScreen = ({ route }) => {
 
           {/* ITEMS */}
           {items.map((item, index) => {
-            const price = item.retailerPrice;
+            const price  = item.retailerPrice;
             const amount = item.qty * price;
             return (
               <View key={index} style={styles.tableRow}>
-                <Text style={[styles.td, { flex: 0.4, textAlign: 'center' }]}>{index + 1}</Text>
+                <Text style={[styles.td, { flex: 0.4, textAlign: "center" }]}>{index + 1}</Text>
                 <Text style={[styles.td, { flex: 2 }]}>{item.name}</Text>
-                <Text style={[styles.td, { flex: 0.8, textAlign: 'center' }]}>-</Text>
-                <Text style={[styles.td, { flex: 0.8, textAlign: 'center' }]}>{item.qty} NOS</Text>
-                <Text style={[styles.td, { flex: 0.8, textAlign: 'right' }]}>₹{price}</Text>
-                <Text style={[styles.td, { flex: 0.5, textAlign: 'center' }]}>NOS</Text>
-                <Text style={[styles.td, { flex: 1, textAlign: 'right' }]}>₹{amount}.00</Text>
+                <Text style={[styles.td, { flex: 0.8, textAlign: "center" }]}>-</Text>
+                <Text style={[styles.td, { flex: 0.8, textAlign: "center" }]}>{item.qty} NOS</Text>
+                <Text style={[styles.td, { flex: 0.8, textAlign: "right" }]}>₹{price}</Text>
+                <Text style={[styles.td, { flex: 0.5, textAlign: "center" }]}>NOS</Text>
+                <Text style={[styles.td, { flex: 1, textAlign: "right" }]}>₹{amount}.00</Text>
               </View>
             );
           })}
 
-          {/* COURIER ROW */}
+          {/* COURIER ROW — ✅ dynamic */}
           <View style={styles.tableRow}>
             <Text style={[styles.td, { flex: 0.4 }]}></Text>
             <Text style={[styles.td, { flex: 2 }]}>Courier Charge</Text>
@@ -272,18 +296,18 @@ const InvoiceScreen = ({ route }) => {
             <Text style={[styles.td, { flex: 0.8 }]}></Text>
             <Text style={[styles.td, { flex: 0.8 }]}></Text>
             <Text style={[styles.td, { flex: 0.5 }]}></Text>
-            <Text style={[styles.td, { flex: 1, textAlign: 'right' }]}>₹{courierCharge}.00</Text>
+            <Text style={[styles.td, { flex: 1, textAlign: "right" }]}>₹{courierCharge}.00</Text>
           </View>
 
           {/* TOTAL ROW */}
           <View style={styles.tableRow}>
             <Text style={[styles.td, { flex: 0.4 }]}></Text>
-            <Text style={[styles.td, { flex: 2, fontWeight: 'bold' }]}>Total</Text>
+            <Text style={[styles.td, { flex: 2, fontWeight: "bold" }]}>Total</Text>
             <Text style={[styles.td, { flex: 0.8 }]}></Text>
-            <Text style={[styles.td, { flex: 0.8, textAlign: 'center', fontWeight: 'bold' }]}>{totalQty} NOS</Text>
+            <Text style={[styles.td, { flex: 0.8, textAlign: "center", fontWeight: "bold" }]}>{totalQty} NOS</Text>
             <Text style={[styles.td, { flex: 0.8 }]}></Text>
             <Text style={[styles.td, { flex: 0.5 }]}></Text>
-            <Text style={[styles.td, { flex: 1, textAlign: 'right', fontWeight: 'bold' }]}>₹{grandTotal}.00</Text>
+            <Text style={[styles.td, { flex: 1, textAlign: "right", fontWeight: "bold" }]}>₹{grandTotal}.00</Text>
           </View>
 
           {/* AMOUNT IN WORDS */}

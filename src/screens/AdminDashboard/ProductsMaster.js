@@ -14,11 +14,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts } from '../../services/features/products/productSlice';
 import { deleteProduct } from '../../services/features/products/productSlice';
 import PopupModal from '../../components/PopupModal';
-
-
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const ProductMaster = ({ navigation }) => {
   const dispatch = useDispatch();
+  const insets = useSafeAreaInsets();
   const products = useSelector(state => state.products.list);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -56,7 +56,7 @@ const ProductMaster = ({ navigation }) => {
   }, [products, search]);
 
   return (
-    <View style={ProductsMasterStyle.container}>
+   <SafeAreaView style={ProductsMasterStyle.container} edges={['bottom']}>
       <Header title="Product Master" />
 
       {/* ADD PRODUCT BUTTON */}
@@ -93,7 +93,7 @@ const ProductMaster = ({ navigation }) => {
             onDelete={() => handleDelete(item._id)}
           />
         )}
-        contentContainerStyle={ProductsMasterStyle.list}
+        contentContainerStyle={[ProductsMasterStyle.list,{ paddingBottom: insets.bottom + 20 }]}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={() => (
           <View style={ProductsMasterStyle.emptyContainer}>
@@ -111,7 +111,7 @@ const ProductMaster = ({ navigation }) => {
         onPress={confirmDelete}
         onSecondaryPress={() => setShowDeleteModal(false)}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 

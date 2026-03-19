@@ -9,10 +9,11 @@ export const adminLogin = createAsyncThunk(
 
     try {
       const res = await API.post('/api/auth/admin', data);
-
+      console.log("-- admin --",data);
       await setToken(res.data.token);
       return res.data;
     } catch (err) {
+      console.log("-- admin(err) --",err);
       return rejectWithValue(err.response.data.message);
     }
   },

@@ -6,6 +6,7 @@ export default StyleSheet.create({
     backgroundColor: "#F6F6F6",
   },
 
+  /* ── Profile Card ── */
   profileCard: {
     backgroundColor: "#FFFFFF",
     margin: 16,
@@ -22,19 +23,77 @@ export default StyleSheet.create({
     backgroundColor: "#FDECEA",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 8,
+  },
+
+  avatarImage: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    marginBottom: 8,
+    backgroundColor: "#F0F0F0",
+  },
+
+  roleBadge: {
+    backgroundColor: "#FFF3F3",
+    borderColor: "#D32F2F",
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 3,
+    marginBottom: 8,
+  },
+
+  roleBadgeText: {
+    fontSize: 11,
+    color: "#D32F2F",
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
   },
 
   name: {
     fontSize: 16,
     fontWeight: "700",
     color: "#212121",
+    textAlign: "center",
   },
 
   subText: {
     fontSize: 12,
     color: "#777",
     marginTop: 4,
+    textAlign: "center",
+  },
+
+  statusBadge: {
+    marginTop: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+
+  statusApproved: {
+    backgroundColor: "#E8F5E9",
+  },
+
+  statusPending: {
+    backgroundColor: "#FFF8E1",
+  },
+
+  statusText: {
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
+  },
+
+  statusApprovedText: {
+    color: "#2E7D32",
+  },
+
+  statusPendingText: {
+    color: "#F57F17",
   },
 
   editButton: {
@@ -52,6 +111,7 @@ export default StyleSheet.create({
     fontWeight: "700",
   },
 
+  /* ── Sections ── */
   section: {
     backgroundColor: "#FFFFFF",
     marginHorizontal: 16,
@@ -125,6 +185,7 @@ export default StyleSheet.create({
     color: "#D32F2F",
   },
 
+  /* ── Logout ── */
   logoutButton: {
     flexDirection: "row",
     backgroundColor: "#D32F2F",
@@ -143,4 +204,3 @@ export default StyleSheet.create({
     marginLeft: 8,
   },
 });
-

@@ -78,7 +78,7 @@ const ROLE_TABS = {
 
   Radnus: [
     { name: 'Dashboard', component: EmployeeDashboard, icon: LayoutDashboard },
-    { name: 'HomeScreen', component: HomeScreen, icon: Home },
+    { name: 'Home', component: HomeScreen, icon: Home },
     { name: 'Reports', component: Report, icon: BarChart3 },
     { name: 'Profile', component: ProfileSettings, icon: CircleUserRound },
   ],

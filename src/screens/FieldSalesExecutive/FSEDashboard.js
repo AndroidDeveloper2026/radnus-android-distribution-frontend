@@ -27,7 +27,9 @@ const FSEDashboard = ({ navigation }) => {
       <ScrollView>
         <View style={FSEDashboardStyle.content}>
           {/* WELCOME */}
-          <Text style={FSEDashboardStyle.welcome}>👋 Hi, {user?.name || 'User'}</Text>
+          <Text style={FSEDashboardStyle.welcome}>
+            👋 Hi, {user?.name || 'User'}
+          </Text>
           <Text style={FSEDashboardStyle.subtitle}>Today’s Overview</Text>
 
           {/* KPI ROW 1 */}
@@ -97,6 +99,22 @@ const FSEDashboard = ({ navigation }) => {
 
           <TouchableOpacity
             style={FSEDashboardStyle.actionItem}
+            onPress={() => navigation.navigate('CustomerListScreen')}
+          >
+            <Users size={20} color="#1976D2" />
+            <Text style={FSEDashboardStyle.actionText}>CustomerDetail</Text>
+          </TouchableOpacity> 
+
+          <TouchableOpacity
+            style={FSEDashboardStyle.actionItem}
+            onPress={() => navigation.navigate('RouteList')}
+          >
+            <Users size={20} color="#1976D2" />
+            <Text style={FSEDashboardStyle.actionText}>RouteList</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={FSEDashboardStyle.actionItem}
             onPress={() => navigation.navigate('RetailerList')}
           >
             <Users size={20} color="#1976D2" />
@@ -127,7 +145,7 @@ const FSEDashboard = ({ navigation }) => {
             <Map size={20} color="#5E35B1" />
             <Text style={FSEDashboardStyle.actionText}>Mapscreen</Text>
           </TouchableOpacity>
-
+                  
           <TouchableOpacity
             style={FSEDashboardStyle.actionItem}
             onPress={() => navigation.navigate('FSETracking')}

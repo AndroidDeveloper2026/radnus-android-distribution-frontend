@@ -40,6 +40,11 @@ const ProductCard = ({ item, onEdit, onDelete }) => {
           </View>
 
           <View style={styles.priceRow}>
+            <Text style={styles.label}>Item Cost</Text>
+            <Text style={styles.value}>₹{item.itemCost}</Text>
+          </View>
+
+          <View style={styles.priceRow}>
             <Text style={styles.label}>Retailer</Text>
             <Text style={styles.value}>₹{item.retailerPrice}</Text>
           </View>

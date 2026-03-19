@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -6,14 +6,17 @@ import {
   TouchableOpacity,
   Alert,
   Image,
+  TextInput,
 } from 'react-native';
+import { Search, X } from 'lucide-react-native';
 import styles from './OrderCartStyle';
 import Header from '../../components/Header';
 
 const userRole = 'fse';
 
-const OrderCart = ({ navigation }) => {
-  const [cart, setCart] = useState([
+const OrderCart = ({ navigation, route }) => {
+  // ✅ Accept cartItems passed from ProductList, fallback to default sample data
+  const initialCart = route?.params?.cartItems ?? [
     {
       id: 1,
       name: 'Fast Charger 25W',
@@ -38,15 +41,27 @@ const OrderCart = ({ navigation }) => {
       image:
         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSr-qYBo49olQ7YpjOk9oO2t7j-sKiEB1TETw&s',
     },
-  ]);
+  ];
 
-  const getPrice = item => {
-    return item.retailerPrice;
-  };
+  const [cart, setCart] = useState(initialCart);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const getPrice = (item) => item.retailerPrice;
+
+  // ── Filter by name or SKU ──────────────────────────────────
+  const filteredCart = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return cart;
+    return cart.filter(
+      (item) =>
+        item.name.toLowerCase().includes(query) ||
+        item.sku.toLowerCase().includes(query),
+    );
+  }, [cart, searchQuery]);
 
   const updateQty = (id, type) => {
-    setCart(prev =>
-      prev.map(item => {
+    setCart((prev) =>
+      prev.map((item) => {
         if (item.id === id) {
           let newQty = type === 'inc' ? item.qty + 1 : item.qty - 1;
           if (newQty < item.moq) {
@@ -60,12 +75,13 @@ const OrderCart = ({ navigation }) => {
     );
   };
 
+  // ✅ Total always from full cart, not filtered
   const totalAmount = cart.reduce(
     (sum, item) => sum + getPrice(item) * item.qty,
     0,
   );
 
-  // ✅ FIXED - pass full cart as items with all fields intact
+  // ✅ Navigate to OrderSuccess (must match your navigator route name)
   const placeOrder = () => {
     navigation.navigate('OrderSuccess', {
       invoiceNumber: 'INV-' + Date.now(),
@@ -80,49 +96,86 @@ const OrderCart = ({ navigation }) => {
     <View style={styles.container}>
       <Header title={'Order Cart'} />
 
+      {/* ── Search Field ── */}
+      <View style={styles.wrapper}>
+        <View style={styles.inputBox}>
+          <Search size={16} color="#999" strokeWidth={2} style={{ marginRight: 8 }} />
+          <TextInput
+            style={styles.input}
+            placeholder="Search by name or SKU…"
+            placeholderTextColor="#bbb"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            returnKeyType="search"
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity
+              onPress={() => setSearchQuery('')}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <X size={15} color="#999" strokeWidth={2} />
+            </TouchableOpacity>
+          )}
+        </View>
+        {searchQuery.length > 0 && (
+          <Text style={styles.resultCount}>
+            {filteredCart.length} result{filteredCart.length !== 1 ? 's' : ''} found
+          </Text>
+        )}
+      </View>
+
       <ScrollView>
         <View style={styles.content}>
-          {cart.map(item => (
-            <View key={item.id} style={styles.card}>
-              <View style={styles.cardRow}>
-                <View style={styles.imageBox}>
-                  <Image
-                    source={{ uri: item.image }}
-                    style={styles.productImage}
-                  />
-                </View>
-
-                <View style={styles.infoContainer}>
-                  <Text style={styles.productName}>{item.name}</Text>
-                  <Text style={styles.sku}>SKU: {item.sku}</Text>
-                  <View style={styles.row}>
-                    <Text style={styles.price}>₹{getPrice(item)}</Text>
+          {filteredCart.length === 0 ? (
+            <View style={styles.emptyBox}>
+              <Search size={36} color="#ddd" strokeWidth={1.5} />
+              <Text style={styles.emptyText}>
+                No items match "{searchQuery}"
+              </Text>
+            </View>
+          ) : (
+            filteredCart.map((item) => (
+              <View key={item.id} style={styles.card}>
+                <View style={styles.cardRow}>
+                  <View style={styles.imageBox}>
+                    <Image
+                      source={{ uri: item.image }}
+                      style={styles.productImage}
+                    />
                   </View>
-                  <Text style={styles.moqText}>MOQ: {item.moq} units</Text>
-                </View>
 
-                <View style={styles.stepperBtn}>
-                  <View style={styles.qtyBox}>
-                    <TouchableOpacity
-                      style={styles.qtyBtn}
-                      onPress={() => updateQty(item.id, 'dec')}
-                    >
-                      <Text>-</Text>
-                    </TouchableOpacity>
+                  <View style={styles.infoContainer}>
+                    <Text style={styles.productName}>{item.name}</Text>
+                    <Text style={styles.sku}>SKU: {item.sku}</Text>
+                    <View style={styles.row}>
+                      <Text style={styles.price}>₹{getPrice(item)}</Text>
+                    </View>
+                    <Text style={styles.moqText}>MOQ: {item.moq} units</Text>
+                  </View>
 
-                    <Text style={styles.qtyText}>{item.qty}</Text>
+                  <View style={styles.stepperBtn}>
+                    <View style={styles.qtyBox}>
+                      <TouchableOpacity
+                        style={styles.qtyBtn}
+                        onPress={() => updateQty(item.id, 'dec')}
+                      >
+                        <Text>-</Text>
+                      </TouchableOpacity>
 
-                    <TouchableOpacity
-                      style={styles.qtyBtn}
-                      onPress={() => updateQty(item.id, 'inc')}
-                    >
-                      <Text>+</Text>
-                    </TouchableOpacity>
+                      <Text style={styles.qtyText}>{item.qty}</Text>
+
+                      <TouchableOpacity
+                        style={styles.qtyBtn}
+                        onPress={() => updateQty(item.id, 'inc')}
+                      >
+                        <Text>+</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </View>
               </View>
-            </View>
-          ))}
+            ))
+          )}
         </View>
       </ScrollView>
 

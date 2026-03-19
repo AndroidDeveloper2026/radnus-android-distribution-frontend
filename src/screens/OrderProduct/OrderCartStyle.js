@@ -157,6 +157,44 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
   },
+  wrapper: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+  },
+  inputBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#e8e8e8',
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+  },
+  input: {
+    flex: 1,
+    fontSize: 13,
+    color: '#1a1a1a',
+    padding: 0,
+  },
+  resultCount: {
+    fontSize: 11,
+    color: '#888',
+    marginTop: 6,
+    marginLeft: 4,
+  },
+  emptyBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+    gap: 12,
+  },
+  emptyText: {
+    fontSize: 13,
+    color: '#aaa',
+    textAlign: 'center',
+  },
 });
 
 export default styles;

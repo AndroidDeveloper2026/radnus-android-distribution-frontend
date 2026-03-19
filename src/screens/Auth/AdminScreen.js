@@ -13,7 +13,7 @@ import showToast from '../../utils/toast';
 import { Eye, EyeOff } from 'lucide-react-native';
 
 const AdminValidationSchema = Yup.object().shape({
-  emailID: Yup.string()
+  email: Yup.string()
     .email('Invalid email address')
     .required('Email is required'),
 
@@ -59,7 +59,7 @@ const AdminScreen = ({ navigation }) => {
 
       {/* FORM */}
       <Formik
-        initialValues={{ emailID: '', password: '' }}
+        initialValues={{ email: '', password: '' }}
         validationSchema={AdminValidationSchema}
         onSubmit={async values => {
           console.log('--- admin (login) ---', values);
@@ -84,16 +84,16 @@ const AdminScreen = ({ navigation }) => {
               <TextInput
                 style={styles.input}
                 keyboardType="email-address"
-                value={values.emailID}
-                onChangeText={handleChange('emailID')}
-                onBlur={handleBlur('emailID')}
+                value={values.email}
+                onChangeText={handleChange('email')}
+                onBlur={handleBlur('email')}
                 placeholder="Enter your email ID"
                 placeholderTextColor={'#000'}
                 autoCapitalize="none"
               />
             </View>
-            {touched.emailID && errors.emailID && (
-              <Text style={styles.error}>{errors.emailID}</Text>
+            {touched.email && errors.email && (
+              <Text style={styles.error}>{errors.email}</Text>
             )}
 
             {/* PASSWORD */}
