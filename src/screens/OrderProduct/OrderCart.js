@@ -48,7 +48,6 @@ const OrderCart = ({ navigation, route }) => {
 
   const getPrice = (item) => item.retailerPrice;
 
-  // ── Filter by name or SKU ──────────────────────────────────
   const filteredCart = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     if (!query) return cart;
@@ -81,7 +80,6 @@ const OrderCart = ({ navigation, route }) => {
     0,
   );
 
-  // ✅ Navigate to OrderSuccess (must match your navigator route name)
   const placeOrder = () => {
     navigation.navigate('OrderSuccess', {
       invoiceNumber: 'INV-' + Date.now(),

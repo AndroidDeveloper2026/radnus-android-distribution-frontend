@@ -38,6 +38,7 @@ const LoginScreen = ({ navigation }) => {
       loginUser({
         email: values?.email.trim(),
         password: values?.password.trim(),
+        role: values?.role,
       }),
     )
       .unwrap()

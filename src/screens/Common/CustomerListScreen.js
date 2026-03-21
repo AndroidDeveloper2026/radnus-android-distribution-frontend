@@ -139,7 +139,7 @@ const CustomerListScreen = ({ navigation }) => {
     </TouchableOpacity>
   );
 
-  // ── Empty State ─────────────────────────────────────
+
   const renderEmpty = () => {
     if (listState === 'loading') return null;
     return (
@@ -196,7 +196,7 @@ const CustomerListScreen = ({ navigation }) => {
   return (
     // SafeAreaView with bottom edge — FAB stays above gesture bar
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      <Header title="Customers" />
+      <Header title="Customers Details" />
 
       {/* Full screen loader — only on first load */}
       {listState === 'loading' && safeCustomers.length === 0 ? (

@@ -4,6 +4,7 @@ import MapLibreGL from '@maplibre/maplibre-react-native';
 import { Navigation, Clock, MapPin, CheckCircle, Timer } from 'lucide-react-native';
 import Header from '../../components/Header';
 import { useDispatch, useSelector } from 'react-redux';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   fetchSessionById,
   clearSelectedSession,
@@ -12,7 +13,6 @@ import {
 MapLibreGL.setAccessToken(null);
 
 const MAPTILER_KEY = '3gTrSf36y6oirRLmBYot';
-
 const ACCENT = '#dc2626';
 
 const formatDateTime = iso => {
@@ -52,7 +52,6 @@ const MapScreen = ({ route }) => {
     }
   }, [sessionId, dispatch]);
 
-  // ── Route GeoJSON ────────────────────────────────────────────────────────
   const routeGeoJSON = useMemo(() => {
     if (!session?.route || session.route.length < 2) return null;
     const coordinates = session.route
@@ -64,31 +63,36 @@ const MapScreen = ({ route }) => {
         );
       })
       .map(point => [point.longitude, point.latitude]);
+
     return {
       type: 'Feature',
       geometry: { type: 'LineString', coordinates },
     };
   }, [session]);
 
-  // ── Camera bounds ────────────────────────────────────────────────────────
   const cameraBounds = useMemo(() => {
     const pts = session?.route;
     if (!pts || pts.length === 0) return null;
+
     let minLat = pts[0].latitude, maxLat = pts[0].latitude;
     let minLng = pts[0].longitude, maxLng = pts[0].longitude;
+
     for (const p of pts) {
-      if (p.latitude  < minLat) minLat = p.latitude;
-      if (p.latitude  > maxLat) maxLat = p.latitude;
+      if (p.latitude < minLat) minLat = p.latitude;
+      if (p.latitude > maxLat) maxLat = p.latitude;
       if (p.longitude < minLng) minLng = p.longitude;
       if (p.longitude > maxLng) maxLng = p.longitude;
     }
+
     const EPSILON = 0.002;
+
     if (minLat === maxLat && minLng === maxLng) {
       return {
         ne: [maxLng + EPSILON, maxLat + EPSILON],
         sw: [minLng - EPSILON, minLat - EPSILON],
       };
     }
+
     return { ne: [maxLng, maxLat], sw: [minLng, minLat] };
   }, [session]);
 
@@ -110,10 +114,9 @@ const MapScreen = ({ route }) => {
       ]
     : centerCoord;
 
-  const isActive    = session?.status === 'ACTIVE';
+  const isActive = session?.status === 'ACTIVE';
   const routePoints = session?.route?.length || 0;
 
-  // ── Loading ──────────────────────────────────────────────────────────────
   if (!session || detailState === 'loading' || detailState === 'idle') {
     return (
       <View style={ms.container}>
@@ -126,7 +129,6 @@ const MapScreen = ({ route }) => {
     );
   }
 
-  // ── Error ────────────────────────────────────────────────────────────────
   if (detailState === 'error') {
     return (
       <View style={ms.container}>
@@ -142,7 +144,6 @@ const MapScreen = ({ route }) => {
     <View style={ms.container}>
       <Header title="FSE Map View" />
 
-      {/* ── Map ── */}
       <MapLibreGL.MapView
         style={ms.map}
         mapStyle={`https://api.maptiler.com/maps/streets/style.json?key=${MAPTILER_KEY}`}
@@ -167,11 +168,11 @@ const MapScreen = ({ route }) => {
           <MapLibreGL.ShapeSource id="routeSource" shape={routeGeoJSON}>
             <MapLibreGL.LineLayer
               id="routeOutline"
-              style={{ lineColor: '#ffffff', lineWidth: 6, lineCap: 'round', lineJoin: 'round' }}
+              style={{ lineColor: '#ffffff', lineWidth: 6 }}
             />
             <MapLibreGL.LineLayer
               id="routeLine"
-              style={{ lineColor: '#22c55e', lineWidth: 4, lineCap: 'round', lineJoin: 'round' }}
+              style={{ lineColor: '#22c55e', lineWidth: 4 }}
             />
           </MapLibreGL.ShapeSource>
         )}
@@ -213,99 +214,92 @@ const MapScreen = ({ route }) => {
         )}
       </MapLibreGL.MapView>
 
-      {/* ── Bottom info card ── */}
-      <View style={ms.infoCard}>
-
-        {/* Row 1: badge + distance */}
-        <View style={ms.row}>
-          <View style={[ms.badge, isActive ? ms.badgeActive : ms.badgeEnded]}>
-            {isActive
-              ? <Navigation size={10} color="#fff" strokeWidth={2.5} />
-              : <CheckCircle size={10} color="#fff" strokeWidth={2.5} />
-            }
-            <Text style={ms.badgeText}>  {isActive ? 'ACTIVE' : 'ENDED'}</Text>
+      {/* ✅ Safe Area Applied Here */}
+      <SafeAreaView edges={['bottom']} style={ms.infoSafe}>
+        <View style={ms.infoCard}>
+          <View style={ms.row}>
+            <View style={[ms.badge, isActive ? ms.badgeActive : ms.badgeEnded]}>
+              {isActive
+                ? <Navigation size={10} color="#fff" />
+                : <CheckCircle size={10} color="#fff" />}
+              <Text style={ms.badgeText}> {isActive ? 'ACTIVE' : 'ENDED'}</Text>
+            </View>
+            <Text style={ms.distance}>
+              {session.totalDistanceKm?.toFixed(3) ?? '0.000'} km
+            </Text>
           </View>
-          <Text style={ms.distance}>
-            {session.totalDistanceKm?.toFixed(3) ?? '0.000'} km
-          </Text>
-        </View>
 
-        {/* Row 2: Start */}
-        <View style={ms.infoRow}>
-          <Clock size={12} color="#16a34a" strokeWidth={2} />
-          <Text style={ms.infoLabel}>  Start</Text>
-          <Text style={ms.infoValue}>{formatDateTime(session.startTime)}</Text>
-        </View>
+          <View style={ms.infoRow}>
+            <Clock size={12} color="#16a34a" />
+            <Text style={ms.infoLabel}> Start</Text>
+            <Text style={ms.infoValue}>{formatDateTime(session.startTime)}</Text>
+          </View>
 
-        {/* Row 3: End */}
-        <View style={ms.infoRow}>
-          <Clock size={12} color={ACCENT} strokeWidth={2} />
-          <Text style={ms.infoLabel}>  End</Text>
-          <Text style={ms.infoValue}>
-            {session.endTime ? formatDateTime(session.endTime) : 'Ongoing…'}
-          </Text>
-        </View>
+          <View style={ms.infoRow}>
+            <Clock size={12} color={ACCENT} />
+            <Text style={ms.infoLabel}> End</Text>
+            <Text style={ms.infoValue}>
+              {session.endTime ? formatDateTime(session.endTime) : 'Ongoing…'}
+            </Text>
+          </View>
 
-        {/* Row 4: Duration */}
-        <View style={ms.infoRow}>
-          <Timer size={12} color="#888" strokeWidth={2} />
-          <Text style={ms.infoLabel}>  Duration</Text>
-          <Text style={ms.infoValue}>
-            {formatDuration(session.startTime, session.endTime)}
-          </Text>
-        </View>
+          <View style={ms.infoRow}>
+            <Timer size={12} color="#888" />
+            <Text style={ms.infoLabel}> Duration</Text>
+            <Text style={ms.infoValue}>
+              {formatDuration(session.startTime, session.endTime)}
+            </Text>
+          </View>
 
-        {/* Row 5: GPS Points */}
-        <View style={ms.infoRow}>
-          <MapPin size={12} color="#888" strokeWidth={2} />
-          <Text style={ms.infoLabel}>  Points</Text>
-          <Text style={ms.infoValue}>{routePoints} GPS points</Text>
+          <View style={ms.infoRow}>
+            <MapPin size={12} color="#888" />
+            <Text style={ms.infoLabel}> Points</Text>
+            <Text style={ms.infoValue}>{routePoints} GPS points</Text>
+          </View>
         </View>
-
-      </View>
+      </SafeAreaView>
     </View>
   );
 };
 
 const ms = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f9fa' },
-  map:       { flex: 1 },
+  map: { flex: 1 },
+
+  infoSafe: {
+    backgroundColor: '#fff',
+  },
 
   centerBox: {
-    flex: 1, justifyContent: 'center', alignItems: 'center', gap: 10,
+    flex: 1, justifyContent: 'center', alignItems: 'center',
   },
-  loadingText: { fontSize: 14, color: '#888', marginTop: 8 },
-  errorText:   { fontSize: 14, color: ACCENT, marginTop: 8 },
 
-  // ── Markers (unchanged) ─────────────────────────────────────────────────
+  loadingText: { fontSize: 14, color: '#888', marginTop: 8 },
+  errorText: { fontSize: 14, color: ACCENT, marginTop: 8 },
+
   markerStart: {
     width: 36, height: 36, borderRadius: 18,
     backgroundColor: '#16a34a',
     justifyContent: 'center', alignItems: 'center',
-    elevation: 4,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2, shadowRadius: 4,
   },
+
   markerEnd: {
     width: 36, height: 36, borderRadius: 18,
     backgroundColor: ACCENT,
     justifyContent: 'center', alignItems: 'center',
-    elevation: 4,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2, shadowRadius: 4,
   },
+
   markerLive: {
     width: 44, height: 44, borderRadius: 22,
     backgroundColor: 'rgba(22,163,74,0.2)',
     justifyContent: 'center', alignItems: 'center',
   },
+
   markerLiveDot: {
     width: 16, height: 16, borderRadius: 8, backgroundColor: '#16a34a',
   },
 
-  // ── Info card ─────────────────────────────────────────────────────────────
   infoCard: {
-    backgroundColor: '#fff',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderTopWidth: 1,
@@ -314,10 +308,10 @@ const ms = StyleSheet.create({
 
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 8,
   },
+
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -325,18 +319,21 @@ const ms = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 20,
   },
+
   badgeActive: { backgroundColor: '#16a34a' },
-  badgeEnded:  { backgroundColor: '#6b7280' },
-  badgeText:   { color: '#fff', fontSize: 11, fontWeight: '700' },
-  distance:    { fontSize: 14, fontWeight: '700', color: '#18181b' },
+  badgeEnded: { backgroundColor: '#6b7280' },
+
+  badgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
+  distance: { fontSize: 14, fontWeight: '700' },
 
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 3,
   },
+
   infoLabel: { fontSize: 12, color: '#888', width: 72 },
-  infoValue: { fontSize: 12, fontWeight: '600', color: '#18181b', flex: 1 },
+  infoValue: { fontSize: 12, fontWeight: '600', flex: 1 },
 });
 
 export default MapScreen;
