@@ -40,18 +40,27 @@ const HomeScreen = ({ navigation }) => {
     }
   }, [products]);
 
-  const getPrice = item => {
-    switch (role) {
-      case 'Admin':
-        return `D: ₹${item.distributorPrice} | R: ₹${item.retailerPrice}`;
-      case 'Distributor':
-        return `₹${item.distributorPrice}`;
-      case 'Retailer':
-        return `₹${item.retailerPrice}`;
-      default:
-        return `₹${item.retailerPrice}`;
-    }
-  };
+
+const getPrice = item => {
+  switch (role) {
+    case 'Admin':
+      return `D: ₹${Number(item.distributorPrice) || 0} | R: ₹${Number(item.retailerPrice) || 0}`;
+    case 'Distributor':
+      return `₹${Number(item.distributorPrice) || 0}`;
+    case 'Retailer':
+      return `₹${Number(item.retailerPrice) || 0}`;
+    case 'FSE':
+      return `₹${Number(item.retailerPrice) || 0}`;
+    case 'MarketingManager':
+      return `₹${Number(item.retailerPrice) || 0}`;
+    case 'MarketingExecutive':
+      return `₹${Number(item.retailerPrice) || 0}`;
+    case 'Radnus':
+      return `D: ₹${Number(item.distributorPrice) || 0} | R: ₹${Number(item.retailerPrice) || 0}`;
+    default:
+      return `₹${Number(item.retailerPrice) || 0}`; // ✅ Number() prevents undefined
+  }
+};
 
 
   /* ------------------ FILTER LOGIC ------------------ */
@@ -86,7 +95,7 @@ const HomeScreen = ({ navigation }) => {
       <Text style={styles.mrp}>₹{item.mrp}</Text>
 
       <Text style={[styles.stock, item.stock === 0 && styles.outStock]}>
-        {item.stock > 0 ? `Stock: ${item.stock}` : 'Out of stock'}
+        {item.moq > 0 ? `Stock: ${item.moq}` : 'Out of stock'}
       </Text>
 
       <Text style={styles.moq}>MOQ: {item.moq}</Text>

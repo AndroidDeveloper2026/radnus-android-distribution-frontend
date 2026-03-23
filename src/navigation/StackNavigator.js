@@ -54,6 +54,7 @@ import ManagerManagement from '../screens/MarketingManager/ManagerManagement';
 import ExecutiveManagement from '../screens/MarketingExecutive/ExecutiveManagement';
 import InvoiceScreen from '../screens/OrderProduct/InvoiceScreen';
 import CustomerListScreen from '../screens/Common/CustomerListScreen';
+import DistributorDetails from '../screens/Distributor/DistributorDetails';
 //-- checking --
 import AdminDashboardScreen from '../screens/AdminDashboard/AdminDashboardScreen';
 import DistributorList from '../screens/MarketingExecutive/DistributorList';
@@ -337,6 +338,12 @@ const StackNavigator = () => {
             options={{ headerShown: false }}
           />
 
+           <Stack.Screen
+            name="DistributorDetails"
+            component={DistributorDetails}
+            options={{ headerShown: false }}
+          />
+          
           <Stack.Screen
             name="RouteList"
             component={RouteList}

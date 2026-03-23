@@ -40,6 +40,21 @@ export const deleteProduct = createAsyncThunk(
   }
 );
 
+export const reduceStock = createAsyncThunk(
+  'products/reduceStock',
+  async (items, { rejectWithValue }) => {
+    try {
+      const payload = items.map((item) => ({
+        productId: item.id,   // ✅ item.id is _id from MongoDB
+        qty: item.qty,
+      }));
+      const res = await API.post('/api/products/reduce-stock', { items: payload });
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.error || 'Stock update failed');
+    }
+  },
+);
 
 const productSlice = createSlice({
   name: "products",

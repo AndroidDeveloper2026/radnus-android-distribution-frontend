@@ -111,5 +111,51 @@ export default StyleSheet.create({
     fontWeight: '700',
   },
 
+  // Add these to your existing DistributorOnboardingStyle.js
+
+profileRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginBottom: 16,
+},
+
+profileImage: {
+  width: 72,
+  height: 72,
+  borderRadius: 36,
+  backgroundColor: "#e5e7eb",
+},
+
+statusBadge: {
+  flexDirection: "row",
+  alignItems: "center",
+  alignSelf: "flex-start",
+  paddingHorizontal: 8,
+  paddingVertical: 3,
+  borderRadius: 20,
+  marginTop: 6,
+},
+
+approvedBadge: {
+  backgroundColor: "#f0fdf4",
+},
+
+pendingBadge: {
+  backgroundColor: "#fffbeb",
+},
+
+statusText: {
+  fontSize: 12,
+  fontWeight: "600",
+},
+
+approvedText: {
+  color: "#16a34a",
+},
+
+pendingText: {
+  color: "#d97706",
+},
+
   
 });

@@ -9,54 +9,21 @@ const GRAY = '#757575';
 const ProductCard = ({ item, onEdit, onDelete }) => {
   return (
     <View style={styles.card}>
-      <View style={styles.topRow}>
-        <View>
-          {/* PRODUCT IMAGE */}
-          <Image
-            source={{
-              uri: item.image || 'https://via.placeholder.com/120',
-            }}
-            style={styles.image}
-          />
-          {/* STATUS */}
-          <View style={styles.statusBadge}>
-            <Text style={styles.statusText}>{item.status}</Text>
-          </View>
-        </View>
 
-        {/* PRODUCT INFO */}
+      {/* TOP — image + actions */}
+      <View style={styles.topRow}>
+        <Image
+          source={{ uri: item.image || 'https://via.placeholder.com/120' }}
+          style={styles.image}
+        />
+
         <View style={styles.info}>
-          <Text style={styles.productName}>{item.name}</Text>
+          <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>
           <Text style={styles.sku}>SKU: {item.sku}</Text>
 
-          <View style={styles.priceRow}>
-            <Text style={styles.label}>MRP</Text>
-            <Text style={styles.value}>₹{item.mrp}</Text>
-          </View>
-
-          <View style={styles.priceRow}>
-            <Text style={styles.label}>Distributor</Text>
-            <Text style={styles.value}>₹{item.distributorPrice}</Text>
-          </View>
-
-          <View style={styles.priceRow}>
-            <Text style={styles.label}>Item Cost</Text>
-            <Text style={styles.value}>₹{item.itemCost}</Text>
-          </View>
-
-          <View style={styles.priceRow}>
-            <Text style={styles.label}>Retailer</Text>
-            <Text style={styles.value}>₹{item.retailerPrice}</Text>
-          </View>
-
-          <View style={styles.priceRow}>
-            <Text style={styles.label}>GST</Text>
-            <Text style={styles.value}>{item.gst}%</Text>
-          </View>
-
-          <View style={styles.priceRow}>
-            <Text style={styles.label}>MOQ</Text>
-            <Text style={styles.value}>{item.moq}</Text>
+          {/* STATUS BADGE */}
+          <View style={styles.statusBadge}>
+            <Text style={styles.statusText}>{item.status}</Text>
           </View>
         </View>
 
@@ -65,15 +32,36 @@ const ProductCard = ({ item, onEdit, onDelete }) => {
           <TouchableOpacity style={styles.iconBtn} onPress={onDelete}>
             <Trash2 size={18} color={RED} />
           </TouchableOpacity>
-
           <TouchableOpacity style={styles.iconBtn} onPress={onEdit}>
             <Edit size={18} color={RED} />
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* DIVIDER */}
+      <View style={styles.divider} />
+
+      {/* PRICE GRID — 2 columns */}
+      <View style={styles.grid}>
+        <PriceItem label="Item Cost"       value={`₹${item.itemCost ?? '—'}`} />
+        <PriceItem label="Distributor"     value={`₹${item.distributorPrice ?? '—'}`} />
+        <PriceItem label="Retailer"        value={`₹${item.retailerPrice ?? '—'}`} />
+        <PriceItem label="MRP"             value={`₹${item.mrp ?? '—'}`} />
+        <PriceItem label="GST"             value={`${item.gst ?? 0}%`} />
+        <PriceItem label="MOQ"             value={`${item.moq ?? 1}`} />
+      </View>
+
     </View>
   );
 };
+
+/* Small reusable price cell */
+const PriceItem = ({ label, value }) => (
+  <View style={styles.priceItem}>
+    <Text style={styles.priceLabel}>{label}</Text>
+    <Text style={styles.priceValue}>{value}</Text>
+  </View>
+);
 
 export const styles = StyleSheet.create({
   card: {
@@ -83,99 +71,98 @@ export const styles = StyleSheet.create({
     marginBottom: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.06,
     shadowRadius: 4,
     elevation: 2,
   },
 
-  iconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#FDECEA',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
+  /* ── TOP ROW ── */
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+
+  image: {
+    width: 90,
+    height: 90,
+    borderRadius: 12,
+    backgroundColor: '#F6F6F6',
+    resizeMode: 'cover',
+  },
+
+  info: {
+    flex: 1,
+    marginLeft: 12,
   },
 
   productName: {
     fontSize: 15,
     fontWeight: '700',
     color: '#212121',
+    lineHeight: 20,
   },
 
   sku: {
     fontSize: 12,
     color: GRAY,
-    marginTop: 2,
-  },
-
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: 3,
-  },
-
-  label: {
-    fontSize: 13,
-    color: GRAY,
-  },
-
-  value: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#212121',
+    marginTop: 3,
+    marginBottom: 8,
   },
 
   statusBadge: {
-    marginTop: 10,
     alignSelf: 'flex-start',
     backgroundColor: '#E8F5E9',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
     borderRadius: 20,
   },
 
   statusText: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 11,
+    fontWeight: '700',
     color: GREEN,
   },
 
-  topRow: {
-    flexDirection: 'row',
-  },
-
-  image: {
-    // flex:1,
-    width: 125,
-    height: 125,
-    borderRadius: 14,
-    backgroundColor: '#fff', //'#F6F6F6'
-    objectFit:'cover',
-  },
-
-  info: {
-    flex: 1,
-    marginLeft: 12,
-    paddingRight: 25,
-  },
-
-  priceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: 2,
-  },
-
   actions: {
-    justifyContent: '',
+    gap: 6,
+    marginLeft: 8,
   },
 
   iconBtn: {
     backgroundColor: '#FDECEA',
     padding: 8,
     borderRadius: 8,
-    marginBottom: 6,
+  },
+
+  /* ── DIVIDER ── */
+  divider: {
+    height: 1,
+    backgroundColor: '#F0F0F0',
+    marginVertical: 12,
+  },
+
+  /* ── PRICE GRID ── */
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+
+  priceItem: {
+    width: '33.33%',          // ✅ 3 columns
+    marginBottom: 10,
+    paddingRight: 8,
+  },
+
+  priceLabel: {
+    fontSize: 11,
+    color: GRAY,
+    marginBottom: 2,
+  },
+
+  priceValue: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#212121',
   },
 });
 

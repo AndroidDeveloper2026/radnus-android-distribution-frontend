@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,44 +7,46 @@ import {
   Alert,
   Image,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import { Search, X } from 'lucide-react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProducts, reduceStock } from '../../services/features/products/productSlice';
 import styles from './OrderCartStyle';
 import Header from '../../components/Header';
 
 const userRole = 'fse';
 
 const OrderCart = ({ navigation, route }) => {
-  // ✅ Accept cartItems passed from ProductList, fallback to default sample data
-  const initialCart = route?.params?.cartItems ?? [
-    {
-      id: 1,
-      name: 'Fast Charger 25W',
-      sku: 'FC-25W-01',
-      retailerPrice: 850,
-      distributorPrice: 780,
-      mrp: 999,
-      qty: 5,
-      moq: 5,
-      image:
-        'https://www.portronics.com/cdn/shop/files/Portronics_Adapto_100_Multiport_100w_Charger.png?v=1738651493',
-    },
-    {
-      id: 2,
-      name: 'Type-C Cable 1.5m',
-      sku: 'TC-CABLE-15',
-      retailerPrice: 320,
-      distributorPrice: 290,
-      mrp: 399,
-      qty: 10,
-      moq: 10,
-      image:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSr-qYBo49olQ7YpjOk9oO2t7j-sKiEB1TETw&s',
-    },
-  ];
+  const dispatch = useDispatch();
+  const { list: products, loading } = useSelector((state) => state.products);
 
+  useEffect(() => {
+    dispatch(fetchProducts());
+  }, []);
+
+  const mapProducts = (list) =>
+    list.map((p) => ({
+      id: p._id,
+      name: p.name ?? 'Unnamed Product',
+      sku: p.sku ?? '-',
+      retailerPrice: Number(p.retailerPrice) || 0,
+      distributorPrice: Number(p.distributorPrice) || 0,
+      mrp: Number(p.mrp) || 0,
+      qty: 0,                          // ✅ always start at 0
+      moq: Number(p.moq) || 1,
+      image: p.image ?? null,
+    }));
+
+  const initialCart = route?.params?.cartItems ?? mapProducts(products);
   const [cart, setCart] = useState(initialCart);
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    if (!route?.params?.cartItems && products.length > 0) {
+      setCart(mapProducts(products));
+    }
+  }, [products]);
 
   const getPrice = (item) => item.retailerPrice;
 
@@ -63,10 +65,7 @@ const OrderCart = ({ navigation, route }) => {
       prev.map((item) => {
         if (item.id === id) {
           let newQty = type === 'inc' ? item.qty + 1 : item.qty - 1;
-          if (newQty < item.moq) {
-            Alert.alert('MOQ Rule', `Minimum order quantity is ${item.moq}`);
-            return item;
-          }
+          if (newQty < 0) return item;  // ✅ just prevent going below 0
           return { ...item, qty: newQty };
         }
         return item;
@@ -74,24 +73,52 @@ const OrderCart = ({ navigation, route }) => {
     );
   };
 
-  // ✅ Total always from full cart, not filtered
-  const totalAmount = cart.reduce(
-    (sum, item) => sum + getPrice(item) * item.qty,
-    0,
-  );
+  // ✅ Fix: ensure each price is a valid number before multiplying
+  const totalAmount = cart.reduce((sum, item) => {
+    const price = Number(getPrice(item)) || 0;
+    const qty = Number(item.qty) || 0;
+    return sum + price * qty;
+  }, 0);
 
-  const placeOrder = () => {
+  // const placeOrder = () => {
+  //   navigation.navigate('OrderSuccess', {
+  //     invoiceNumber: 'INV-' + Date.now(),
+  //     items: cart,
+  //     grandTotal: totalAmount,
+  //     paymentMode: 'cash',
+  //     date: new Date().toISOString(),
+  //   });
+  // };
+
+const placeOrder = async () => {
+  // ✅ Filter only items with qty > 0
+  const orderedItems = cart.filter((item) => item.qty > 0);
+
+  if (orderedItems.length === 0) {
+    Alert.alert('Empty Order', 'Please add at least one item before placing order.');
+    return;
+  }
+
+  try {
+    // ✅ Reduce stock in MongoDB first
+    await dispatch(reduceStock(orderedItems)).unwrap();
+
+    // ✅ Then navigate to OrderSuccess
     navigation.navigate('OrderSuccess', {
       invoiceNumber: 'INV-' + Date.now(),
-      items: cart,
+      items: orderedItems,       // ✅ only ordered items
       grandTotal: totalAmount,
       paymentMode: 'cash',
       date: new Date().toISOString(),
     });
-  };
+  } catch (err) {
+    Alert.alert('Order Failed', err || 'Could not place order. Try again.');
+  }
+};
 
   return (
-    <View style={styles.container}>
+    // ✅ Fix: flex:1 ensures footer sticks to bottom with no gap
+    <View style={[styles.container, { flex: 1 }]}>
       <Header title={'Order Cart'} />
 
       {/* ── Search Field ── */}
@@ -122,65 +149,95 @@ const OrderCart = ({ navigation, route }) => {
         )}
       </View>
 
-      <ScrollView>
-        <View style={styles.content}>
-          {filteredCart.length === 0 ? (
-            <View style={styles.emptyBox}>
-              <Search size={36} color="#ddd" strokeWidth={1.5} />
-              <Text style={styles.emptyText}>
-                No items match "{searchQuery}"
-              </Text>
-            </View>
-          ) : (
-            filteredCart.map((item) => (
-              <View key={item.id} style={styles.card}>
-                <View style={styles.cardRow}>
-                  <View style={styles.imageBox}>
-                    <Image
-                      source={{ uri: item.image }}
-                      style={styles.productImage}
-                    />
-                  </View>
-
-                  <View style={styles.infoContainer}>
-                    <Text style={styles.productName}>{item.name}</Text>
-                    <Text style={styles.sku}>SKU: {item.sku}</Text>
-                    <View style={styles.row}>
-                      <Text style={styles.price}>₹{getPrice(item)}</Text>
+      {/* ✅ Loading spinner while fetching */}
+      {loading ? (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#e53935" />
+        </View>
+      ) : (
+        <ScrollView contentContainerStyle={{ paddingBottom: 8 }}>
+          <View style={styles.content}>
+            {filteredCart.length === 0 ? (
+              <View style={styles.emptyBox}>
+                <Search size={36} color="#ddd" strokeWidth={1.5} />
+                <Text style={styles.emptyText}>
+                  No items match "{searchQuery}"
+                </Text>
+              </View>
+            ) : (
+              filteredCart.map((item) => (
+                <View key={item.id} style={styles.card}>
+                  <View style={styles.cardRow}>
+                    <View style={styles.imageBox}>
+                      {item.image ? (
+                        <Image
+                          source={{ uri: item.image }}
+                          style={styles.productImage}
+                        />
+                      ) : (
+                        // ✅ Fallback if no image
+                        <View
+                          style={[
+                            styles.productImage,
+                            {
+                              backgroundColor: '#f0f0f0',
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                            },
+                          ]}
+                        >
+                          <Text style={{ fontSize: 10, color: '#aaa' }}>No Image</Text>
+                        </View>
+                      )}
                     </View>
-                    <Text style={styles.moqText}>MOQ: {item.moq} units</Text>
-                  </View>
 
-                  <View style={styles.stepperBtn}>
-                    <View style={styles.qtyBox}>
-                      <TouchableOpacity
-                        style={styles.qtyBtn}
-                        onPress={() => updateQty(item.id, 'dec')}
-                      >
-                        <Text>-</Text>
-                      </TouchableOpacity>
+                    <View style={styles.infoContainer}>
+                      <Text style={styles.productName}>{item.name}</Text>
+                      <Text style={styles.sku}>SKU: {item.sku}</Text>
+                      <View style={styles.row}>
+                        {/* ✅ Fix: toLocaleString prevents NaN display */}
+                        <Text style={styles.price}>
+                          ₹{getPrice(item).toLocaleString('en-IN')}
+                        </Text>
+                      </View>
+                      <Text style={styles.moqText}>MOQ: {item.moq} units</Text>
+                    </View>
 
-                      <Text style={styles.qtyText}>{item.qty}</Text>
+                    <View style={styles.stepperBtn}>
+                      <View style={styles.qtyBox}>
+                        <TouchableOpacity
+                          style={styles.qtyBtn}
+                          onPress={() => updateQty(item.id, 'dec')}
+                        >
+                          <Text>-</Text>
+                        </TouchableOpacity>
 
-                      <TouchableOpacity
-                        style={styles.qtyBtn}
-                        onPress={() => updateQty(item.id, 'inc')}
-                      >
-                        <Text>+</Text>
-                      </TouchableOpacity>
+                        <Text style={styles.qtyText}>{item.qty}</Text>
+
+                        <TouchableOpacity
+                          style={styles.qtyBtn}
+                          onPress={() => updateQty(item.id, 'inc')}
+                        >
+                          <Text>+</Text>
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   </View>
                 </View>
-              </View>
-            ))
-          )}
-        </View>
-      </ScrollView>
+              ))
+            )}
+          </View>
+        </ScrollView>
+      )}
 
-      <View style={styles.footer}>
+      {/* ✅ Fix gap: removed any margin/padding that caused space above device nav */}
+      <View style={[styles.footer, { marginBottom: 0, paddingBottom: 16 }]}>
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>Total</Text>
-          <Text style={styles.totalValue}>₹{totalAmount}</Text>
+          {/* ✅ Fix: formatted total, never NaN */}
+          <Text style={styles.totalValue}>
+            ₹{totalAmount.toLocaleString('en-IN')}
+          </Text>
         </View>
 
         <TouchableOpacity style={styles.placeOrderBtn} onPress={placeOrder}>
