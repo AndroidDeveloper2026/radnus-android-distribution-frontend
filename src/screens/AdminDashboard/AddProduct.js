@@ -27,6 +27,9 @@ const validationSchema = Yup.object().shape({
     .required('Item cost required'),
   gst: Yup.number().typeError('GST must be number').required('GST required'),
   moq: Yup.number().typeError('MOQ must be number').required('MOQ required'),
+  walkinPrice: Yup.number()
+    .typeError('Walk-in price must be number')
+    .required('Walk-in price required'),
 });
 
 const AddProduct = ({ navigation }) => {
@@ -66,6 +69,7 @@ const AddProduct = ({ navigation }) => {
           itemCost: '',
           gst: '',
           moq: '',
+          walkinPrice: '',
         }}
         validationSchema={validationSchema}
         onSubmit={async values => {
@@ -84,9 +88,10 @@ const AddProduct = ({ navigation }) => {
             formData.append('mrp', values.mrp);
             formData.append('distributorPrice', values.distributorPrice);
             formData.append('retailerPrice', values.retailerPrice);
-            formData.append('itemCost', values.itemCost);  
+            formData.append('itemCost', values.itemCost);
             formData.append('gst', values.gst);
             formData.append('moq', values.moq);
+            formData.append('walkinPrice', values.walkinPrice);
 
             if (image) {
               formData.append('image', {
@@ -204,15 +209,15 @@ const AddProduct = ({ navigation }) => {
                 <Text style={{ color: 'red' }}>{errors.sku}</Text>
               )}
 
-              {/* MRP */}
+              {/* ITEM COST */}
               <Input
-                label="MRP (₹)"
+                label="Item Cost (₹)"
                 keyboardType="numeric"
-                value={values.mrp}
-                onChangeText={handleChange('mrp')}
+                value={values.itemCost}
+                onChangeText={handleChange('itemCost')}
               />
-              {errors.mrp && touched.mrp && (
-                <Text style={{ color: 'red' }}>{errors.mrp}</Text>
+              {errors.itemCost && touched.itemCost && (
+                <Text style={{ color: 'red' }}>{errors.itemCost}</Text>
               )}
 
               {/* DISTRIBUTOR PRICE */}
@@ -237,15 +242,26 @@ const AddProduct = ({ navigation }) => {
                 <Text style={{ color: 'red' }}>{errors.retailerPrice}</Text>
               )}
 
-              {/* ITEM COST */}
+              {/* WALK-IN PRICE */}
               <Input
-                label="Item Cost (₹)"
+                label="Walk-in Price (₹)"
                 keyboardType="numeric"
-                value={values.itemCost}
-                onChangeText={handleChange('itemCost')}
+                value={values.walkinPrice}
+                onChangeText={handleChange('walkinPrice')}
               />
-              {errors.itemCost && touched.itemCost && (
-                <Text style={{ color: 'red' }}>{errors.itemCost}</Text>
+              {errors.walkinPrice && touched.walkinPrice && (
+                <Text style={{ color: 'red' }}>{errors.walkinPrice}</Text>
+              )}
+
+              {/* MRP */}
+              <Input
+                label="MRP (₹)"
+                keyboardType="numeric"
+                value={values.mrp}
+                onChangeText={handleChange('mrp')}
+              />
+              {errors.mrp && touched.mrp && (
+                <Text style={{ color: 'red' }}>{errors.mrp}</Text>
               )}
 
               {/* GST */}

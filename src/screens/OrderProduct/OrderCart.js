@@ -11,29 +11,34 @@ import {
 } from 'react-native';
 import { Search, X } from 'lucide-react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchProducts, reduceStock } from '../../services/features/products/productSlice';
+import {
+  fetchProducts,
+  reduceStock,
+} from '../../services/features/products/productSlice';
 import styles from './OrderCartStyle';
 import Header from '../../components/Header';
+import API from '../../services/API/api';
 
-const userRole = 'fse';
+// const userRole = 'fse';
 
 const OrderCart = ({ navigation, route }) => {
   const dispatch = useDispatch();
-  const { list: products, loading } = useSelector((state) => state.products);
+  const user = useSelector(state => state.auth.user);
+  const { list: products, loading } = useSelector(state => state.products);
 
   useEffect(() => {
     dispatch(fetchProducts());
-  }, []);
+  }, [dispatch]);
 
-  const mapProducts = (list) =>
-    list.map((p) => ({
+  const mapProducts = list =>
+    list.map(p => ({
       id: p._id,
       name: p.name ?? 'Unnamed Product',
       sku: p.sku ?? '-',
       retailerPrice: Number(p.retailerPrice) || 0,
       distributorPrice: Number(p.distributorPrice) || 0,
       mrp: Number(p.mrp) || 0,
-      qty: 0,                          // ✅ always start at 0
+      qty: 0, // ✅ always start at 0
       moq: Number(p.moq) || 1,
       image: p.image ?? null,
     }));
@@ -48,24 +53,24 @@ const OrderCart = ({ navigation, route }) => {
     }
   }, [products]);
 
-  const getPrice = (item) => item.retailerPrice;
+  const getPrice = item => item.retailerPrice;
 
   const filteredCart = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     if (!query) return cart;
     return cart.filter(
-      (item) =>
+      item =>
         item.name.toLowerCase().includes(query) ||
         item.sku.toLowerCase().includes(query),
     );
   }, [cart, searchQuery]);
 
   const updateQty = (id, type) => {
-    setCart((prev) =>
-      prev.map((item) => {
+    setCart(prev =>
+      prev.map(item => {
         if (item.id === id) {
           let newQty = type === 'inc' ? item.qty + 1 : item.qty - 1;
-          if (newQty < 0) return item;  // ✅ just prevent going below 0
+          if (newQty < 0) return item; // ✅ just prevent going below 0
           return { ...item, qty: newQty };
         }
         return item;
@@ -80,51 +85,101 @@ const OrderCart = ({ navigation, route }) => {
     return sum + price * qty;
   }, 0);
 
-  // const placeOrder = () => {
-  //   navigation.navigate('OrderSuccess', {
-  //     invoiceNumber: 'INV-' + Date.now(),
-  //     items: cart,
-  //     grandTotal: totalAmount,
-  //     paymentMode: 'cash',
-  //     date: new Date().toISOString(),
-  //   });
+  // const placeOrder = async () => {
+  //   // ✅ Filter only items with qty > 0
+  //   // const orderedItems = cart.filter((item) => item.qty > 0);
+
+  //   const orderedItems = cart
+  //     .filter(item => item.qty > 0)
+  //     .map(item => ({
+  //       ...item,
+  //       productId: item.id, // ✅ backend expects 'productId'
+  //     }));
+
+  //   if (orderedItems.length === 0) {
+  //     Alert.alert(
+  //       'Empty Order',
+  //       'Please add at least one item before placing order.',
+  //     );
+  //     return;
+  //   }
+
+  //   try {
+  //     // ✅ Reduce stock in MongoDB first
+  //     await dispatch(reduceStock(orderedItems)).unwrap();
+
+  //     // ✅ Then navigate to OrderSuccess
+  //     navigation.navigate('OrderSuccess', {
+  //       invoiceNumber: 'INV-' + Date.now(),
+  //       items: orderedItems, // ✅ only ordered items
+  //       grandTotal: totalAmount,
+  //       paymentMode: 'cash',
+  //       date: new Date().toISOString(),
+  //     });
+  //   } catch (err) {
+  //     Alert.alert('Order Failed', err || 'Could not place order. Try again.');
+  //   }
   // };
 
-const placeOrder = async () => {
-  // ✅ Filter only items with qty > 0
-  const orderedItems = cart.filter((item) => item.qty > 0);
+  const placeOrder = async () => {
+  const orderedItems = cart
+    .filter(item => item.qty > 0)
+    .map(item => ({
+      productId: item.id,
+      name: item.name,
+      qty: item.qty,
+      price: item.retailerPrice,
+    }));
 
   if (orderedItems.length === 0) {
-    Alert.alert('Empty Order', 'Please add at least one item before placing order.');
+    Alert.alert('Empty Order', 'Please add at least one item.');
     return;
   }
 
   try {
-    // ✅ Reduce stock in MongoDB first
+    // ✅ Reduce stock first
     await dispatch(reduceStock(orderedItems)).unwrap();
 
-    // ✅ Then navigate to OrderSuccess
+    // ✅ CALL BACKEND (UPDATED)
+    const res = await API.post("/api/invoices", {
+      billerName: user?.name || "Unknown", // ✅ IMPORTANT CHANGE
+
+      items: orderedItems,
+      totalAmount: totalAmount,
+      paymentMode: "cash",
+    });
+
+    const invoiceNumber = res.data.invoice.invoiceNumber;
+
+    // ✅ Navigate
     navigation.navigate('OrderSuccess', {
-      invoiceNumber: 'INV-' + Date.now(),
-      items: orderedItems,       // ✅ only ordered items
+      invoiceNumber,
+      items: orderedItems,
       grandTotal: totalAmount,
       paymentMode: 'cash',
       date: new Date().toISOString(),
     });
+
   } catch (err) {
-    Alert.alert('Order Failed', err || 'Could not place order. Try again.');
+    console.log(err);
+    Alert.alert("Error", err.message || "Order failed");
   }
 };
 
   return (
-    // ✅ Fix: flex:1 ensures footer sticks to bottom with no gap
+    // Fix: flex:1 ensures footer sticks to bottom with no gap
     <View style={[styles.container, { flex: 1 }]}>
       <Header title={'Order Cart'} />
 
       {/* ── Search Field ── */}
       <View style={styles.wrapper}>
         <View style={styles.inputBox}>
-          <Search size={16} color="#999" strokeWidth={2} style={{ marginRight: 8 }} />
+          <Search
+            size={16}
+            color="#999"
+            strokeWidth={2}
+            style={{ marginRight: 8 }}
+          />
           <TextInput
             style={styles.input}
             placeholder="Search by name or SKU…"
@@ -144,14 +199,17 @@ const placeOrder = async () => {
         </View>
         {searchQuery.length > 0 && (
           <Text style={styles.resultCount}>
-            {filteredCart.length} result{filteredCart.length !== 1 ? 's' : ''} found
+            {filteredCart.length} result{filteredCart.length !== 1 ? 's' : ''}{' '}
+            found
           </Text>
         )}
       </View>
 
-      {/* ✅ Loading spinner while fetching */}
+      {/* Loading spinner while fetching */}
       {loading ? (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
           <ActivityIndicator size="large" color="#e53935" />
         </View>
       ) : (
@@ -165,7 +223,7 @@ const placeOrder = async () => {
                 </Text>
               </View>
             ) : (
-              filteredCart.map((item) => (
+              filteredCart.map(item => (
                 <View key={item.id} style={styles.card}>
                   <View style={styles.cardRow}>
                     <View style={styles.imageBox}>
@@ -186,7 +244,9 @@ const placeOrder = async () => {
                             },
                           ]}
                         >
-                          <Text style={{ fontSize: 10, color: '#aaa' }}>No Image</Text>
+                          <Text style={{ fontSize: 10, color: '#aaa' }}>
+                            No Image
+                          </Text>
                         </View>
                       )}
                     </View>
@@ -195,12 +255,14 @@ const placeOrder = async () => {
                       <Text style={styles.productName}>{item.name}</Text>
                       <Text style={styles.sku}>SKU: {item.sku}</Text>
                       <View style={styles.row}>
-                        {/* ✅ Fix: toLocaleString prevents NaN display */}
+                        {/* Fix: toLocaleString prevents NaN display */}
                         <Text style={styles.price}>
                           ₹{getPrice(item).toLocaleString('en-IN')}
                         </Text>
                       </View>
-                      <Text style={styles.moqText}>MOQ: {item.moq} units</Text>
+                      <Text style={styles.moqText}>
+                        Stock: {item.moq} units
+                      </Text>
                     </View>
 
                     <View style={styles.stepperBtn}>
@@ -230,11 +292,11 @@ const placeOrder = async () => {
         </ScrollView>
       )}
 
-      {/* ✅ Fix gap: removed any margin/padding that caused space above device nav */}
+      {/* Fix gap: removed any margin/padding that caused space above device nav */}
       <View style={[styles.footer, { marginBottom: 0, paddingBottom: 16 }]}>
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>Total</Text>
-          {/* ✅ Fix: formatted total, never NaN */}
+          {/* Fix: formatted total, never NaN */}
           <Text style={styles.totalValue}>
             ₹{totalAmount.toLocaleString('en-IN')}
           </Text>

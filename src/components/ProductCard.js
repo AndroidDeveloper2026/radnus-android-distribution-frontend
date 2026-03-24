@@ -9,7 +9,6 @@ const GRAY = '#757575';
 const ProductCard = ({ item, onEdit, onDelete }) => {
   return (
     <View style={styles.card}>
-
       {/* TOP — image + actions */}
       <View style={styles.topRow}>
         <Image
@@ -18,13 +17,17 @@ const ProductCard = ({ item, onEdit, onDelete }) => {
         />
 
         <View style={styles.info}>
-          <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>
+          <Text style={styles.productName} numberOfLines={2}>
+            {item.name}
+          </Text>
           <Text style={styles.sku}>SKU: {item.sku}</Text>
+          <Text style={styles.stockText}>Stock: {item.moq ?? 0}</Text>
 
           {/* STATUS BADGE */}
           <View style={styles.statusBadge}>
             <Text style={styles.statusText}>{item.status}</Text>
           </View>
+          
         </View>
 
         {/* ACTIONS */}
@@ -43,14 +46,17 @@ const ProductCard = ({ item, onEdit, onDelete }) => {
 
       {/* PRICE GRID — 2 columns */}
       <View style={styles.grid}>
-        <PriceItem label="Item Cost"       value={`₹${item.itemCost ?? '—'}`} />
-        <PriceItem label="Distributor"     value={`₹${item.distributorPrice ?? '—'}`} />
-        <PriceItem label="Retailer"        value={`₹${item.retailerPrice ?? '—'}`} />
-        <PriceItem label="MRP"             value={`₹${item.mrp ?? '—'}`} />
-        <PriceItem label="GST"             value={`${item.gst ?? 0}%`} />
-        <PriceItem label="MOQ"             value={`${item.moq ?? 1}`} />
+        <PriceItem label="Item Cost" value={`₹${item.itemCost ?? 0}`} />
+        <PriceItem
+          label="Distributor"
+          value={`₹${item.distributorPrice ?? 0}`}
+        />
+        <PriceItem label="Retailer" value={`₹${item.retailerPrice ?? 0}`} />
+        <PriceItem label="Walkin" value={`₹${item.walkinPrice ?? 0}`} />
+        <PriceItem label="MRP" value={`₹${item.mrp ?? 0}`} />
+        <PriceItem label="GST" value={`${item.gst ?? 0}%`} />
+        {/* <PriceItem label="MOQ"             value={`${item.moq ?? 1}`} /> */}
       </View>
-
     </View>
   );
 };
@@ -106,7 +112,7 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     color: GRAY,
     marginTop: 3,
-    marginBottom: 8,
+    marginBottom: 5,
   },
 
   statusBadge: {
@@ -121,6 +127,13 @@ export const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
     color: GREEN,
+  },
+
+  stockText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: GREEN,
+    marginBottom: 5,
   },
 
   actions: {
@@ -148,7 +161,7 @@ export const styles = StyleSheet.create({
   },
 
   priceItem: {
-    width: '33.33%',          // ✅ 3 columns
+    width: '33.33%', // ✅ 3 columns
     marginBottom: 10,
     paddingRight: 8,
   },

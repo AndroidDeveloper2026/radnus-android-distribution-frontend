@@ -1,8 +1,17 @@
 import React, { useRef, useEffect, useState } from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet, Animated,
-  TextInput, Modal, ScrollView, KeyboardAvoidingView,
-  Platform, ActivityIndicator, Alert,
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+  TextInput,
+  Modal,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -13,24 +22,40 @@ import {
 } from '../../services/features/customer/customerSlice.js';
 import LottieView from 'lottie-react-native';
 import {
-  FileText, ChevronDown, X, User,
-  Truck, Calendar, Phone, UserPlus, CheckCircle,
-  MapPin, Building2, AlertTriangle, WifiOff,
+  FileText,
+  ChevronDown,
+  X,
+  User,
+  Truck,
+  Calendar,
+  Phone,
+  UserPlus,
+  CheckCircle,
+  MapPin,
+  Building2,
+  AlertTriangle,
+  WifiOff,
 } from 'lucide-react-native';
 import Header from '../../components/Header';
 import styles from './OrderSucessStyle';
 
 const SALESPERSONS = [
-  { id: 1, name: 'Arjun Kumar' },
-  { id: 2, name: 'Priya Sharma' },
-  { id: 3, name: 'Rahul Verma' },
-  { id: 4, name: 'Sneha Nair' },
-  { id: 5, name: 'Manoj Das' },
+  { id: 1, name: 'SHANTHI' },
+  { id: 2, name: 'ABINAYA' },
+  { id: 3, name: 'UMA MAGESWARI' },
+  { id: 4, name: 'HARIVARTHINI' },
+  { id: 5, name: 'UMA MAM' },
+  { id: 6, name: 'SHARMILA' },
+  { id: 7, name: 'MOHANA AMBIGAI' },
+  { id: 8, name: 'KALAIVANI' },
+  { id: 9, name: 'SUNDER SIR' },
 ];
 
-const formatDate = (iso) =>
+const formatDate = iso =>
   new Date(iso).toLocaleDateString('en-IN', {
-    day: '2-digit', month: 'short', year: 'numeric',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
   });
 
 // ─────────────────────────────────────────────────────────
@@ -38,9 +63,11 @@ const OrderSuccessScreen = ({ route, navigation }) => {
   const { invoiceNumber, grandTotal, paymentMode, items, date } =
     route.params || {};
 
+  const [referenceNo, setReferenceNo] = useState('');
+
   const dispatch = useDispatch();
   const {
-    data:        customer,
+    data: customer,
     lookupState,
     addState,
     error,
@@ -52,33 +79,43 @@ const OrderSuccessScreen = ({ route, navigation }) => {
 
   // ── Add Customer Form ──────────────────────────────────
   const [addModalVisible, setAddModalVisible] = useState(false);
-  const [newName,         setNewName]         = useState('');
-  const [newAddress,      setNewAddress]      = useState('');
-  const [newCity,         setNewCity]         = useState('');
-  const [newState,        setNewState]        = useState('');
+  const [newName, setNewName] = useState('');
+  const [newAddress, setNewAddress] = useState('');
+  const [newCity, setNewCity] = useState('');
+  const [newState, setNewState] = useState('');
 
   // ── Other Form ─────────────────────────────────────────
   const [courierCharge, setCourierCharge] = useState('80');
-  const [selectedSP,    setSelectedSP]    = useState(null);
-  const [dropdownOpen,  setDropdownOpen]  = useState(false);
+  const [selectedSP, setSelectedSP] = useState(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   // ── Confirm Modal ──────────────────────────────────────
   const [confirmVisible, setConfirmVisible] = useState(false);
 
   // ── Animations ─────────────────────────────────────────
-  const fadeAnim  = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
-  const fadeBg    = useRef(new Animated.Value(0)).current;
+  const fadeBg = useRef(new Animated.Value(0)).current;
 
   // ── Entry animation + cleanup on unmount ───────────────
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(fadeAnim,  { toValue: 1, duration: 500, useNativeDriver: true }),
-      Animated.timing(slideAnim, { toValue: 0, duration: 500, useNativeDriver: true }),
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }),
     ]).start();
-    return () => { dispatch(resetCustomer()); };
+    return () => {
+      dispatch(resetCustomer());
+    };
   }, [dispatch]);
 
   // ── Auto-lookup when exactly 10 digits entered ─────────
@@ -111,24 +148,43 @@ const OrderSuccessScreen = ({ route, navigation }) => {
   const triggerShake = () => {
     shakeAnim.setValue(0);
     Animated.sequence([
-      Animated.timing(shakeAnim, { toValue: 10,  duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: -10, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: 8,   duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: -8,  duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: 0,   duration: 50, useNativeDriver: true }),
+      Animated.timing(shakeAnim, {
+        toValue: 10,
+        duration: 50,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shakeAnim, {
+        toValue: -10,
+        duration: 50,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shakeAnim, {
+        toValue: 8,
+        duration: 50,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shakeAnim, {
+        toValue: -8,
+        duration: 50,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shakeAnim, {
+        toValue: 0,
+        duration: 50,
+        useNativeDriver: true,
+      }),
     ]).start();
   };
 
   // ── View Invoice — validation gate ─────────────────────
   const handleViewInvoice = () => {
-
     // 1. Phone empty or incomplete
     if (buyerPhone.length < 10) {
       setPhoneError(true);
       triggerShake();
       Alert.alert(
         'Phone Required',
-        'Please enter a valid 10-digit phone number to continue.'
+        'Please enter a valid 10-digit phone number to continue.',
       );
       return;
     }
@@ -149,7 +205,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
         [
           { text: '+ Add Customer', onPress: () => setAddModalVisible(true) },
           { text: 'Cancel', style: 'cancel' },
-        ]
+        ],
       );
       return;
     }
@@ -159,7 +215,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
       setPhoneError(true);
       Alert.alert(
         'Connection Error',
-        'Could not reach server. Please check your connection and try again.'
+        'Could not reach server. Please check your connection and try again.',
       );
       return;
     }
@@ -177,28 +233,47 @@ const OrderSuccessScreen = ({ route, navigation }) => {
       Alert.alert('Required', 'Customer name is required.');
       return;
     }
-    dispatch(addCustomer({
-      phone:   buyerPhone,
-      name:    newName.trim(),
-      address: newAddress.trim(),
-      city:    newCity.trim(),
-      state:   newState.trim(),
-    }));
+    dispatch(
+      addCustomer({
+        phone: buyerPhone,
+        name: newName.trim(),
+        address: newAddress.trim(),
+        city: newCity.trim(),
+        state: newState.trim(),
+      }),
+    );
   };
 
   // ── Confirm Modal ──────────────────────────────────────
   const openConfirmModal = () => {
     setConfirmVisible(true);
     Animated.parallel([
-      Animated.timing(fadeBg,    { toValue: 1, duration: 300, useNativeDriver: true }),
-      Animated.spring(scaleAnim, { toValue: 1, tension: 70, friction: 10, useNativeDriver: true }),
+      Animated.timing(fadeBg, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 70,
+        friction: 10,
+        useNativeDriver: true,
+      }),
     ]).start();
   };
 
   const closeConfirmModal = () => {
     Animated.parallel([
-      Animated.timing(fadeBg,    { toValue: 0, duration: 200, useNativeDriver: true }),
-      Animated.timing(scaleAnim, { toValue: 0.8, duration: 200, useNativeDriver: true }),
+      Animated.timing(fadeBg, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 0.8,
+        duration: 200,
+        useNativeDriver: true,
+      }),
     ]).start(() => setConfirmVisible(false));
   };
 
@@ -209,16 +284,17 @@ const OrderSuccessScreen = ({ route, navigation }) => {
       navigation.navigate('InvoiceScreen', {
         invoiceNumber,
         items,
-        total:         grandTotal,
+        total: grandTotal,
         paymentMode,
         date,
-        buyerName:     customer?.name    || '',
+        buyerName: customer?.name || '',
         buyerPhone,
-        buyerAddress:  customer?.address || '',
-        buyerCity:     customer?.city    || '',
-        buyerState:    customer?.state   || '',
+        buyerAddress: customer?.address || '',
+        buyerCity: customer?.city || '',
+        buyerState: customer?.state || '',
         courierCharge: parseFloat(courierCharge) || 0,
-        salesperson:   selectedSP?.name  || '',
+        salesperson: selectedSP?.name || '',
+        referenceNo: referenceNo,
       });
     }, 300);
   };
@@ -228,7 +304,6 @@ const OrderSuccessScreen = ({ route, navigation }) => {
 
   // ── Phone Lookup Result Card ───────────────────────────
   const renderLookupResult = () => {
-
     // Loading
     if (lookupState === 'loading') {
       return (
@@ -245,7 +320,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
         <View style={styles.foundCard}>
           <View style={styles.foundCardTop}>
             <CheckCircle size={15} color="#16a34a" strokeWidth={2.5} />
-            <Text style={styles.foundLabel}>  Customer Found</Text>
+            <Text style={styles.foundLabel}> Customer Found</Text>
             <TouchableOpacity
               style={styles.changeBtn}
               onPress={() => {
@@ -263,15 +338,16 @@ const OrderSuccessScreen = ({ route, navigation }) => {
           {customer?.address ? (
             <View style={ls.subRow}>
               <MapPin size={12} color="#555" strokeWidth={2} />
-              <Text style={styles.customerSub}>  {customer.address}</Text>
+              <Text style={styles.customerSub}> {customer.address}</Text>
             </View>
           ) : null}
 
-          {(customer?.city || customer?.state) ? (
+          {customer?.city || customer?.state ? (
             <View style={ls.subRow}>
               <Building2 size={12} color="#555" strokeWidth={2} />
               <Text style={styles.customerSub}>
-                {'  '}{[customer.city, customer.state].filter(Boolean).join(', ')}
+                {'  '}
+                {[customer.city, customer.state].filter(Boolean).join(', ')}
               </Text>
             </View>
           ) : null}
@@ -294,7 +370,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
             onPress={() => setAddModalVisible(true)}
           >
             <UserPlus size={15} color="#fff" strokeWidth={2} />
-            <Text style={styles.addBtnText}>  Add Customer Details</Text>
+            <Text style={styles.addBtnText}> Add Customer Details</Text>
           </TouchableOpacity>
         </View>
       );
@@ -314,7 +390,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
             style={[styles.addBtn, { backgroundColor: '#dc2626' }]}
             onPress={() => dispatch(lookupCustomer(buyerPhone))}
           >
-            <Text style={styles.addBtnText}>  Retry</Text>
+            <Text style={styles.addBtnText}> Retry</Text>
           </TouchableOpacity>
         </View>
       );
@@ -352,7 +428,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
           >
             {/* ══ Order Summary Box ══ */}
             <View style={styles.infoBox}>
-              <Row label="Invoice No"   value={invoiceNumber} />
+              <Row label="Invoice No" value={invoiceNumber} />
               <Divider />
               <Row label="Payment Mode" value={paymentMode?.toUpperCase()} />
               <Divider />
@@ -373,7 +449,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
               <View style={styles.fieldGroup}>
                 <View style={styles.labelRow}>
                   <Calendar size={14} color="#16a34a" strokeWidth={2} />
-                  <Text style={styles.label}>  Invoice Date</Text>
+                  <Text style={styles.label}> Invoice Date</Text>
                 </View>
                 <View style={styles.readonlyField}>
                   <Text style={styles.readonlyText}>
@@ -386,7 +462,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
               <View style={styles.fieldGroup}>
                 <View style={styles.labelRow}>
                   <User size={14} color="#16a34a" strokeWidth={2} />
-                  <Text style={styles.label}>  Salesperson</Text>
+                  <Text style={styles.label}> Salesperson</Text>
                 </View>
                 <TouchableOpacity
                   style={styles.dropdown}
@@ -439,6 +515,21 @@ const OrderSuccessScreen = ({ route, navigation }) => {
                 )}
               </View>
 
+              {/* Reference No */}
+              <View style={styles.fieldGroup}>
+                <View style={styles.labelRow}>
+                  <FileText size={14} color="#16a34a" strokeWidth={2} />
+                  <Text style={styles.label}> Reference No.</Text>
+                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="e.g. PO-12345"
+                  placeholderTextColor="#bbb"
+                  value={referenceNo}
+                  onChangeText={setReferenceNo}
+                />
+              </View>
+
               {/* ══ Phone Number + Live Lookup ══ */}
               <View style={styles.fieldGroup}>
                 <View style={styles.labelRow}>
@@ -448,10 +539,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
                     strokeWidth={2}
                   />
                   <Text
-                    style={[
-                      styles.label,
-                      phoneError && { color: '#dc2626' },
-                    ]}
+                    style={[styles.label, phoneError && { color: '#dc2626' }]}
                   >
                     {'  Phone Number '}
                     <Text style={{ color: '#dc2626' }}>*</Text>
@@ -472,7 +560,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
                     keyboardType="phone-pad"
                     maxLength={10}
                     value={buyerPhone}
-                    onChangeText={(t) => {
+                    onChangeText={t => {
                       setBuyerPhone(t);
                       setPhoneError(false);
                     }}
@@ -493,7 +581,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
               <View style={styles.fieldGroup}>
                 <View style={styles.labelRow}>
                   <Truck size={14} color="#16a34a" strokeWidth={2} />
-                  <Text style={styles.label}>  Courier Charge (₹)</Text>
+                  <Text style={styles.label}> Courier Charge (₹)</Text>
                 </View>
                 <TextInput
                   style={styles.input}
@@ -543,7 +631,6 @@ const OrderSuccessScreen = ({ route, navigation }) => {
             >
               <Text style={styles.ghostText}>Book Another Order</Text>
             </TouchableOpacity>
-
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -563,10 +650,9 @@ const OrderSuccessScreen = ({ route, navigation }) => {
           >
             <ScrollView keyboardShouldPersistTaps="handled">
               <View style={styles.sheetCard}>
-
                 <View style={styles.sheetHeader}>
                   <UserPlus size={18} color="#16a34a" strokeWidth={2} />
-                  <Text style={styles.sheetTitle}>  Add New Customer</Text>
+                  <Text style={styles.sheetTitle}> Add New Customer</Text>
                   <TouchableOpacity onPress={() => setAddModalVisible(false)}>
                     <X size={20} color="#888" strokeWidth={2} />
                   </TouchableOpacity>
@@ -574,7 +660,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
 
                 <View style={styles.phonePill}>
                   <Phone size={13} color="#16a34a" strokeWidth={2} />
-                  <Text style={styles.phonePillText}>  {buyerPhone}</Text>
+                  <Text style={styles.phonePillText}> {buyerPhone}</Text>
                 </View>
 
                 <TextInput
@@ -626,7 +712,6 @@ const OrderSuccessScreen = ({ route, navigation }) => {
                     <Text style={styles.saveBtnText}>Save Customer</Text>
                   )}
                 </TouchableOpacity>
-
               </View>
             </ScrollView>
           </KeyboardAvoidingView>
@@ -678,11 +763,11 @@ const OrderSuccessScreen = ({ route, navigation }) => {
             </Text>
 
             <View style={styles.popupInfoBox}>
-              <Row label="Invoice No"  value={invoiceNumber} />
+              <Row label="Invoice No" value={invoiceNumber} />
               <Divider />
-              <Row label="Buyer"       value={customer?.name || '—'} />
+              <Row label="Buyer" value={customer?.name || '—'} />
               <Divider />
-              <Row label="Phone"       value={buyerPhone || '—'} />
+              <Row label="Phone" value={buyerPhone || '—'} />
               <Divider />
 
               {/* ── Address — fixed alignment ── */}
@@ -712,19 +797,14 @@ const OrderSuccessScreen = ({ route, navigation }) => {
               />
             </View>
 
-            <TouchableOpacity
-              style={styles.primaryBtn}
-              onPress={goToInvoice}
-            >
+            <TouchableOpacity style={styles.primaryBtn} onPress={goToInvoice}>
               <FileText
                 size={18}
                 color="#fff"
                 strokeWidth={2}
                 style={{ marginRight: 8 }}
               />
-              <Text style={styles.primaryText}>
-                Confirm & Generate Invoice
-              </Text>
+              <Text style={styles.primaryText}>Confirm & Generate Invoice</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -733,7 +813,6 @@ const OrderSuccessScreen = ({ route, navigation }) => {
             >
               <Text style={styles.outlineText}>Go Back & Edit</Text>
             </TouchableOpacity>
-
           </Animated.View>
         </View>
       </Modal>
@@ -746,14 +825,14 @@ const ls = StyleSheet.create({
   // Icon + text row inside found card
   subRow: {
     flexDirection: 'row',
-    alignItems:    'center',
-    marginTop:     3,
+    alignItems: 'center',
+    marginTop: 3,
   },
   // Address text in confirm modal — right aligned, wraps properly
   addressValue: {
-    flex:       1,
-    textAlign:  'right',
-    flexWrap:   'wrap',
+    flex: 1,
+    textAlign: 'right',
+    flexWrap: 'wrap',
   },
 });
 
