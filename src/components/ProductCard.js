@@ -52,7 +52,7 @@ const ProductCard = ({ item, onEdit, onDelete }) => {
           value={`₹${item.distributorPrice ?? 0}`}
         />
         <PriceItem label="Retailer" value={`₹${item.retailerPrice ?? 0}`} />
-        <PriceItem label="Walkin" value={`₹${item.walkinPrice ?? 0}`} />
+        <PriceItem label="Walk-in" value={`₹${item.walkinPrice ?? 0}`} />
         <PriceItem label="MRP" value={`₹${item.mrp ?? 0}`} />
         <PriceItem label="GST" value={`${item.gst ?? 0}%`} />
         {/* <PriceItem label="MOQ"             value={`${item.moq ?? 1}`} /> */}

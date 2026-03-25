@@ -35,6 +35,8 @@ import {
   Building2,
   AlertTriangle,
   WifiOff,
+  CreditCard,
+  IndianRupee,
 } from 'lucide-react-native';
 import Header from '../../components/Header';
 import styles from './OrderSucessStyle';
@@ -58,10 +60,33 @@ const formatDate = iso =>
     year: 'numeric',
   });
 
+// Generate invoice number based on financial year
+const getInvoiceNumber = (invoiceNum) => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1; // Jan = 1
+  
+  // Financial year starts in April
+  let financialYear;
+  if (month >= 4) {
+    financialYear = `${year}-${year + 1}`;
+  } else {
+    financialYear = `${year - 1}-${year}`;
+  }
+  
+  // Extract sequence number from original invoice (e.g., "004" from "RC2025-2026/004")
+  const sequence = invoiceNum?.split('/')?.pop() || '001';
+  
+  return `RC${financialYear}/${sequence}`;
+};
+
 // ─────────────────────────────────────────────────────────
 const OrderSuccessScreen = ({ route, navigation }) => {
-  const { invoiceNumber, grandTotal, paymentMode, items, date } =
+  const { invoiceNumber: rawInvoiceNumber, grandTotal, paymentMode, items, date } =
     route.params || {};
+  
+  // Format invoice number to current financial year
+  const invoiceNumber = getInvoiceNumber(rawInvoiceNumber);
 
   const [referenceNo, setReferenceNo] = useState('');
 
@@ -426,24 +451,48 @@ const OrderSuccessScreen = ({ route, navigation }) => {
               { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
             ]}
           >
-            {/* ══ Order Summary Box ══ */}
-            <View style={styles.infoBox}>
-              <Row label="Invoice No" value={invoiceNumber} />
-              <Divider />
-              <Row label="Payment Mode" value={paymentMode?.toUpperCase()} />
-              <Divider />
-              <Row
-                label="Amount Paid"
-                value={`₹${grandTotal}`}
-                valueStyle={styles.amountText}
-              />
-            </View>
-
-            {/* ══ Form Card ══ */}
+            {/* ══ Form Card with Invoice Details Included ══ */}
             <View style={styles.formCard}>
               <Text style={styles.formCardTitle}>
                 Delivery & Invoice Details
               </Text>
+
+              {/* Invoice Number */}
+              <View style={styles.fieldGroup}>
+                <View style={styles.labelRow}>
+                  <FileText size={14} color="#16a34a" strokeWidth={2} />
+                  <Text style={styles.label}> Invoice No</Text>
+                </View>
+                <View style={styles.readonlyField}>
+                  <Text style={styles.readonlyText}>{invoiceNumber}</Text>
+                </View>
+              </View>
+
+              {/* Payment Mode */}
+              <View style={styles.fieldGroup}>
+                <View style={styles.labelRow}>
+                  <CreditCard size={14} color="#16a34a" strokeWidth={2} />
+                  <Text style={styles.label}> Payment Mode</Text>
+                </View>
+                <View style={styles.readonlyField}>
+                  <Text style={styles.readonlyText}>
+                    {paymentMode?.toUpperCase()}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Amount Paid */}
+              <View style={styles.fieldGroup}>
+                <View style={styles.labelRow}>
+                  <IndianRupee size={14} color="#16a34a" strokeWidth={2} />
+                  <Text style={styles.label}> Amount Paid</Text>
+                </View>
+                <View style={styles.readonlyField}>
+                  <Text style={[styles.readonlyText, styles.amountText]}>
+                    ₹{grandTotal}
+                  </Text>
+                </View>
+              </View>
 
               {/* Invoice Date */}
               <View style={styles.fieldGroup}>

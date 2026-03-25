@@ -103,7 +103,15 @@ const FSEDashboard = ({ navigation }) => {
           >
             <Users size={20} color="#1976D2" />
             <Text style={FSEDashboardStyle.actionText}>CustomerDetail</Text>
-          </TouchableOpacity> 
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={FSEDashboardStyle.actionItem}
+            onPress={() => navigation.navigate('InvoiceListScreen')}
+          >
+            <Users size={20} color="#1976D2" />
+            <Text style={FSEDashboardStyle.actionText}>InvoiceListScreen</Text>
+          </TouchableOpacity>
 
           <TouchableOpacity
             style={FSEDashboardStyle.actionItem}
@@ -145,7 +153,7 @@ const FSEDashboard = ({ navigation }) => {
             <Map size={20} color="#5E35B1" />
             <Text style={FSEDashboardStyle.actionText}>Mapscreen</Text>
           </TouchableOpacity>
-                  
+
           <TouchableOpacity
             style={FSEDashboardStyle.actionItem}
             onPress={() => navigation.navigate('FSETracking')}

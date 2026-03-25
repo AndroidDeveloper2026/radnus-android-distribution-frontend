@@ -55,6 +55,7 @@ import ExecutiveManagement from '../screens/MarketingExecutive/ExecutiveManageme
 import InvoiceScreen from '../screens/OrderProduct/InvoiceScreen';
 import CustomerListScreen from '../screens/Common/CustomerListScreen';
 import DistributorDetails from '../screens/Distributor/DistributorDetails';
+import InvoiceListScreen from '../screens/OrderProduct/InvoiceListScreen';
 //-- checking --
 import AdminDashboardScreen from '../screens/AdminDashboard/AdminDashboardScreen';
 import DistributorList from '../screens/MarketingExecutive/DistributorList';
@@ -267,6 +268,12 @@ const StackNavigator = () => {
           />
 
           <Stack.Screen
+            name="InvoiceListScreen"
+            component={InvoiceListScreen}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
             name="CustomerListScreen"
             component={CustomerListScreen}
             options={{ headerShown: false }}
@@ -338,12 +345,12 @@ const StackNavigator = () => {
             options={{ headerShown: false }}
           />
 
-           <Stack.Screen
+          <Stack.Screen
             name="DistributorDetails"
             component={DistributorDetails}
             options={{ headerShown: false }}
           />
-          
+
           <Stack.Screen
             name="RouteList"
             component={RouteList}

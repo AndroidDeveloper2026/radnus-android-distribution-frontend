@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native';
 import styles from './RetailerStyle';
 import RetailerApprovalModal from './RetailerApprovalModal';
@@ -9,14 +9,12 @@ import {
   updateStatus,
 } from '../../services/features/retailer/retailerSlice';
 import { User, Phone, MapPin, Calendar } from 'lucide-react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
-// 🔐 Role simulation
 const userRole = 'distributor';
 
 const RetailerList = ({ navigation }) => {
   const dispatch = useDispatch();
-
-  // ✅ SAFE SELECTOR
   const retailers = useSelector(state => state.retailer?.list || []);
 
   const [selectedRetailer, setSelectedRetailer] = useState(null);
@@ -25,7 +23,13 @@ const RetailerList = ({ navigation }) => {
 
   useEffect(() => {
     dispatch(fetchRetailers());
-  }, []);
+  }, [dispatch]);
+
+  useFocusEffect(
+    useCallback(() => {
+      setActiveCard(null);
+    }, [])
+  );
 
   const openApproval = retailer => {
     setSelectedRetailer(retailer);
@@ -46,10 +50,8 @@ const RetailerList = ({ navigation }) => {
         onPress={() => setActiveCard(isActive ? null : item._id)}
       >
         <View style={styles.card}>
-          {/* SHOP IMAGE */}
           <Image source={{ uri: item.shopPhoto }} style={styles.shopImage} />
 
-          {/* NAME + STATUS */}
           <View style={styles.row}>
             <Text style={styles.name}>{item.shopName}</Text>
 
@@ -67,25 +69,37 @@ const RetailerList = ({ navigation }) => {
             </Text>
           </View>
 
-          {/* OWNER */}
           <View style={styles.infoRow}>
             <User size={14} color="#616161" />
             <Text style={styles.infoText}>Owner: {item.ownerName}</Text>
           </View>
 
-          {/* MOBILE */}
           <View style={styles.infoRow}>
             <Phone size={14} color="#616161" />
             <Text style={styles.infoText}>Mobile: {item.mobile}</Text>
           </View>
 
-          {/* GPS */}
+          {/* ✅ AREA */}
           <View style={styles.infoRow}>
             <MapPin size={14} color="#616161" />
-            <Text style={styles.infoText}>GPS: {item.gps}</Text>
+            <Text style={styles.infoText}>Area: {item.area || '-'}</Text>
           </View>
 
-          {/* CREATED */}
+          {/* ✅ ADDRESS */}
+          <View style={styles.infoRow}>
+            <MapPin size={14} color="#616161" />
+            <Text style={styles.infoText}>
+              Address: {item.address || '-'}
+            </Text>
+          </View>
+
+          {/* ✅ GST */}
+          <View style={styles.infoRow}>
+            <Text style={styles.infoText}>
+              GST: {item.gst || '-'}
+            </Text>
+          </View>
+
           <View style={styles.infoRow}>
             <Calendar size={14} color="#616161" />
             <Text style={styles.infoText}>
@@ -93,19 +107,20 @@ const RetailerList = ({ navigation }) => {
             </Text>
           </View>
 
-          {/* EDIT BUTTON */}
           {isActive && (
             <TouchableOpacity
               style={styles.actionBtn}
               onPress={() =>
-                navigation.navigate('RetailerProfile', { retailer: item })
+                navigation.navigate('RetailerProfile', {
+                  retailer: item,
+                  edit: true,
+                })
               }
             >
               <Text style={styles.actionText}>Edit</Text>
             </TouchableOpacity>
           )}
 
-          {/* APPROVAL BUTTON */}
           {userRole !== 'fse' && item.status === 'PENDING' && (
             <TouchableOpacity
               style={styles.actionBtn}
