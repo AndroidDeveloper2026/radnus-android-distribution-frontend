@@ -56,6 +56,7 @@ import InvoiceScreen from '../screens/OrderProduct/InvoiceScreen';
 import CustomerListScreen from '../screens/Common/CustomerListScreen';
 import DistributorDetails from '../screens/Distributor/DistributorDetails';
 import InvoiceListScreen from '../screens/OrderProduct/InvoiceListScreen';
+import AdminFeedbackScreen from '../screens/AdminDashboard/AdminFeedbackScreen'
 //-- checking --
 import AdminDashboardScreen from '../screens/AdminDashboard/AdminDashboardScreen';
 import DistributorList from '../screens/MarketingExecutive/DistributorList';
@@ -270,6 +271,12 @@ const StackNavigator = () => {
           <Stack.Screen
             name="InvoiceListScreen"
             component={InvoiceListScreen}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="AdminFeedbackScreen"
+            component={AdminFeedbackScreen}
             options={{ headerShown: false }}
           />
 

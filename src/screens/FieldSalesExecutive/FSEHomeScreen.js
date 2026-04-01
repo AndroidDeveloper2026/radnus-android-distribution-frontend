@@ -23,6 +23,10 @@ import {
   Info,
   RefreshCw,
 } from 'lucide-react-native';
+import {
+  getSessionId,
+  setSessionId as saveSessionId,
+} from '../../services/AuthStorage/authStorgage';
 
 const FSEHomeScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -38,9 +42,35 @@ const FSEHomeScreen = ({ navigation }) => {
 
   useEffect(() => {
     console.log('Current user:', user);
+    loadSavedSession();
     requestLocationPermission();
     checkTodaySession();
   }, []);
+
+  //   useEffect(() => {
+  //   loadSavedSession();
+  //   requestLocationPermission();
+  // }, []);
+
+  const loadSavedSession = async () => {
+    try {
+      const savedSession = await getSessionId();
+
+      if (savedSession) {
+        console.log('Restored session:', savedSession);
+
+        setSessionId(savedSession);
+        setAttendanceMarked(true);
+
+        dispatch(startTracking(savedSession));
+      } else {
+      // fallback to API
+      checkTodaySession();
+    }
+    } catch (err) {
+      console.log('Session restore error:', err);
+    }
+  };
 
   const checkTodaySession = async () => {
     try {
@@ -215,6 +245,9 @@ const FSEHomeScreen = ({ navigation }) => {
 
       const newSessionId = res.data._id;
 
+      // Save to AsyncStorage
+      await saveSessionId(newSessionId);
+
       setSessionId(newSessionId);
       setAttendanceMarked(true);
 
@@ -247,9 +280,14 @@ const FSEHomeScreen = ({ navigation }) => {
     <View style={FSEHomeStyles.container}>
       <Header title="Start Day" showBackArrow={false} />
       <View style={FSEHomeStyles.content}>
-
         {/* Welcome */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 10,
+          }}
+        >
           <Text style={FSEHomeStyles.title}>
             👋 Welcome! {user?.name || 'User'}
           </Text>
@@ -319,8 +357,14 @@ const FSEHomeScreen = ({ navigation }) => {
                     disabled={refreshingLocation}
                     style={{ marginTop: 8 }}
                   >
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <RefreshCw size={16} color="#2563EB" style={{ marginRight: 4 }} />
+                    <View
+                      style={{ flexDirection: 'row', alignItems: 'center' }}
+                    >
+                      <RefreshCw
+                        size={16}
+                        color="#2563EB"
+                        style={{ marginRight: 4 }}
+                      />
                       <Text style={{ color: '#2563EB', fontWeight: '600' }}>
                         Refresh Location
                       </Text>
@@ -330,8 +374,14 @@ const FSEHomeScreen = ({ navigation }) => {
               ) : (
                 <TouchableOpacity onPress={() => getCurrentLocation(true)}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <MapPin size={16} color="#2563EB" style={{ marginRight: 4 }} />
-                    <Text style={[FSEHomeStyles.cardValue, { color: '#2563EB' }]}>
+                    <MapPin
+                      size={16}
+                      color="#2563EB"
+                      style={{ marginRight: 4 }}
+                    />
+                    <Text
+                      style={[FSEHomeStyles.cardValue, { color: '#2563EB' }]}
+                    >
                       Tap to Get Location
                     </Text>
                   </View>
@@ -392,4 +442,3 @@ const FSEHomeScreen = ({ navigation }) => {
 };
 
 export default FSEHomeScreen;
-

@@ -21,6 +21,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ManagerDashboard from '../screens/MarketingManager/ManagerDashboard';
 import ExecutiveDashboard from '../screens/MarketingExecutive/ExecutiveDashboard';
 import EmployeeDashboard from '../screens/RadnusEmployee/EmployeeDashboard';
+import FeedbackScreen from '../screens/OrderProduct/FeedbackScreen';
+import AdminFeedbackScreen from '../screens/AdminDashboard/AdminFeedbackScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -33,7 +35,7 @@ const ROLE_TABS = {
       icon: LayoutDashboard,
     },
     { name: 'Home', component: HomeScreen, icon: Home },
-    { name: 'Reports', component: Report, icon: BarChart3 },
+    { name: 'Notification', component: AdminFeedbackScreen, icon: BarChart3 },
     { name: 'Profile', component: ProfileSettings, icon: CircleUserRound },
   ],
 
@@ -79,7 +81,7 @@ const ROLE_TABS = {
   Radnus: [
     { name: 'Dashboard', component: EmployeeDashboard, icon: LayoutDashboard },
     { name: 'Home', component: HomeScreen, icon: Home },
-    { name: 'Reports', component: Report, icon: BarChart3 },
+    { name: 'FeedBack', component: FeedbackScreen, icon: BarChart3 },
     { name: 'Profile', component: ProfileSettings, icon: CircleUserRound },
   ],
 };

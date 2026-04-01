@@ -16,6 +16,7 @@ import managerReducer from '../services/features/manager/managerSlice';
 import customerReducer from '../services/features/customer/customerSlice';
 import sessionReducer  from '../services/features/fse/sessionSlice';
 import invoiceReducer from '../services/features/retailer/invoiceSlice';
+import feedbackReducer from "../services/features/retailer/feedbackSlice";
 
 export const store = configureStore({
   reducer: {
@@ -36,5 +37,6 @@ export const store = configureStore({
     customer: customerReducer,
     session:  sessionReducer,
     invoice: invoiceReducer,
+    feedback: feedbackReducer,
   },
 });

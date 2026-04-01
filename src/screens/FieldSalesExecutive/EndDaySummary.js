@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { stopTracking } from '../../services/features/fse/trackingSlice';
 import API from '../../services/API/api';
 import { stopTrackingService } from '../../utils/TrackingService';
+import { clearSessionId } from '../../services/AuthStorage/authStorgage';
 
 const EndDaySummary = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -35,30 +36,31 @@ const EndDaySummary = ({ navigation }) => {
       stopTrackingService();
 
       // ✅ Update session status to ENDED
-      await API.post("/api/session/end", { sessionId });
+      await API.post('/api/session/end', { sessionId });
 
       console.log('End day submitted for session:', sessionId);
 
-      // ✅ Clear Redux tracking state
+      // // ✅ Clear Redux tracking state
+      // dispatch(stopTracking());
+
+      // ✅ Clear AsyncStorage session
+      await clearSessionId();
+
+      // ✅ Clear Redux
       dispatch(stopTracking());
 
       // ✅ Show success message
-      Alert.alert(
-        'Success',
-        'Your day has been ended successfully!',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              // ✅ Navigate back to home
-              navigation.replace("MainTabs", {
-                role: "FSE",
-              });
-            }
-          }
-        ]
-      );
-
+      Alert.alert('Success', 'Your day has been ended successfully!', [
+        {
+          text: 'OK',
+          onPress: () => {
+            // ✅ Navigate back to home
+            navigation.replace('MainTabs', {
+              role: 'FSE',
+            });
+          },
+        },
+      ]);
     } catch (err) {
       console.log('End day error:', err);
       Alert.alert('Error', 'Failed to end day. Please try again.');
@@ -73,8 +75,8 @@ const EndDaySummary = ({ navigation }) => {
       'Are you sure you want to end your day? All tracking will be stopped.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'End Day', style: 'destructive', onPress: submitEndDay }
-      ]
+        { text: 'End Day', style: 'destructive', onPress: submitEndDay },
+      ],
     );
   };
 
@@ -86,21 +88,35 @@ const EndDaySummary = ({ navigation }) => {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-
         {/* NOTES SECTION */}
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>End of Day</Text>
 
           <View style={{ marginTop: 10 }}>
-
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-              <CheckCircle size={16} color="#16A34A" style={{ marginRight: 6 }} />
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 6,
+              }}
+            >
+              <CheckCircle
+                size={16}
+                color="#16A34A"
+                style={{ marginRight: 6 }}
+              />
               <Text style={styles.note}>
                 All data has been auto-captured from today's activity.
               </Text>
             </View>
 
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 6,
+              }}
+            >
               <Clock size={16} color="#2563EB" style={{ marginRight: 6 }} />
               <Text style={styles.note}>
                 Your location tracking will be stopped.
@@ -113,7 +129,6 @@ const EndDaySummary = ({ navigation }) => {
                 Once submitted, this day will be locked and cannot be modified.
               </Text>
             </View>
-
           </View>
         </View>
 
@@ -122,10 +137,7 @@ const EndDaySummary = ({ navigation }) => {
 
         {/* SUBMIT BUTTON */}
         <TouchableOpacity
-          style={[
-            styles.submitBtn,
-            submitting && styles.submitBtnDisabled
-          ]}
+          style={[styles.submitBtn, submitting && styles.submitBtnDisabled]}
           onPress={handleSubmit}
           disabled={submitting}
         >
@@ -134,12 +146,9 @@ const EndDaySummary = ({ navigation }) => {
             {submitting ? 'Submitting...' : 'Submit End Day'}
           </Text>
         </TouchableOpacity>
-
       </ScrollView>
     </View>
   );
 };
 
 export default EndDaySummary;
-
-

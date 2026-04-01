@@ -1,3 +1,5 @@
+import { enableScreens } from 'react-native-screens';
+enableScreens();
 import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import RootNavigator from './src/navigation/RootNavigator';
@@ -11,7 +13,7 @@ import { displayNotification } from './src/utils/notificationService';
 const App = () => {
 //  console.log('--- APP js url ---',API_BASE_URL);
  
- useEffect(() => {
+ useEffect(() => { 
 
     const unsubscribe = messaging().onMessage(async remoteMessage => {
 

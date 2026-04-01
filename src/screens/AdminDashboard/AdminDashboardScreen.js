@@ -1,56 +1,79 @@
-import React from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
-import styles from "./AdminDashboardStyle";
-import Header from "../../components/Header";
-import Icons from "../../components/Icon";
-import Color from "../../utils/constants/colors"
+import React from 'react';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import styles from './AdminDashboardStyle';
+import Header from '../../components/Header';
+import Icons from '../../components/Icon';
+import Color from '../../utils/constants/colors';
 
 // import { TrendingUp, Users, UserCheck, Package, AlertCircle, BarChart3 } from 'lucide-react-native';
 
-
 const AdminDashboard = ({ navigation }) => {
-
-  const handleDistributorOnboarding = () =>{
-  navigation.navigate('DistributorOnboarding')
-  }
+  const handleDistributorOnboarding = () => {
+    navigation.navigate('DistributorOnboarding');
+  };
   return (
     <View style={styles.container}>
       <Header title="Admin Dashboard" showBackArrow={false} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
-
           {/* 📊 OVERALL SALES */}
           <Text style={styles.sectionTitle}>Overall Sales</Text>
 
           <View style={styles.kpiRow}>
             <View style={styles.kpiBox}>
-              <Icons name={"TrendingUp"} size={25} color={Color.success} circleSize={55} withCircle={true} backgroundColor="#c6ffe1a0"/>
+              <Icons
+                name={'TrendingUp'}
+                size={25}
+                color={Color.success}
+                circleSize={55}
+                withCircle={true}
+                backgroundColor="#c6ffe1a0"
+              />
               <Text style={styles.kpiLabel}>Today Sales</Text>
               <Text style={styles.kpiValue}>₹0</Text>
             </View>
 
             <View style={styles.kpiBox}>
-               <Icons name={"CalendarDays"} size={25} color="#BB5cf6" circleSize={55} withCircle={true} backgroundColor="#edcfff78"/>
+              <Icons
+                name={'CalendarDays'}
+                size={25}
+                color="#BB5cf6"
+                circleSize={55}
+                withCircle={true}
+                backgroundColor="#edcfff78"
+              />
               <Text style={styles.kpiLabel}>This Month</Text>
               <Text style={styles.kpiValue}>₹ 0</Text>
             </View>
           </View>
 
           <View style={styles.kpiRow}>
-            <TouchableOpacity style={styles.kpiBox} onPress={handleDistributorOnboarding}>
-                <Icons name={"UsersRound"} size={25} color="#4b4efc" circleSize={55} withCircle={true} backgroundColor="#bebffe92"/>
+            <TouchableOpacity
+              style={styles.kpiBox}
+              onPress={handleDistributorOnboarding}
+            >
+              <Icons
+                name={'UsersRound'}
+                size={25}
+                color="#4b4efc"
+                circleSize={55}
+                withCircle={true}
+                backgroundColor="#bebffe92"
+              />
               <Text style={styles.kpiLabel}>Total Distributors</Text>
               <Text style={styles.kpiValue}>0</Text>
             </TouchableOpacity>
 
             <View style={styles.kpiBox}>
-                <Icons name={"UserCheck"} size={25} color="#F59E0B" circleSize={55} withCircle={true} backgroundColor="#fee7beb3"/>
+              <Icons
+                name={'UserCheck'}
+                size={25}
+                color="#F59E0B"
+                circleSize={55}
+                withCircle={true}
+                backgroundColor="#fee7beb3"
+              />
               <Text style={styles.kpiLabel}>Active Retailers</Text>
               <Text style={styles.kpiValue}>0</Text>
             </View>
@@ -61,13 +84,27 @@ const AdminDashboard = ({ navigation }) => {
 
           <View style={styles.kpiRow}>
             <View style={styles.kpiBox}>
-              <Icons name={"UserCheck"} size={25} color="#0babf5" circleSize={55} withCircle={true} backgroundColor="#b4e7ffa6"/>
+              <Icons
+                name={'UserCheck'}
+                size={25}
+                color="#0babf5"
+                circleSize={55}
+                withCircle={true}
+                backgroundColor="#b4e7ffa6"
+              />
               <Text style={styles.kpiLabel}>Active FSE</Text>
               <Text style={styles.kpiValue}>0</Text>
             </View>
 
             <View style={styles.kpiBox}>
-              <Icons name={"Timer"} size={25} color="#f55d0b" circleSize={55} withCircle={true} backgroundColor="#fac9ae71"/>
+              <Icons
+                name={'Timer'}
+                size={25}
+                color="#f55d0b"
+                circleSize={55}
+                withCircle={true}
+                backgroundColor="#fac9ae71"
+              />
               <Text style={styles.kpiLabel}> Attendance Today</Text>
               <Text style={styles.kpiValue}>0%</Text>
             </View>
@@ -75,13 +112,27 @@ const AdminDashboard = ({ navigation }) => {
 
           <View style={styles.kpiRow}>
             <View style={styles.kpiBox}>
-              <Icons name={"IndianRupee"} size={25} color="#07a37f" circleSize={55} withCircle={true} backgroundColor="#b4f8d865"/>
+              <Icons
+                name={'IndianRupee'}
+                size={25}
+                color="#07a37f"
+                circleSize={55}
+                withCircle={true}
+                backgroundColor="#b4f8d865"
+              />
               <Text style={styles.kpiLabel}>Pending Collections</Text>
               <Text style={styles.kpiValue}>₹0</Text>
             </View>
 
             <View style={styles.kpiBox}>
-              <Icons name={"Package"} size={25} color="#F59E0B" circleSize={55} withCircle={true} backgroundColor="#fee7beb3"/>
+              <Icons
+                name={'Package'}
+                size={25}
+                color="#F59E0B"
+                circleSize={55}
+                withCircle={true}
+                backgroundColor="#fee7beb3"
+              />
               <Text style={styles.kpiLabel}>Non-Moving Stock</Text>
               <Text style={styles.kpiValue}>₹0</Text>
             </View>
@@ -92,7 +143,7 @@ const AdminDashboard = ({ navigation }) => {
 
           <TouchableOpacity
             style={styles.navItem}
-            onPress={() => navigation.navigate("DistributorOnboardList")}
+            onPress={() => navigation.navigate('DistributorOnboardList')}
           >
             <Text style={styles.navTitle}>Pending Approvals</Text>
             <Text style={styles.navSubTitle}>
@@ -102,22 +153,18 @@ const AdminDashboard = ({ navigation }) => {
 
           <TouchableOpacity
             style={styles.navItem}
-            onPress={() => navigation.navigate("DistributorPerformance")}
+            onPress={() => navigation.navigate('DistributorPerformance')}
           >
             <Text style={styles.navTitle}>Distributor Performance</Text>
-            <Text style={styles.navSubTitle}>
-              Sales · Stock · Incentives
-            </Text>
+            <Text style={styles.navSubTitle}>Sales · Stock · Incentives</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.navItem}
-            onPress={() => navigation.navigate("FSEPerformance")}
+            onPress={() => navigation.navigate('FSEPerformance')}
           >
             <Text style={styles.navTitle}>FSE Performance</Text>
-            <Text style={styles.navSubTitle}>
-              Attendance · Sales · Visits
-            </Text>
+            <Text style={styles.navSubTitle}>Attendance · Sales · Visits</Text>
           </TouchableOpacity>
 
           {/* 🧩 MASTER & CONTROL */}
@@ -125,7 +172,7 @@ const AdminDashboard = ({ navigation }) => {
 
           <TouchableOpacity
             style={styles.navItem}
-            onPress={() => navigation.navigate("TerritoryMapping")}
+            onPress={() => navigation.navigate('TerritoryMapping')}
           >
             <Text style={styles.navTitle}>Territory Management</Text>
             <Text style={styles.navSubTitle}>
@@ -135,15 +182,13 @@ const AdminDashboard = ({ navigation }) => {
 
           <TouchableOpacity
             style={styles.navItem}
-            onPress={() => navigation.navigate("ProductMaster")}
+            onPress={() => navigation.navigate('ProductMaster')}
           >
             <Text style={styles.navTitle}>Product Master</Text>
-            <Text style={styles.navSubTitle}>
-              Products · Pricing · MOQ
-            </Text>
+            <Text style={styles.navSubTitle}>Products · Pricing · MOQ</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.navItem}
             onPress={() => navigation.navigate("Reports")}
           >
@@ -151,8 +196,15 @@ const AdminDashboard = ({ navigation }) => {
             <Text style={styles.navSubTitle}>
               Sales · Stock · Incentives
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => navigation.navigate('AdminFeedbackScreen')}
+          >
+            <Text style={styles.navTitle}>AdminFeedbackScreen</Text>
+            <Text style={styles.navSubTitle}>customer Feedback</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>

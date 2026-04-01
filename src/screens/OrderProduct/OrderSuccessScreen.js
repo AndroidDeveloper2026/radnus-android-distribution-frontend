@@ -53,6 +53,13 @@ const SALESPERSONS = [
   { id: 9, name: 'SUNDER SIR' },
 ];
 
+const PAYMENT_MODES = [
+  { id: 1, label: 'Cash' },
+  { id: 2, label: 'GPay' },
+  { id: 3, label: 'Credit Card' },
+  { id: 4, label: 'Debit Card' },
+];
+
 const formatDate = iso =>
   new Date(iso).toLocaleDateString('en-IN', {
     day: '2-digit',
@@ -61,11 +68,11 @@ const formatDate = iso =>
   });
 
 // Generate invoice number based on financial year
-const getInvoiceNumber = (invoiceNum) => {
+const getInvoiceNumber = invoiceNum => {
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth() + 1; // Jan = 1
-  
+
   // Financial year starts in April
   let financialYear;
   if (month >= 4) {
@@ -73,18 +80,23 @@ const getInvoiceNumber = (invoiceNum) => {
   } else {
     financialYear = `${year - 1}-${year}`;
   }
-  
+
   // Extract sequence number from original invoice (e.g., "004" from "RC2025-2026/004")
   const sequence = invoiceNum?.split('/')?.pop() || '001';
-  
+
   return `RC${financialYear}/${sequence}`;
 };
 
 // ─────────────────────────────────────────────────────────
 const OrderSuccessScreen = ({ route, navigation }) => {
-  const { invoiceNumber: rawInvoiceNumber, grandTotal, paymentMode, items, date } =
-    route.params || {};
-  
+  const {
+    invoiceNumber: rawInvoiceNumber,
+    grandTotal,
+    paymentMode,
+    items,
+    date,
+  } = route.params || {};
+
   // Format invoice number to current financial year
   const invoiceNumber = getInvoiceNumber(rawInvoiceNumber);
 
@@ -117,6 +129,11 @@ const OrderSuccessScreen = ({ route, navigation }) => {
   // ── Confirm Modal ──────────────────────────────────────
   const [confirmVisible, setConfirmVisible] = useState(false);
 
+  const [selectedPaymentMode, setSelectedPaymentMode] = useState(
+    paymentMode ? { label: paymentMode } : null,
+  );
+  const [paymentDropdownOpen, setPaymentDropdownOpen] = useState(false);
+
   // ── Animations ─────────────────────────────────────────
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
@@ -141,7 +158,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
     return () => {
       dispatch(resetCustomer());
     };
-  }, [dispatch]);
+  }, []);
 
   // ── Auto-lookup when exactly 10 digits entered ─────────
   useEffect(() => {
@@ -310,7 +327,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
         invoiceNumber,
         items,
         total: grandTotal,
-        paymentMode,
+        paymentMode: selectedPaymentMode?.label || paymentMode,
         date,
         buyerName: customer?.name || '',
         buyerPhone,
@@ -469,7 +486,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
               </View>
 
               {/* Payment Mode */}
-              <View style={styles.fieldGroup}>
+              {/* <View style={styles.fieldGroup}>
                 <View style={styles.labelRow}>
                   <CreditCard size={14} color="#16a34a" strokeWidth={2} />
                   <Text style={styles.label}> Payment Mode</Text>
@@ -479,6 +496,68 @@ const OrderSuccessScreen = ({ route, navigation }) => {
                     {paymentMode?.toUpperCase()}
                   </Text>
                 </View>
+              </View> */}
+
+              {/* Payment Mode */}
+              <View style={styles.fieldGroup}>
+                <View style={styles.labelRow}>
+                  <CreditCard size={14} color="#16a34a" strokeWidth={2} />
+                  <Text style={styles.label}> Payment Mode</Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.dropdown}
+                  onPress={() => setPaymentDropdownOpen(o => !o)}
+                  activeOpacity={0.8}
+                >
+                  <Text
+                    style={
+                      selectedPaymentMode
+                        ? styles.dropdownSelected
+                        : styles.dropdownPlaceholder
+                    }
+                  >
+                    {selectedPaymentMode
+                      ? selectedPaymentMode.label.toUpperCase()
+                      : 'Select payment mode…'}
+                  </Text>
+                  <ChevronDown
+                    size={16}
+                    color="#888"
+                    style={{
+                      transform: [
+                        { rotate: paymentDropdownOpen ? '180deg' : '0deg' },
+                      ],
+                    }}
+                  />
+                </TouchableOpacity>
+                {paymentDropdownOpen && (
+                  <View style={styles.dropdownList}>
+                    {PAYMENT_MODES.map(mode => (
+                      <TouchableOpacity
+                        key={mode.id}
+                        style={[
+                          styles.dropdownItem,
+                          selectedPaymentMode?.id === mode.id &&
+                            styles.dropdownItemActive,
+                        ]}
+                        onPress={() => {
+                          setSelectedPaymentMode(mode);
+                          setPaymentDropdownOpen(false);
+                        }}
+                      >
+                        <Text
+                          style={[
+                            styles.dropdownItemText,
+                            selectedPaymentMode?.id === mode.id &&
+                              styles.dropdownItemTextActive,
+                          ]}
+                        >
+                          {mode.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
               </View>
 
               {/* Amount Paid */}

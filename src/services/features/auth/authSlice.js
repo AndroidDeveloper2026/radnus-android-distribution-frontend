@@ -13,7 +13,7 @@ export const loginUser = createAsyncThunk(
       return res.data;
     } catch (err) {
       console.log('--- loginuser (err)---',err);
-      return rejectWithValue(err.response?.data?.msg || 'Login failed');
+      return rejectWithValue(err.response?.data?.msg || 'Login failed');a
     }
   },
 );

@@ -102,7 +102,7 @@ const FSEDashboard = ({ navigation }) => {
             onPress={() => navigation.navigate('CustomerListScreen')}
           >
             <Users size={20} color="#1976D2" />
-            <Text style={FSEDashboardStyle.actionText}>CustomerDetail</Text>
+            <Text style={FSEDashboardStyle.actionText}>Stock</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
