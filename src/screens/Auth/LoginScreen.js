@@ -42,11 +42,9 @@ const LoginScreen = ({ navigation }) => {
       }),
     )
       .unwrap()
-      // .then(res => {
-      //   console.log('LOGIN SUCCESS', res);
-
-      //   navigation.replace('Home'); // ✅ ADD THIS
-      // })
+      .then(res => {
+        console.log('LOGIN SUCCESS', res);
+      })
       .catch(err => {
         console.log('-- login form (error) --', err);
         // showToast('Server Running Slow!','short')

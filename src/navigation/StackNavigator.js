@@ -66,13 +66,31 @@ import { selectAuthState } from '../store/selectors/authSelector';
 const Stack = createStackNavigator();
 
 const StackNavigator = () => {
-  const { token, role } = useSelector(selectAuthState);
+  // const { token, role } = useSelector(selectAuthState); //old
   // const { token, admin } = useSelector(state => state.adminAuth);
   // const { token, user } = useSelector(state => state.auth);
   // const role = user?.role;
 
-  const isLoggedIn = !!token;
+  // const isLoggedIn = !!token; //old
   // const role = admin?.role;
+
+  const { token, user, isCheckingAuth, role } = useSelector(selectAuthState);
+  const isLoggedIn = !!token && !!user;
+
+  console.log('--token--',token);
+  console.log('--user--',user);
+  console.log('--isCheckingAuth--',isCheckingAuth);
+  console.log('--role--',role);
+
+  // Show splash screen while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Splash" component={SplashScreen} />
+      </Stack.Navigator>
+    );
+  }
+
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {!isLoggedIn ? (
