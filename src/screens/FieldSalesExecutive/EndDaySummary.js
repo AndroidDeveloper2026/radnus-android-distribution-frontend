@@ -3,10 +3,6 @@ import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import styles from './EndDaySummaryStyle';
 import Header from '../../components/Header';
 import {
-  ShoppingCart,
-  IndianRupee,
-  Wallet,
-  MapPin,
   CheckCircle,
   Clock,
   Lock,

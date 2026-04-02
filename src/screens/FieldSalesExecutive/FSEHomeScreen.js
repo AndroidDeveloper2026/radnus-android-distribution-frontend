@@ -41,16 +41,12 @@ const FSEHomeScreen = ({ navigation }) => {
   const [refreshingLocation, setRefreshingLocation] = useState(false);
 
   useEffect(() => {
-    console.log('Current user:', user);
+    // console.log('Current user:', user);
     loadSavedSession();
     requestLocationPermission();
     checkTodaySession();
   }, []);
 
-  //   useEffect(() => {
-  //   loadSavedSession();
-  //   requestLocationPermission();
-  // }, []);
 
   const loadSavedSession = async () => {
     try {

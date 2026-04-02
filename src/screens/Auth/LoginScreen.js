@@ -9,7 +9,7 @@ import * as Yup from 'yup';
 import { useDispatch } from 'react-redux';
 import { loginUser } from '../../services/features/auth/authSlice';
 import { Eye, EyeOff } from 'lucide-react-native';
-import showToast from '../../utils/toast';
+// import showToast from '../../utils/toast';
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string()
@@ -43,7 +43,7 @@ const LoginScreen = ({ navigation }) => {
     )
       .unwrap()
       .then(res => {
-        console.log('LOGIN SUCCESS', res);
+        // console.log('LOGIN SUCCESS', res);
       })
       .catch(err => {
         console.log('-- login form (error) --', err);
@@ -139,35 +139,28 @@ const LoginScreen = ({ navigation }) => {
 
               {/* ROLE */}
               <Text style={styles.label}>Role</Text>
+              {/* ROLE */}
+
               <View style={styles.pickerWrapper}>
                 <Picker
                   selectedValue={values.role}
-                  // selectionColor={'#ffffff'}
                   onValueChange={handleChange('role')}
+                  dropdownIconColor="#666666" // visible arrow in light/dark
+                  style={{ color: '#000' }} 
                 >
-                  <Picker.Item label="Select Role" value="" color="#000000" />
-                  <Picker.Item
-                    label="Distributor"
-                    value="Distributor"
-                    color="#000000"
-                  />
-                  <Picker.Item label="FSE" value="FSE" color="#000000" />
-                  <Picker.Item
-                    label="Retailer"
-                    value="Retailer"
-                    color="#000000"
-                  />
+                  <Picker.Item label="Select Role" value="Select Role" />
+                  <Picker.Item label="Distributor" value="Distributor" />
+                  <Picker.Item label="FSE" value="FSE" />
+                  <Picker.Item label="Retailer" value="Retailer" />
                   <Picker.Item
                     label="Marketing Manager"
                     value="MarketingManager"
-                    color="#000"
                   />
                   <Picker.Item
                     label="Marketing Executive"
                     value="MarketingExecutive"
-                    color="#000"
                   />
-                  <Picker.Item label="Radnus" value="Radnus" color="#000" />
+                  <Picker.Item label="Radnus" value="Radnus" />
                 </Picker>
               </View>
               {touched.role && errors.role && (
@@ -216,3 +209,7 @@ const LoginScreen = ({ navigation }) => {
 };
 
 export default LoginScreen;
+
+
+
+    

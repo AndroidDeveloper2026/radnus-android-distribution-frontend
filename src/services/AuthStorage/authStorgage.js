@@ -1,18 +1,4 @@
-// import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// const TOKEN_KEY = "token";
-
-// export const getToken = async () => {
-//   return await AsyncStorage.getItem(TOKEN_KEY);
-// };
-
-// export const setToken = async (token) => {
-//   await AsyncStorage.setItem(TOKEN_KEY, token);
-// };
-
-// export const clearToken = async () => {
-//   await AsyncStorage.removeItem(TOKEN_KEY);
-// };
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -22,10 +8,7 @@ const SESSION_KEY = "sessionId";
 const ACCESS_TOKEN = "accessToken";
 const REFRESH_TOKEN = "refreshToken";
 
-/**
- * Performs AsyncStorage operations with retry logic
- * Handles temporary storage access issues during app transitions
- */
+
 const asyncStorageWithRetry = async (operation, key, value = null) => {
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
@@ -72,36 +55,7 @@ export const getToken = async () => {
   }
 };
 
-/**
- * Store authentication token
- */
-// export const setToken = async (token) => {
-//   try {
-//     await asyncStorageWithRetry('set', TOKEN_KEY, token);
-//     return true;
-//   } catch (error) {
-//     console.error('Failed to set token:', error);
-//     throw error; // Throw here because login should fail if we can't store token
-//   }
-// };
 
-/**
- * Clear authentication token
- */
-// export const clearToken = async () => {
-//   try {
-//     await asyncStorageWithRetry('remove', TOKEN_KEY);
-//     return true;
-//   } catch (error) {
-//     console.error('Failed to clear token:', error);
-//     // Don't throw here - logout should still succeed even if storage fails
-//     return false;
-//   }
-// };
-
-/**
- * Check if token exists
- */
 export const hasToken = async () => {
   try {
     const token = await getToken();
@@ -112,9 +66,7 @@ export const hasToken = async () => {
   }
 };
 
-/**
- * Store session ID
- */
+
 export const setSessionId = async (sessionId) => {
   try {
     await asyncStorageWithRetry('set', SESSION_KEY, sessionId);
@@ -125,9 +77,7 @@ export const setSessionId = async (sessionId) => {
   }
 };
 
-/**
- * Get session ID
- */
+
 export const getSessionId = async () => {
   try {
     return await asyncStorageWithRetry('get', SESSION_KEY);
@@ -137,9 +87,7 @@ export const getSessionId = async () => {
   }
 };
 
-/**
- * Clear session ID
- */
+
 export const clearSessionId = async () => {
   try {
     await asyncStorageWithRetry('remove', SESSION_KEY);

@@ -2,11 +2,6 @@ import { useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 import { cancelAllRequests } from '../../services/API/api';
  
-/**
- * Hook to handle app state changes (background/foreground)
- * Cancels pending requests when app goes to background
- * Refreshes auth when app comes to foreground
- */
 export const useAppStateHandler = (onAppResume = null, onAppBackground = null) => {
   const appState = useRef(AppState.currentState);
   const appStateSubscription = useRef(null);
@@ -70,19 +65,3 @@ export const useAppStateHandler = (onAppResume = null, onAppBackground = null) =
   };
 };
  
-/**
- * Example usage in your screen:
- * 
- * const handleAppResume = async () => {
- *   console.log('App resumed - refresh data here');
- * };
- * 
- * const handleAppBackground = async () => {
- *   console.log('App going to background - save state here');
- * };
- * 
- * const MyScreen = () => {
- *   useAppStateHandler(handleAppResume, handleAppBackground);
- *   return <View>...</View>;
- * };
- */

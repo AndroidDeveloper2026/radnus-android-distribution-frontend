@@ -1,124 +1,7 @@
-// import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-// import API from '../../API/api';
-
-// /* GET EXECUTIVES */
-
-// export const getExecutives = createAsyncThunk(
-//   'executive/getExecutives',
-//   async () => {
-//     const res = await API.get('/executives');
-//     return res.data;
-//   },
-// );
-
-// /* ADD EXECUTIVE */
-
-// export const addExecutive = createAsyncThunk(
-//   'executive/addExecutive',
-//   async data => {
-//     const res = await API.post('/executives', data, {
-//       headers: { 'Content-Type': 'multipart/form-data' },
-//     });
-//     return res.data;
-//   },
-// );
-
-// export const deleteExecutive = createAsyncThunk(
-//   'executive/deleteExecutive',
-//   async id => {
-//     await API.delete(`/executives/${id}`);
-//     return id;
-//   },
-// );
-
-// export const updateExecutive = createAsyncThunk(
-//   'executive/updateExecutive',
-//   async ({ id, data }) => {
-//     const res = await API.put(`/executives/${id}`, data);
-//     return res.data;
-//   },
-// );
-
-// export const approveExecutive = createAsyncThunk(
-//   'executive/approveExecutive',
-//   async id => {
-//     const res = await API.put(`/executives/${id}`, {
-//       status: 'APPROVED',
-//     });
-//     return res.data;
-//   },
-// );
-
-// const executiveSlice = createSlice({
-//   name: 'executive',
-
-//   initialState: {
-//     list: [],
-//     loading: false,
-//   },
-
-//   reducers: {},
-
-//   extraReducers: builder => {
-//     builder
-
-//       /* GET */
-
-//       .addCase(getExecutives.pending, state => {
-//         state.loading = true;
-//       })
-
-//       .addCase(getExecutives.fulfilled, (state, action) => {
-//         state.loading = false;
-//         state.list = action.payload;
-//       })
-
-//       .addCase(getExecutives.rejected, state => {
-//         state.loading = false;
-//       })
-
-//       /* ADD */
-
-//       .addCase(addExecutive.fulfilled, (state, action) => {
-//         state.list.push(action.payload);
-//       })
-
-//       /* DELETE */
-
-//       .addCase(deleteExecutive.fulfilled, (state, action) => {
-//         state.list = state.list.filter(e => e._id !== action.payload);
-//       })
-
-//       /* UPDATE */
-
-//       .addCase(updateExecutive.fulfilled, (state, action) => {
-//         const index = state.list.findIndex(e => e._id === action.payload._id);
-
-//         if (index !== -1) {
-//           state.list[index] = action.payload;
-//         }
-//       })
-
-//       /* APPROVE */
-
-//       .addCase(approveExecutive.fulfilled, (state, action) => {
-//         const index = state.list.findIndex(e => e._id === action.payload._id);
-
-//         if (index !== -1) {
-//           state.list[index] = action.payload;
-//         }
-//       });
-//   },
-// });
-
-// export default executiveSlice.reducer;
-
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import API from "../../API/api";
 
-/* ================================
-   GET EXECUTIVES
-================================ */
+
 
 export const getExecutives = createAsyncThunk(
   "executive/getExecutives",
@@ -139,9 +22,7 @@ export const getExecutives = createAsyncThunk(
   }
 );
 
-/* ================================
-   ADD EXECUTIVE
-================================ */
+
 
 export const addExecutive = createAsyncThunk(
   "executive/addExecutive",
@@ -166,9 +47,7 @@ export const addExecutive = createAsyncThunk(
   }
 );
 
-/* ================================
-   DELETE EXECUTIVE
-================================ */
+
 
 export const deleteExecutive = createAsyncThunk(
   "executive/deleteExecutive",
@@ -189,9 +68,7 @@ export const deleteExecutive = createAsyncThunk(
   }
 );
 
-/* ================================
-   UPDATE EXECUTIVE
-================================ */
+
 
 export const updateExecutive = createAsyncThunk(
   "executive/updateExecutive",
@@ -212,9 +89,7 @@ export const updateExecutive = createAsyncThunk(
   }
 );
 
-/* ================================
-   APPROVE EXECUTIVE
-================================ */
+
 
 export const approveExecutive = createAsyncThunk(
   "executive/approveExecutive",
@@ -237,9 +112,7 @@ export const approveExecutive = createAsyncThunk(
   }
 );
 
-/* ================================
-   SLICE
-================================ */
+
 
 const executiveSlice = createSlice({
   name: "executive",
@@ -255,9 +128,6 @@ const executiveSlice = createSlice({
   extraReducers: (builder) => {
     builder
 
-      /* ================================
-         GET EXECUTIVES
-      ================================ */
 
       .addCase(getExecutives.pending, (state) => {
         state.loading = true;
@@ -291,9 +161,7 @@ const executiveSlice = createSlice({
         state.error = action.payload;
       })
 
-      /* ================================
-         DELETE EXECUTIVE
-      ================================ */
+
 
       .addCase(deleteExecutive.pending, (state) => {
         state.loading = true;
@@ -311,9 +179,7 @@ const executiveSlice = createSlice({
         state.error = action.payload;
       })
 
-      /* ================================
-         UPDATE EXECUTIVE
-      ================================ */
+
 
       .addCase(updateExecutive.fulfilled, (state, action) => {
         const index = state.list.findIndex(
@@ -325,9 +191,7 @@ const executiveSlice = createSlice({
         }
       })
 
-      /* ================================
-         APPROVE EXECUTIVE
-      ================================ */
+
 
       .addCase(approveExecutive.fulfilled, (state, action) => {
         const index = state.list.findIndex(

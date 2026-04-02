@@ -45,7 +45,7 @@ const InvoiceListScreen = ({ navigation }) => {
 
   useEffect(() => {
     dispatch(fetchInvoices(tab));
-  }, [tab]);
+  }, [tab,dispatch]);
 
   const onRefresh = async () => {
     setRefreshing(true);

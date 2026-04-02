@@ -184,30 +184,44 @@ const RegisterScreen = ({ navigation }) => {
                   <Picker
                     selectedValue={values.role}
                     onValueChange={val => setFieldValue('role', val)}
+                    dropdownIconColor="#666666" // visible arrow in light/dark
+                    style={{ color: '#000' }}
                   >
-                    <Picker.Item label="Select Role" value="" color="#000" />
+                    <Picker.Item
+                      label="Select Role"
+                      value=""
+                      // //color="#000"
+                    />
                     <Picker.Item
                       label="Marketing Manager"
                       value="MarketingManager"
-                      color="#000"
+                      // //color="#000"
                     />
                     <Picker.Item
                       label="Marketing Executive"
                       value="MarketingExecutive"
-                      color="#000"
+                      // //color="#000"
                     />
                     <Picker.Item
                       label="Distributor"
                       value="Distributor"
-                      color="#000"
+                      // //color="#000"
                     />
-                    <Picker.Item label="FSE" value="FSE" color="#000" />
+                    <Picker.Item
+                      label="FSE"
+                      value="FSE"
+                      //color="#000"
+                    />
                     <Picker.Item
                       label="Retailer"
                       value="Retailer"
-                      color="#000"
+                      //color="#000"
                     />
-                    <Picker.Item label="Radnus" value="Radnus" color="#000" />
+                    <Picker.Item
+                      label="Radnus"
+                      value="Radnus"
+                      //color="#000"
+                    />
                   </Picker>
                 </View>
                 {touched.role && errors.role && (
@@ -225,18 +239,20 @@ const RegisterScreen = ({ navigation }) => {
                       setFieldValue('district', '');
                       setFieldValue('taluk', '');
                     }}
+                    dropdownIconColor="#666666" // visible arrow in light/dark
+                    style={{ color: '#000' }}
                   >
                     <Picker.Item
                       label="Select State"
                       value=""
-                      color="#000000"
+                      // color="#000000"
                     />
                     {Object.keys(locationData).map(st => (
                       <Picker.Item
                         key={st}
                         label={st}
                         value={st}
-                        color="#000000"
+                        // color="#000000"
                       />
                     ))}
                   </Picker>
@@ -256,11 +272,13 @@ const RegisterScreen = ({ navigation }) => {
                       setFieldValue('district', val);
                       setFieldValue('taluk', '');
                     }}
+                    dropdownIconColor="#666666" // visible arrow in light/dark
+                    style={{ color: '#000' }}
                   >
                     <Picker.Item
                       label="Select District"
                       value=""
-                      color="#000"
+                      //color="#000"
                     />
                     {values.state &&
                       Object.keys(locationData[values.state]).map(dist => (
@@ -268,7 +286,7 @@ const RegisterScreen = ({ navigation }) => {
                           key={dist}
                           label={dist}
                           value={dist}
-                          color="#000000"
+                          // color="#000000"
                         />
                       ))}
                   </Picker>
@@ -285,11 +303,13 @@ const RegisterScreen = ({ navigation }) => {
                     selectedValue={values.taluk}
                     selectionColor={'#000'}
                     onValueChange={val => setFieldValue('taluk', val)}
+                    dropdownIconColor="#666666" // visible arrow in light/dark
+                    style={{ color: '#000' }}
                   >
                     <Picker.Item
                       label="Select Taluk"
                       value=""
-                      color="#000000"
+                      // color="#000000"
                     />
                     {values.state &&
                       values.district &&
@@ -298,7 +318,7 @@ const RegisterScreen = ({ navigation }) => {
                           key={t}
                           label={t}
                           value={t}
-                          color="#000000"
+                          // color="#000000"
                         />
                       ))}
                   </Picker>

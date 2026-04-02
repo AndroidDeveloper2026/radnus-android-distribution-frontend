@@ -37,17 +37,7 @@ const FSEManagement = ({ navigation }) => {
   // FILTER BY STATUS
   const filtered = list.filter(f => f.status === tab);
 
-  // REJECT
-  // const confirmReject = () => {
-  //   dispatch(
-  //     updateFSE({
-  //       id: selectedId,
-  //       data: { status: "REJECTED" },
-  //     })
-  //   );
 
-  //   setShowRejectModal(false);
-  // };
 
   const confirmAction = () => {
     if (modalType === 'reject') {

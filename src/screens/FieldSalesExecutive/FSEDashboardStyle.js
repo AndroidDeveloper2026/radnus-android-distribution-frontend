@@ -88,27 +88,7 @@ const FSEDashboardStyle = StyleSheet.create({
     padding: 16,
   },
 
-  // iconCircle: {
-  //   width: 40,
-  //   height: 40,
-  //   borderRadius: 20,
-  //   backgroundColor: '#FDECEC',
-  //   justifyContent: 'center',
-  //   alignItems: 'center',
-  //   marginBottom: 10,
-  // },
 
-  // cardValue: {
-  //   fontSize: 22,
-  //   fontWeight: '700',
-  //   color: '#212121',
-  // },
-
-  // cardLabel: {
-  //   fontSize: 13,
-  //   color: '#757575',
-  //   marginTop: 4,
-  // },
 
   /* QUICK ACTION */
   sectionTitle: {

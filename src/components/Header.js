@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Dimensions,
+  // Dimensions,
   StatusBar,
   StyleSheet,
   Text,

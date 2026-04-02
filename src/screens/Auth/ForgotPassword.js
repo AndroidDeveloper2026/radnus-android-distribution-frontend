@@ -46,41 +46,7 @@ const ForgotPassword = ({ navigation }) => {
     }
   };
 
-//   const handleSubmit = async values => {
-//   try {
-//     setLoading(true);
 
-//     console.log("EMAIL ENTERED:", values.email);
-
-//     const res = await axios.post(`${API_BASE_URL}/api/auth/forgot-password`, {
-//       email: values.email,
-//     });
-
-//     console.log("API RESPONSE:", res.data);
-
-//     if (res.data.success) {
-//       console.log("OTP SENT SUCCESSFULLY");
-
-//       navigation.navigate('OtpScreen', {
-//         email: values.email,
-//         type: 'reset',
-//       });
-//     } else {
-//       console.log("API RETURNED FALSE:", res.data.message);
-//     }
-
-//   } catch (err) {
-//     console.log("FORGOT PASSWORD ERROR:", err);
-//     console.log("SERVER ERROR RESPONSE:", err?.response?.data);
-
-//     Alert.alert(
-//       'Error',
-//       err?.response?.data?.message || 'Something went wrong',
-//     );
-//   } finally {
-//     setLoading(false);
-//   }
-// };
 
   return (
     <View style={styles.container}>

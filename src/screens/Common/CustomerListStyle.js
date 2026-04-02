@@ -202,76 +202,7 @@ export default StyleSheet.create({
     fontSize: 15,
   },
 
-  //   actions: {
-  //   alignItems: 'center',
-  //   justifyContent: 'center',
-  //   gap: 10,
-  //   paddingLeft: 8,
-  // },
-  // iconBtn: {
-  //   padding: 4,
-  // },
-  // // Modal overlay
-  // overlay: {
-  //   flex: 1,
-  //   justifyContent: 'flex-end',
-  //   backgroundColor: 'rgba(0,0,0,0.4)',
-  // },
-  // sheet: {
-  //   backgroundColor: '#fff',
-  //   borderTopLeftRadius: 20,
-  //   borderTopRightRadius: 20,
-  //   padding: 20,
-  //   paddingBottom: 36,
-  // },
-  // sheetHeader: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   marginBottom: 14,
-  // },
-  // sheetTitle: {
-  //   flex: 1,
-  //   fontSize: 16,
-  //   fontWeight: '600',
-  //   color: '#111',
-  // },
-  // phonePill: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   backgroundColor: '#f0fdf4',
-  //   borderRadius: 8,
-  //   paddingVertical: 8,
-  //   paddingHorizontal: 12,
-  //   marginBottom: 14,
-  // },
-  // phonePillText: {
-  //   color: '#16a34a',
-  //   fontWeight: '600',
-  //   fontSize: 14,
-  // },
-  // input: {
-  //   borderWidth: 1,
-  //   borderColor: '#e5e7eb',
-  //   borderRadius: 10,
-  //   paddingHorizontal: 12,
-  //   paddingVertical: 10,
-  //   fontSize: 14,
-  //   color: '#111',
-  //   marginBottom: 10,
-  //   backgroundColor: '#fafafa',
-  // },
-  // saveBtn: {
-  //   backgroundColor: '#16a34a',
-  //   borderRadius: 12,
-  //   paddingVertical: 14,
-  //   alignItems: 'center',
-  //   marginTop: 6,
-  // },
-  // saveBtnText: {
-  //   color: '#fff',
-  //   fontWeight: '700',
-  //   fontSize: 15,
-  // },
+
 
   actions: {
     alignItems: 'center',

@@ -78,48 +78,14 @@ const OrderCart = ({ navigation, route }) => {
     );
   };
 
-  // ✅ Fix: ensure each price is a valid number before multiplying
+  //  Fix: ensure each price is a valid number before multiplying
   const totalAmount = cart.reduce((sum, item) => {
     const price = Number(getPrice(item)) || 0;
     const qty = Number(item.qty) || 0;
     return sum + price * qty;
   }, 0);
 
-  // const placeOrder = async () => {
-  //   // ✅ Filter only items with qty > 0
-  //   // const orderedItems = cart.filter((item) => item.qty > 0);
 
-  //   const orderedItems = cart
-  //     .filter(item => item.qty > 0)
-  //     .map(item => ({
-  //       ...item,
-  //       productId: item.id, // ✅ backend expects 'productId'
-  //     }));
-
-  //   if (orderedItems.length === 0) {
-  //     Alert.alert(
-  //       'Empty Order',
-  //       'Please add at least one item before placing order.',
-  //     );
-  //     return;
-  //   }
-
-  //   try {
-  //     // ✅ Reduce stock in MongoDB first
-  //     await dispatch(reduceStock(orderedItems)).unwrap();
-
-  //     // ✅ Then navigate to OrderSuccess
-  //     navigation.navigate('OrderSuccess', {
-  //       invoiceNumber: 'INV-' + Date.now(),
-  //       items: orderedItems, // ✅ only ordered items
-  //       grandTotal: totalAmount,
-  //       paymentMode: 'cash',
-  //       date: new Date().toISOString(),
-  //     });
-  //   } catch (err) {
-  //     Alert.alert('Order Failed', err || 'Could not place order. Try again.');
-  //   }
-  // };
 
   const placeOrder = async () => {
   const orderedItems = cart
@@ -137,12 +103,12 @@ const OrderCart = ({ navigation, route }) => {
   }
 
   try {
-    // ✅ Reduce stock first
+    //  Reduce stock first
     await dispatch(reduceStock(orderedItems)).unwrap();
 
-    // ✅ CALL BACKEND (UPDATED)
+    //  CALL BACKEND (UPDATED)
     const res = await API.post("/api/invoices", {
-      billerName: user?.name || "Unknown", // ✅ IMPORTANT CHANGE
+      billerName: user?.name || "Unknown", //  IMPORTANT CHANGE
 
       items: orderedItems,
       totalAmount: totalAmount,
@@ -151,7 +117,7 @@ const OrderCart = ({ navigation, route }) => {
 
     const invoiceNumber = res.data.invoice.invoiceNumber;
 
-    // ✅ Navigate
+    //  Navigate
     navigation.navigate('OrderSuccess', {
       invoiceNumber,
       items: orderedItems,
@@ -233,7 +199,7 @@ const OrderCart = ({ navigation, route }) => {
                           style={styles.productImage}
                         />
                       ) : (
-                        // ✅ Fallback if no image
+                        //  Fallback if no image
                         <View
                           style={[
                             styles.productImage,
