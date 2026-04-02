@@ -42,6 +42,11 @@ const LoginScreen = ({ navigation }) => {
       }),
     )
       .unwrap()
+      // .then(res => {
+      //   console.log('LOGIN SUCCESS', res);
+
+      //   navigation.replace('Home'); // ✅ ADD THIS
+      // })
       .catch(err => {
         console.log('-- login form (error) --', err);
         // showToast('Server Running Slow!','short')
@@ -164,11 +169,7 @@ const LoginScreen = ({ navigation }) => {
                     value="MarketingExecutive"
                     color="#000"
                   />
-                  <Picker.Item
-                    label="Radnus"
-                    value="Radnus"
-                    color="#000"
-                  />
+                  <Picker.Item label="Radnus" value="Radnus" color="#000" />
                 </Picker>
               </View>
               {touched.role && errors.role && (

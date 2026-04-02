@@ -19,6 +19,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const TOKEN_KEY = "token";
 const MAX_RETRIES = 3;
 const SESSION_KEY = "sessionId";
+const ACCESS_TOKEN = "accessToken";
+const REFRESH_TOKEN = "refreshToken";
+
 /**
  * Performs AsyncStorage operations with retry logic
  * Handles temporary storage access issues during app transitions
@@ -72,29 +75,29 @@ export const getToken = async () => {
 /**
  * Store authentication token
  */
-export const setToken = async (token) => {
-  try {
-    await asyncStorageWithRetry('set', TOKEN_KEY, token);
-    return true;
-  } catch (error) {
-    console.error('Failed to set token:', error);
-    throw error; // Throw here because login should fail if we can't store token
-  }
-};
+// export const setToken = async (token) => {
+//   try {
+//     await asyncStorageWithRetry('set', TOKEN_KEY, token);
+//     return true;
+//   } catch (error) {
+//     console.error('Failed to set token:', error);
+//     throw error; // Throw here because login should fail if we can't store token
+//   }
+// };
 
 /**
  * Clear authentication token
  */
-export const clearToken = async () => {
-  try {
-    await asyncStorageWithRetry('remove', TOKEN_KEY);
-    return true;
-  } catch (error) {
-    console.error('Failed to clear token:', error);
-    // Don't throw here - logout should still succeed even if storage fails
-    return false;
-  }
-};
+// export const clearToken = async () => {
+//   try {
+//     await asyncStorageWithRetry('remove', TOKEN_KEY);
+//     return true;
+//   } catch (error) {
+//     console.error('Failed to clear token:', error);
+//     // Don't throw here - logout should still succeed even if storage fails
+//     return false;
+//   }
+// };
 
 /**
  * Check if token exists
@@ -146,3 +149,18 @@ export const clearSessionId = async () => {
     return false;
   }
 };
+
+export const setTokens = async (access, refresh) => {
+ await AsyncStorage.setItem(ACCESS_TOKEN, access);
+ await AsyncStorage.setItem(REFRESH_TOKEN, refresh);
+};
+
+export const getAccessToken = () => AsyncStorage.getItem(ACCESS_TOKEN);
+export const getRefreshToken = () => AsyncStorage.getItem(REFRESH_TOKEN);
+
+export const clearTokens = async () => {
+ await AsyncStorage.removeItem(ACCESS_TOKEN);
+ await AsyncStorage.removeItem(REFRESH_TOKEN);
+};
+
+
