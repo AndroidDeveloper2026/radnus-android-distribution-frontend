@@ -1,13 +1,157 @@
-import React, { useEffect, useState } from 'react';
+// import React, { useEffect, useState } from 'react';
+// import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+// import styles from './LoginStyle';
+
+// import LeftArrow from '../../assets/svg/white-left-arrow.svg';
+
+// import { Formik } from 'formik';
+
+// import * as Yup from 'yup';
+// import { useSelector, useDispatch } from 'react-redux';
+// import { adminLogin } from '../../services/features/auth/adminAuthSlice';
+// import showToast from '../../utils/toast';
+// import { Eye, EyeOff } from 'lucide-react-native';
+
+// const AdminValidationSchema = Yup.object().shape({
+//   email: Yup.string()
+//     .email('Invalid email address')
+//     .required('Email is required'),
+
+//   password: Yup.string()
+//     .min(6, 'Password must be at least 6 characters')
+//     .required('Password is required'),
+// });
+
+// const AdminScreen = ({ navigation }) => {
+//   const dispatch = useDispatch();
+//   const [showPassword, setShowPassword] = useState(false);
+//   const { token, error } = useSelector(state => state?.adminAuth);
+
+//   const handleBackBtn = () => {
+//     navigation.goBack();
+//   };
+
+//   useEffect(() => {
+//     if (token) {
+//       showToast('Successfully login', 'short');
+
+//       navigation.replace('MainTabs', {
+//         role: 'Admin',
+//       });
+//     }
+//   }, [token, navigation]);
+
+//   useEffect(() => {
+//     if (error) {
+//       showToast(error, 'short'); // or custom message
+//     }
+//   }, [error]);
+
+//   return (
+//     <View style={styles.container}>
+//       {/* HEADER */}
+//       <View style={styles.header}>
+//         <TouchableOpacity style={styles.backButton} onPress={handleBackBtn}>
+//           <LeftArrow width={35} height={35} />
+//         </TouchableOpacity>
+//         <Text style={styles.heading}>Admin Login</Text>
+//       </View>
+
+//       {/* FORM */}
+//       <Formik
+//         initialValues={{ email: '', password: '' }}
+//         validationSchema={AdminValidationSchema}
+//         onSubmit={async values => {
+//           console.log('--- admin (login) ---', values);
+
+//           dispatch(adminLogin(values));
+//         }}
+//       >
+//         {({
+//           handleChange,
+//           handleBlur,
+//           handleSubmit,
+//           values,
+//           errors,
+//           touched,
+//         }) => (
+//           <View style={styles.card}>
+//             <Text style={styles.title}>Get log in your account</Text>
+
+//             {/* MOBILE / EMAIL */}
+//             <View style={styles.inputGroup}>
+//               <Text style={styles.label}>Email ID</Text>
+//               <TextInput
+//                 style={styles.input}
+//                 keyboardType="email-address"
+//                 value={values.email}
+//                 onChangeText={handleChange('email')}
+//                 onBlur={handleBlur('email')}
+//                 placeholder="Enter your email ID"
+//                 placeholderTextColor={'#000'}
+//                 autoCapitalize="none"
+//               />
+//             </View>
+//             {touched.email && errors.email && (
+//               <Text style={styles.error}>{errors.email}</Text>
+//             )}
+
+//             {/* PASSWORD */}
+//             <View style={styles.inputGroup}>
+//               <Text style={styles.label}>Password</Text>
+//               <TextInput
+//                 style={[
+//                   styles.input,
+//                   { paddingRight: 45 }, // space for icon inside
+//                 ]}
+//                 secureTextEntry={!showPassword}
+//                 value={values.password}
+//                 onChangeText={handleChange('password')}
+//                 onBlur={handleBlur('password')}
+//                 placeholderTextColor={'#000'}
+//                 placeholder="Enter your password"
+//               />
+//               {/* 👁️ ICON INSIDE INPUT */}
+//               <TouchableOpacity
+//                 onPress={() => setShowPassword(!showPassword)}
+//                 style={{
+//                   position: 'absolute',
+//                   right: 12,
+//                   top: '73%',
+//                   transform: [{ translateY: -10 }],
+//                 }}
+//               >
+//                 {showPassword ? (
+//                   <EyeOff size={20} color="#555" />
+//                 ) : (
+//                   <Eye size={20} color="#555" />
+//                 )}
+//               </TouchableOpacity>
+//             </View>
+//             {touched.password && errors.password && (
+//               <Text style={styles.error}>{errors.password}</Text>
+//             )}
+
+//             {/* LOGIN BUTTON */}
+//             <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+//               <Text style={styles.buttonText}>LOGIN</Text>
+//             </TouchableOpacity>
+//           </View>
+//         )}
+//       </Formik>
+//     </View>
+//   );
+// };
+
+// export default AdminScreen;
+
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import styles from './LoginStyle';
-
 import LeftArrow from '../../assets/svg/white-left-arrow.svg';
-
 import { Formik } from 'formik';
-
 import * as Yup from 'yup';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { adminLogin } from '../../services/features/auth/adminAuthSlice';
 import showToast from '../../utils/toast';
 import { Eye, EyeOff } from 'lucide-react-native';
@@ -16,7 +160,6 @@ const AdminValidationSchema = Yup.object().shape({
   email: Yup.string()
     .email('Invalid email address')
     .required('Email is required'),
-
   password: Yup.string()
     .min(6, 'Password must be at least 6 characters')
     .required('Password is required'),
@@ -25,31 +168,29 @@ const AdminValidationSchema = Yup.object().shape({
 const AdminScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
-  const { token, error } = useSelector(state => state?.adminAuth);
+  const { token, error, loading } = useSelector(state => state?.adminAuth);
 
   const handleBackBtn = () => {
     navigation.goBack();
   };
 
-  useEffect(() => {
-    if (token) {
-      showToast('Successfully login', 'short');
+  // ✅ REMOVE THIS useEffect - Don't navigate manually!
+  // Let StackNavigator handle navigation based on Redux state
+  // useEffect(() => {
+  //   if (token) {
+  //     navigation.replace('MainTabs', { role: 'Admin' });
+  //   }
+  // }, [token, navigation]);
 
-      navigation.replace('MainTabs', {
-        role: 'Admin',
-      });
-    }
-  }, [token, navigation]);
-
-  useEffect(() => {
+  // Only show error toasts
+  React.useEffect(() => {
     if (error) {
-      showToast(error, 'short'); // or custom message
+      showToast(error, 'short');
     }
   }, [error]);
 
   return (
     <View style={styles.container}>
-      {/* HEADER */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={handleBackBtn}>
           <LeftArrow width={35} height={35} />
@@ -57,14 +198,27 @@ const AdminScreen = ({ navigation }) => {
         <Text style={styles.heading}>Admin Login</Text>
       </View>
 
-      {/* FORM */}
       <Formik
         initialValues={{ email: '', password: '' }}
         validationSchema={AdminValidationSchema}
-        onSubmit={async values => {
-          console.log('--- admin (login) ---', values);
-
-          dispatch(adminLogin(values));
+        onSubmit={async (values, { setSubmitting }) => {
+          console.log('--- Admin login ---', values.email);
+          
+          dispatch(adminLogin(values))
+            .unwrap()
+            .then(() => {
+              // ✅ DO NOT NAVIGATE HERE
+              // StackNavigator will automatically switch to MainTabs
+              console.log('Admin login successful');
+              showToast('Login successful', 'short');
+            })
+            .catch((err) => {
+              console.log('Admin login failed:', err);
+              showToast(err || 'Login failed', 'short');
+            })
+            .finally(() => {
+              setSubmitting(false);
+            });
         }}
       >
         {({
@@ -74,11 +228,11 @@ const AdminScreen = ({ navigation }) => {
           values,
           errors,
           touched,
+          isSubmitting,
         }) => (
           <View style={styles.card}>
             <Text style={styles.title}>Get log in your account</Text>
 
-            {/* MOBILE / EMAIL */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Email ID</Text>
               <TextInput
@@ -96,14 +250,10 @@ const AdminScreen = ({ navigation }) => {
               <Text style={styles.error}>{errors.email}</Text>
             )}
 
-            {/* PASSWORD */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Password</Text>
               <TextInput
-                style={[
-                  styles.input,
-                  { paddingRight: 45 }, // space for icon inside
-                ]}
+                style={[styles.input, { paddingRight: 45 }]}
                 secureTextEntry={!showPassword}
                 value={values.password}
                 onChangeText={handleChange('password')}
@@ -111,7 +261,6 @@ const AdminScreen = ({ navigation }) => {
                 placeholderTextColor={'#000'}
                 placeholder="Enter your password"
               />
-              {/* 👁️ ICON INSIDE INPUT */}
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
                 style={{
@@ -132,9 +281,14 @@ const AdminScreen = ({ navigation }) => {
               <Text style={styles.error}>{errors.password}</Text>
             )}
 
-            {/* LOGIN BUTTON */}
-            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-              <Text style={styles.buttonText}>LOGIN</Text>
+            <TouchableOpacity 
+              style={styles.button} 
+              onPress={handleSubmit}
+              disabled={isSubmitting}
+            >
+              <Text style={styles.buttonText}>
+                {isSubmitting ? 'LOGGING IN...' : 'LOGIN'}
+              </Text>
             </TouchableOpacity>
           </View>
         )}

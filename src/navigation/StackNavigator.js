@@ -56,12 +56,13 @@ import InvoiceScreen from '../screens/OrderProduct/InvoiceScreen';
 import CustomerListScreen from '../screens/Common/CustomerListScreen';
 import DistributorDetails from '../screens/Distributor/DistributorDetails';
 import InvoiceListScreen from '../screens/OrderProduct/InvoiceListScreen';
-import AdminFeedbackScreen from '../screens/AdminDashboard/AdminFeedbackScreen'
+import AdminFeedbackScreen from '../screens/AdminDashboard/AdminFeedbackScreen';
 //-- checking --
 import AdminDashboardScreen from '../screens/AdminDashboard/AdminDashboardScreen';
 import DistributorList from '../screens/MarketingExecutive/DistributorList';
 import { useSelector } from 'react-redux';
 import { selectAuthState } from '../store/selectors/authSelector';
+import InvoiceViewScreen from '../screens/OrderProduct/InvoiceViewScreen';
 
 const Stack = createStackNavigator();
 
@@ -75,15 +76,19 @@ const StackNavigator = () => {
   // const role = admin?.role;
 
   const { token, user, isCheckingAuth, role } = useSelector(selectAuthState);
+  const { isCheckingAuth: isAdminChecking } = useSelector(state => state.adminAuth);
+  
+  const isChecking = isCheckingAuth || isAdminChecking;
+
   const isLoggedIn = !!token && !!user;
 
-  console.log('--token--',token);
-  console.log('--user--',user);
-  console.log('--isCheckingAuth--',isCheckingAuth);
-  console.log('--role--',role);
+  console.log('--token--', token);
+  console.log('--user--', user);
+  console.log('--isCheckingAuth--', isCheckingAuth);
+  console.log('--role--', role);
 
   // Show splash screen while checking authentication
-  if (isCheckingAuth) {
+  if (isChecking) {
     return (
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Splash" component={SplashScreen} />
@@ -283,6 +288,12 @@ const StackNavigator = () => {
           <Stack.Screen
             name="InvoiceScreen"
             component={InvoiceScreen}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="InvoiceViewScreen"
+            component={InvoiceViewScreen}
             options={{ headerShown: false }}
           />
 

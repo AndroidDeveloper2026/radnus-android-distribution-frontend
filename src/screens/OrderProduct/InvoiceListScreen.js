@@ -31,36 +31,37 @@ const InvoiceListScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
 
-  const loadAll = useCallback(
-    (filter = 'all') => {
-      dispatch(fetchInvoices(filter));
-      dispatch(fetchInvoiceCounts());
-    },
-    [dispatch],
-  );
+  // ✅ Improved: async + Promise.all
+  const loadAll = useCallback(async (filter = 'all') => {
+    await Promise.all([
+      dispatch(fetchInvoices(filter)),
+      dispatch(fetchInvoiceCounts()),
+    ]);
+  }, [dispatch]);
 
+  // ✅ Use current tab instead of hardcoded 'all'
   useEffect(() => {
-    loadAll('all');
+    loadAll(tab);
   }, []);
 
+  // ✅ Clean dependency
   useEffect(() => {
     dispatch(fetchInvoices(tab));
-  }, [tab,dispatch]);
+  }, [tab]);
 
   const onRefresh = async () => {
     setRefreshing(true);
     setSearch('');
-    await Promise.all([
-      dispatch(fetchInvoices(tab)),
-      dispatch(fetchInvoiceCounts()),
-    ]);
+    // ✅ Reuse loadAll
+    await loadAll(tab);
     setRefreshing(false);
   };
 
-  // ── Search filter applied on top of Redux data ──
+  // ── Search filter ──
   const filteredData = useMemo(() => {
     if (!search.trim()) return data;
     const q = search.toLowerCase();
+
     return data.filter(
       item =>
         item.billerName?.toLowerCase().includes(q) ||
@@ -73,7 +74,8 @@ const InvoiceListScreen = ({ navigation }) => {
   const renderItem = ({ item }) => (
     <TouchableOpacity
       style={styles.card}
-      onPress={() => navigation.navigate('InvoiceScreen', item)}
+      // ✅ Updated navigation
+      onPress={() => navigation.navigate('InvoiceViewScreen', { invoice: item })}
       activeOpacity={0.85}
     >
       {/* Date Row */}
@@ -105,11 +107,13 @@ const InvoiceListScreen = ({ navigation }) => {
           </View>
           <Text style={styles.invoice}>{item.invoiceNumber}</Text>
         </View>
+
         <View style={styles.iconRow}>
           <View style={[styles.iconBox, { backgroundColor: '#E8F5E9' }]}>
             <IndianRupee size={13} color="#2E7D32" />
           </View>
-          <Text style={styles.amount}>{item.totalAmount}</Text>
+          {/* ✅ Currency symbol added */}
+          <Text style={styles.amount}>₹{item.totalAmount}</Text>
         </View>
       </View>
 

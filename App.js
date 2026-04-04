@@ -11,6 +11,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { displayNotification } from './src/utils/notificationService';
 
 import { checkAuth } from './src/services/features/auth/authSlice';
+import { checkAdminAuth } from './src/services/features/auth/adminAuthSlice'; 
 
 // Separate component to use dispatch
 const AppContent = () => {
@@ -19,6 +20,7 @@ const AppContent = () => {
   useEffect(() => {
     // Check authentication when app starts
     dispatch(checkAuth());
+    dispatch(checkAdminAuth()); 
   }, [dispatch]);
 
   useEffect(() => {

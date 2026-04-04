@@ -103,6 +103,36 @@ const EmployeeDashboard = ({ navigation }) => {
         <QuickAction
           icon={
             <Icons
+              name={'Users'}
+              size={20}
+              color="#1976D2"
+              circleSize={40}
+              withCircle={true}
+              // backgroundColor="#d6e8ff"
+            />
+          }
+          label="Customer Details"
+          onPress={() => navigation.navigate('CustomerListScreen')}
+        />
+
+        <QuickAction
+          icon={
+            <Icons
+              name={'ClipboardList'}
+              size={20}
+              color="#d3602f"
+              circleSize={40}
+              withCircle={true}
+              // backgroundColor="#ffd6d6"
+            />
+          }
+          label="Invoice History"
+          onPress={() => navigation.navigate('InvoiceListScreen')}
+        />
+
+        <QuickAction
+          icon={
+            <Icons
               name={'Package'}
               size={20}
               color="#D32F2F"
@@ -141,7 +171,7 @@ const EmployeeDashboard = ({ navigation }) => {
               // backgroundColor="#d6e8ff"
             />
           }
-          label="RetailerSalesTab"
+          label="Retailer Sales"
           onPress={() => navigation.navigate('RetailerSalesTab')}
         />
 
@@ -156,7 +186,7 @@ const EmployeeDashboard = ({ navigation }) => {
               // backgroundColor="#f1e0ff"
             />
           }
-          label="CentralStock"
+          label="Central Stock"
           onPress={() => navigation.navigate('CentralStock')}
         />
 
@@ -168,10 +198,10 @@ const EmployeeDashboard = ({ navigation }) => {
               color="#F9A825"
               circleSize={40}
               withCircle={true}
-              backgroundColor="#fff3cd"
+              // backgroundColor="#fff3cd"
             />
           }
-          label="OrderBilling"
+          label="Order Billing"
           onPress={() => navigation.navigate('OrderBilling')}
         />
       </ScrollView>

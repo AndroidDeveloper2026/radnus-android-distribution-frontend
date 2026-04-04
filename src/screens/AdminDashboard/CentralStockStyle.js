@@ -32,30 +32,78 @@ export default StyleSheet.create({
     color: "#D32F2F",
   },
 
+  // ✅ IMPROVED RED CARD - More compact, better details display
   totalCard: {
     backgroundColor: "#D32F2F",
-    margin: 16,
-    padding: 20,
-    borderRadius: 16,
+    margin: 12,
+    padding: 14,
+    borderRadius: 14,
     alignItems: "center",
   },
 
+  // ✅ IMPROVED - Larger prominent amount
   totalValue: {
-    fontSize: 22,
+    fontSize: 28,
     fontWeight: "700",
-    color: "#FFF",
+    color: "#FFFFFF",
+    marginBottom: 4,
   },
 
+  // ✅ IMPROVED - Subtitle
   totalLabel: {
-    fontSize: 12,
-    color: "#FFECEC",
-    marginTop: 4,
+    fontSize: 11,
+    color: "#FFFFFF",
+    fontWeight: "400",
+    marginBottom: 10,
+  },
+
+  // ✅ NEW - Summary rows with better organization
+  summaryRow: {
+    width: "100%",
+    gap: 0,
+  },
+
+  // ✅ IMPROVED - Individual summary items with better layout
+  summaryItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 4,
+    paddingHorizontal: 0,
+    justifyContent: "space-between",
+    width: "100%",
+  },
+
+  // ✅ IMPROVED - Summary item left side (icon + label)
+  summaryItemLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+
+  // ✅ NEW - Summary item right side (value)
+  summaryItemRight: {
+    alignItems: "flex-end",
+  },
+
+  // ✅ IMPROVED - Summary text (label)
+  summaryText: {
+    fontSize: 11,
+    color: "#FFFFFF",
+    fontWeight: "400",
+    marginLeft: 6,
+  },
+
+  // ✅ NEW - Summary value text
+  summaryValue: {
+    fontSize: 11,
+    color: "#FFFFFF",
+    fontWeight: "600",
   },
 
   list: {
-    paddingTop:16,
-    paddingHorizontal: 16,
-    paddingBottom: 20,
+    paddingTop: 12,
+    paddingHorizontal: 12,
+    paddingBottom: 16,
   },
 
   card: {
@@ -142,5 +190,49 @@ export default StyleSheet.create({
   outward: {
     color: "#D32F2F",
   },
-});
 
+  emptyContainer: {
+    padding: 20,
+    alignItems: "center",
+    marginTop: 40,
+  },
+
+  emptyText: {
+    textAlign: "center",
+    color: "#999",
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 8,
+  },
+
+  emptySubText: {
+    textAlign: "center",
+    color: "#BBB",
+    fontSize: 12,
+    lineHeight: 18,
+  },
+
+  price: {
+    fontSize: 11,
+    color: "#666",
+    marginTop: 4,
+  },
+
+  totalAmount: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#212121",
+    marginTop: 2,
+  },
+
+  badge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+
+  badgeText: {
+    fontSize: 10,
+    fontWeight: "700",
+  },
+});
