@@ -32,6 +32,50 @@ export default StyleSheet.create({
     color: "#D32F2F",
   },
 
+  // ✅ NEW - Time Filter Row (for Day/Week/Month toggles)
+  timeFilterRow: {
+    flexDirection: "row",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "#f8f9fa",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+    gap: 6,
+    flexWrap: "wrap",
+  },
+
+  // ✅ NEW - Time Filter Button
+  timeFilterBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+
+  // ✅ NEW - Time Filter Button Active State
+  timeFilterBtnActive: {
+    backgroundColor: "#D32F2F",
+    borderColor: "#D32F2F",
+  },
+
+  // ✅ NEW - Time Filter Text
+  timeFilterText: {
+    fontSize: 11,
+    color: "#666",
+    fontWeight: "500",
+  },
+
+  // ✅ NEW - Time Filter Text Active State
+  timeFilterTextActive: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+
   // ✅ IMPROVED RED CARD - More compact, better details display
   totalCard: {
     backgroundColor: "#D32F2F",

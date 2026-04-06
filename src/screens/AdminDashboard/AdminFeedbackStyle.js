@@ -6,12 +6,49 @@ export default StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
 
+  // Tab bar styles
+  tabBar: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 4,
+    borderRadius: 30,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 30,
+  },
+  activeTab: {
+    backgroundColor: '#D32F2F', // active tab background
+  },
+  tabText: {
+    fontWeight: '600',
+    color: '#666',
+  },
+  activeTabText: {
+    color: '#fff',
+  },
+
+  // Card styles
   card: {
     backgroundColor: '#fff',
     padding: 14,
     marginHorizontal: 10,
     marginVertical: 10,
     borderRadius: 10,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 1,
   },
 
   message: {

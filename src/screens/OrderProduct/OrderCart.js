@@ -15,6 +15,7 @@ import {
   fetchProducts,
   reduceStock,
 } from '../../services/features/products/productSlice';
+import { fetchInvoices } from '../../services/features/retailer/invoiceSlice';
 import styles from './OrderCartStyle';
 import Header from '../../components/Header';
 import API from '../../services/API/api';
@@ -25,10 +26,25 @@ const OrderCart = ({ navigation, route }) => {
   const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
   const { list: products, loading } = useSelector(state => state.products);
+  const { data: invoices } = useSelector(state => state.invoice || { data: [] });
 
   useEffect(() => {
     dispatch(fetchProducts());
+    dispatch(fetchInvoices("all"));
   }, [dispatch]);
+
+  // const mapProducts = list =>
+  //   list.map(p => ({
+  //     id: p._id,
+  //     name: p.name ?? 'Unnamed Product',
+  //     sku: p.sku ?? '-',
+  //     retailerPrice: Number(p.retailerPrice) || 0,
+  //     distributorPrice: Number(p.distributorPrice) || 0,
+  //     mrp: Number(p.mrp) || 0,
+  //     qty: 0, // ✅ always start at 0
+  //     moq: Number(p.moq) || 1,
+  //     image: p.image ?? null,
+  //   }));
 
   const mapProducts = list =>
     list.map(p => ({
@@ -38,10 +54,22 @@ const OrderCart = ({ navigation, route }) => {
       retailerPrice: Number(p.retailerPrice) || 0,
       distributorPrice: Number(p.distributorPrice) || 0,
       mrp: Number(p.mrp) || 0,
-      qty: 0, // ✅ always start at 0
+      qty: 0,
       moq: Number(p.moq) || 1,
+      currentStock: getCurrentStock(p._id, Number(p.moq) || 1), // ✅ Calculate dynamically
       image: p.image ?? null,
     }));
+  
+  // Calculate current stock for each product
+  const getCurrentStock = (productId, moq) => {
+    // Calculate total sold from invoices
+    const totalSold = invoices.reduce((sum, invoice) => {
+      const item = invoice.items?.find(i => i.productId === productId);
+      return sum + (item?.qty || 0);
+    }, 0);
+    
+    return Math.max(0, moq - totalSold);
+  };
 
   const initialCart = route?.params?.cartItems ?? mapProducts(products);
   const [cart, setCart] = useState(initialCart);
@@ -87,7 +115,52 @@ const OrderCart = ({ navigation, route }) => {
 
 
 
-  const placeOrder = async () => {
+//   const placeOrder = async () => {
+//   const orderedItems = cart
+//     .filter(item => item.qty > 0)
+//     .map(item => ({
+//       productId: item.id,
+//       name: item.name,
+//       qty: item.qty,
+//       price: item.retailerPrice,
+//     }));
+
+//   if (orderedItems.length === 0) {
+//     Alert.alert('Empty Order', 'Please add at least one item.');
+//     return;
+//   }
+
+//   try {
+//     //  Reduce stock first
+//     await dispatch(reduceStock(orderedItems)).unwrap();
+
+//     //  CALL BACKEND (UPDATED)
+//     const res = await API.post("/api/invoices", {
+//       billerName: user?.name || "Unknown", //  IMPORTANT CHANGE
+
+//       items: orderedItems,
+//       totalAmount: totalAmount,
+//       paymentMode: "cash",
+//     });
+
+//     const invoiceNumber = res.data.invoice.invoiceNumber;
+
+//     //  Navigate
+//     navigation.navigate('OrderSuccess', {
+//       invoiceNumber,
+//       items: orderedItems,
+//       grandTotal: totalAmount,
+//       paymentMode: 'cash',
+//       date: new Date().toISOString(),
+//     });
+
+//   } catch (err) {
+//     console.log(err);
+//     Alert.alert("Error", err.message || "Order failed");
+//   }
+// };
+
+const placeOrder = async () => {
   const orderedItems = cart
     .filter(item => item.qty > 0)
     .map(item => ({
@@ -103,13 +176,12 @@ const OrderCart = ({ navigation, route }) => {
   }
 
   try {
-    //  Reduce stock first
+    // ✅ UNCOMMENT THIS - Reduces stock in Redux
     await dispatch(reduceStock(orderedItems)).unwrap();
 
-    //  CALL BACKEND (UPDATED)
+    // Create invoice
     const res = await API.post("/api/invoices", {
-      billerName: user?.name || "Unknown", //  IMPORTANT CHANGE
-
+      billerName: user?.name || "Unknown",
       items: orderedItems,
       totalAmount: totalAmount,
       paymentMode: "cash",
@@ -117,7 +189,6 @@ const OrderCart = ({ navigation, route }) => {
 
     const invoiceNumber = res.data.invoice.invoiceNumber;
 
-    //  Navigate
     navigation.navigate('OrderSuccess', {
       invoiceNumber,
       items: orderedItems,
@@ -227,7 +298,7 @@ const OrderCart = ({ navigation, route }) => {
                         </Text>
                       </View>
                       <Text style={styles.moqText}>
-                        Stock: {item.moq} units
+                        Stock: {item.currentStock} units
                       </Text>
                     </View>
 
@@ -277,3 +348,4 @@ const OrderCart = ({ navigation, route }) => {
 };
 
 export default OrderCart;
+

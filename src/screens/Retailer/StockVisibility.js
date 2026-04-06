@@ -75,7 +75,7 @@ const StockVisibility = () => {
 
   return (
     <View style={styles.container}>
-      <Header title="Stock Availability" />
+      <Header title="Stock Visibility" />
 
       {/* INFO BANNER */}
       <View style={styles.infoBox}>
