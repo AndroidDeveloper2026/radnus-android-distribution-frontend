@@ -133,6 +133,8 @@ const OrderSuccessScreen = ({ route, navigation }) => {
     paymentMode ? { label: paymentMode } : null,
   );
   const [paymentDropdownOpen, setPaymentDropdownOpen] = useState(false);
+  const [customerType, setCustomerType] = useState('customer');
+  const [shopName, setShopName] = useState('');
 
   // ── Animations ─────────────────────────────────────────
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -270,11 +272,33 @@ const OrderSuccessScreen = ({ route, navigation }) => {
   };
 
   // ── Save new customer to DB ────────────────────────────
+  // const handleSaveNewCustomer = () => {
+  //   if (!newName.trim()) {
+  //     Alert.alert('Required', 'Customer name is required.');
+  //     return;
+  //   }
+  //   dispatch(
+  //     addCustomer({
+  //       phone: buyerPhone,
+  //       name: newName.trim(),
+  //       address: newAddress.trim(),
+  //       city: newCity.trim(),
+  //       state: newState.trim(),
+  //     }),
+  //   );
+  // };
+
   const handleSaveNewCustomer = () => {
     if (!newName.trim()) {
       Alert.alert('Required', 'Customer name is required.');
       return;
     }
+
+    if (customerType === 'shop' && !shopName.trim()) {
+      Alert.alert('Required', 'Shop name is required.');
+      return;
+    }
+
     dispatch(
       addCustomer({
         phone: buyerPhone,
@@ -282,6 +306,8 @@ const OrderSuccessScreen = ({ route, navigation }) => {
         address: newAddress.trim(),
         city: newCity.trim(),
         state: newState.trim(),
+        type: customerType, // ✅ NEW
+        shopName: shopName.trim(), // ✅ NEW
       }),
     );
   };
@@ -375,7 +401,13 @@ const OrderSuccessScreen = ({ route, navigation }) => {
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.customerName}>{customer?.name}</Text>
+          {/* <Text style={styles.customerName}>{customer?.name}</Text> */}
+
+          <Text style={styles.customerName}>
+            {customer?.type === 'shop'
+              ? `${customer.shopName} (${customer.ownerName})`
+              : customer?.name}
+          </Text>
 
           {customer?.address ? (
             <View style={ls.subRow}>
@@ -791,6 +823,31 @@ const OrderSuccessScreen = ({ route, navigation }) => {
                   <Text style={styles.phonePillText}> {buyerPhone}</Text>
                 </View>
 
+                <View style={{ flexDirection: 'row', marginBottom: 10 }}>
+                  <TouchableOpacity onPress={() => setCustomerType('customer')}>
+                    <Text
+                      style={{
+                        color: customerType === 'customer' ? '#16a34a' : '#888',
+                        fontWeight: '600',
+                      }}
+                    >
+                      Customer
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity onPress={() => setCustomerType('shop')}>
+                    <Text
+                      style={{
+                        marginLeft: 20,
+                        color: customerType === 'shop' ? '#16a34a' : '#888',
+                        fontWeight: '600',
+                      }}
+                    >
+                      Shop
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
                 <TextInput
                   style={styles.sheetInput}
                   placeholder="Customer Name *"
@@ -798,6 +855,15 @@ const OrderSuccessScreen = ({ route, navigation }) => {
                   value={newName}
                   onChangeText={setNewName}
                 />
+                {customerType === 'shop' && (
+                  <TextInput
+                    style={styles.sheetInput}
+                    placeholder="Shop Name *"
+                    placeholderTextColor="#bbb"
+                    value={shopName}
+                    onChangeText={setShopName}
+                  />
+                )}
                 <TextInput
                   style={[
                     styles.sheetInput,
@@ -893,7 +959,14 @@ const OrderSuccessScreen = ({ route, navigation }) => {
             <View style={styles.popupInfoBox}>
               <Row label="Invoice No" value={invoiceNumber} />
               <Divider />
-              <Row label="Buyer" value={customer?.name || '—'} />
+              <Row
+                label="Buyer"
+                value={
+                  customer?.type === 'shop'
+                    ? `${customer.shopName} (${customer.name})`
+                    : customer?.name || '—'
+                }
+              />
               <Divider />
               <Row label="Phone" value={buyerPhone || '—'} />
               <Divider />

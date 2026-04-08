@@ -470,13 +470,20 @@ const FSEHomeScreen = ({ navigation }) => {
   const [refreshingLocation, setRefreshingLocation] = useState(false);
   const permissionChecked = useRef(false);
 
+  // ✅ FIX: Wait for user before loading session and permissions
   useEffect(() => {
-    if (!permissionChecked.current) {
-      requestLocationPermission();
-      permissionChecked.current = true;
-    }
-    loadSavedSession();
-  }, []);
+    const initialize = async () => {
+      if (!permissionChecked.current) {
+        await requestLocationPermission();
+        permissionChecked.current = true;
+      }
+      // Only load session after user is available
+      if (user?._id || user?.id) {
+        await loadSavedSession();
+      }
+    };
+    initialize();
+  }, [user]); // Re-run when user becomes available
 
   const loadSavedSession = async () => {
     try {
@@ -487,7 +494,7 @@ const FSEHomeScreen = ({ navigation }) => {
         setAttendanceMarked(true);
         dispatch(startTracking(savedSession));
       } else {
-        checkTodaySession();
+        await checkTodaySession();
       }
     } catch (err) {
       console.log('Session restore error:', err);
@@ -513,7 +520,6 @@ const FSEHomeScreen = ({ navigation }) => {
     }
   };
 
-  // ✅ Unified location error handler
   const handleLocationError = error => {
     setLocationLoading(false);
     setRefreshingLocation(false);
@@ -539,7 +545,7 @@ const FSEHomeScreen = ({ navigation }) => {
     }
   };
 
-  // ✅ Permission + location request (Android & iOS)
+  // ✅ Improved iOS permission handling with callback
   const requestLocationPermission = async () => {
     try {
       if (Platform.OS === 'android') {
@@ -564,23 +570,20 @@ const FSEHomeScreen = ({ navigation }) => {
         if (result === PermissionsAndroid.RESULTS.GRANTED) {
           getCurrentLocation(true);
         } else {
-          setLocationLoading(false); // ✅ FIX: was missing on denial path
+          setLocationLoading(false);
           Alert.alert(
             'Permission Required',
             'Location permission is required to start your day',
             [
               { text: 'Cancel', style: 'cancel' },
-              {
-                text: 'Open Settings',
-                onPress: () => Linking.openSettings(),
-              },
+              { text: 'Open Settings', onPress: () => Linking.openSettings() },
             ],
           );
         }
       } else {
-        // ✅ FIX: iOS — requestAuthorization is async-ish, wrap in try/catch
-        try {
-          Geolocation.requestAuthorization('whenInUse');
+        // iOS: request authorization with callback
+        Geolocation.requestAuthorization('whenInUse', () => {
+          // Callback when user responds (granted or denied)
           Geolocation.getCurrentPosition(
             position => {
               const { latitude, longitude, accuracy } = position.coords;
@@ -591,10 +594,22 @@ const FSEHomeScreen = ({ navigation }) => {
             error => handleLocationError(error),
             { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 },
           );
-        } catch (iosErr) {
-          setLocationLoading(false);
-          console.error('iOS location error:', iosErr);
-        }
+        });
+        // Fallback in case callback never fires (old API)
+        setTimeout(() => {
+          if (locationLoading) {
+            Geolocation.getCurrentPosition(
+              position => {
+                const { latitude, longitude, accuracy } = position.coords;
+                setLocation({ latitude, longitude, accuracy });
+                getAddress(latitude, longitude);
+                setLocationLoading(false);
+              },
+              error => handleLocationError(error),
+              { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 },
+            );
+          }
+        }, 2000);
       }
     } catch (err) {
       setLocationLoading(false);
@@ -643,31 +658,6 @@ const FSEHomeScreen = ({ navigation }) => {
     }
   };
 
-// const getAddress = async (lat, lng) => {
-//   try {
-//     console.log('Fetching address:', lat, lng);
-
-//     const response = await fetch(
-//       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
-//       {
-//         headers: {
-//           'User-Agent': 'FSEApp/1.0',
-//           'Accept': 'application/json',
-//         },
-//       }
-//     );
-
-//     const data = await response.json();
-
-//     console.log('API response:', data);
-
-//     setAddress(data?.display_name || 'Address not found');
-//   } catch (error) {
-//     console.log('Address error:', error);
-//     setAddress('Error fetching address');
-//   }
-// };
-
   const getFreshGPSLocation = () => {
     return new Promise((resolve, reject) => {
       Geolocation.getCurrentPosition(
@@ -696,7 +686,6 @@ const FSEHomeScreen = ({ navigation }) => {
       try {
         freshLocation = await getFreshGPSLocation();
       } catch (gpsErr) {
-        // ✅ FIX: reset startingDay if GPS fetch fails
         setStartingDay(false);
         Alert.alert(
           'GPS Error',
@@ -718,21 +707,17 @@ const FSEHomeScreen = ({ navigation }) => {
       dispatch(startTracking(newSessionId));
       startTrackingService(userId, newSessionId);
 
-      // ✅ FIX: reset startingDay before navigating
       setStartingDay(false);
-
       navigation.navigate('FSETracking', { sessionId: newSessionId });
     } catch (err) {
       console.log('markAttendance error:', err);
       Alert.alert('Error', 'Failed to start day. Please try again.');
-      // ✅ FIX: always reset startingDay on error
       setStartingDay(false);
     }
   };
 
   const handleStartDaybtn = () => {
     if (attendanceMarked && sessionId) {
-      // ✅ FIX: navigation when already marked should never be blocked
       navigation.navigate('FSETracking', { sessionId });
     } else {
       markAttendance();
@@ -743,15 +728,13 @@ const FSEHomeScreen = ({ navigation }) => {
     getCurrentLocation(false);
   };
 
-  // ✅ FIX: removed `attendanceMarked` from disabled check so "Day Already Started"
-  //         button still navigates — instead show it as active when marked
+  // Button disabled only when location is loading or we're starting the day
   const isButtonDisabled = !location || locationLoading || startingDay;
 
   return (
     <View style={FSEHomeStyles.container}>
       <Header title="Start Day" showBackArrow={false} />
       <View style={FSEHomeStyles.content}>
-        {/* Welcome */}
         <View
           style={{
             flexDirection: 'row',

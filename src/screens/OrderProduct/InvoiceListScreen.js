@@ -109,9 +109,9 @@ const InvoiceListScreen = ({ navigation }) => {
         </View>
 
         <View style={styles.iconRow}>
-          <View style={[styles.iconBox, { backgroundColor: '#E8F5E9' }]}>
+          {/* <View style={[styles.iconBox, { backgroundColor: '#E8F5E9' }]}>
             <IndianRupee size={13} color="#2E7D32" />
-          </View>
+          </View> */}
           {/* ✅ Currency symbol added */}
           <Text style={styles.amount}>₹{item.totalAmount}</Text>
         </View>
