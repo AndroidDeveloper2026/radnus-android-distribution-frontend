@@ -89,16 +89,87 @@
 
 //--------------------------------------------------------------
 
-import Geolocation from 'react-native-geolocation-service';
+// import Geolocation from 'react-native-geolocation-service';
+// import API from '../services/API/api';
+// import socket from '../services/socket/socket';
+
+// let watchId = null;
+
+// export const startTrackingService = (userId, sessionId) => {
+//   if (watchId) {
+//     Geolocation.clearWatch(watchId);
+//   }
+
+//   watchId = Geolocation.watchPosition(
+//     async (position) => {
+//       const { latitude, longitude } = position.coords;
+//       const timestamp = new Date();
+
+//       try {
+//         await API.post('/api/location/update', {
+//           userId,
+//           sessionId,
+//           latitude,
+//           longitude,
+//           timestamp,
+//         });
+
+//         socket.emit('send-location', {
+//           sessionId,
+//           latitude,
+//           longitude,
+//           timestamp,
+//         });
+
+//         console.log(`📍 Route point: ${latitude}, ${longitude}`);
+//       } catch (error) {
+//         console.log('❌ Location update error:', error.message);
+//       }
+//     },
+//     (error) => {
+//       console.log('❌ GPS watch error:', error);
+//     },
+//     {
+//       enableHighAccuracy: true,
+//       distanceFilter: 5,        // update every 5 meters (accurate route)
+//       interval: 5000,           // or every 5 seconds
+//       fastestInterval: 2000,
+//       showsBackgroundLocationIndicator: true, // iOS
+//     }
+//   );
+
+//   console.log('🚀 Tracking started for session:', sessionId);
+// };
+
+// export const stopTrackingService = () => {
+//   if (watchId) {
+//     Geolocation.clearWatch(watchId);
+//     watchId = null;
+//     console.log('🛑 Tracking stopped');
+//   }
+// };
+
+//--------------------------------------------
+
+import Geolocation from '@react-native-community/geolocation';
 import API from '../services/API/api';
-import socket from '../services/socket/socket';
+import { getSocket } from '../services/socket/socket'; // ✅ use getSocket(), not default import
 
 let watchId = null;
+let isTracking = false; // ✅ FIX: guard against double-start leak
 
 export const startTrackingService = (userId, sessionId) => {
-  if (watchId) {
+  // ✅ FIX: if already tracking, stop old watcher cleanly before starting new one
+  if (watchId !== null) {
     Geolocation.clearWatch(watchId);
+    watchId = null;
   }
+
+  if (isTracking) {
+    console.log('⚠️ Tracking already active, restarting for new session:', sessionId);
+  }
+
+  isTracking = true;
 
   watchId = Geolocation.watchPosition(
     async (position) => {
@@ -114,7 +185,7 @@ export const startTrackingService = (userId, sessionId) => {
           timestamp,
         });
 
-        socket.emit('send-location', {
+        getSocket().emit('send-location', {
           sessionId,
           latitude,
           longitude,
@@ -131,10 +202,10 @@ export const startTrackingService = (userId, sessionId) => {
     },
     {
       enableHighAccuracy: true,
-      distanceFilter: 5,        // update every 5 meters (accurate route)
-      interval: 5000,           // or every 5 seconds
+      distanceFilter: 5,
+      interval: 5000,
       fastestInterval: 2000,
-      showsBackgroundLocationIndicator: true, // iOS
+      showsBackgroundLocationIndicator: true,
     }
   );
 
@@ -142,10 +213,13 @@ export const startTrackingService = (userId, sessionId) => {
 };
 
 export const stopTrackingService = () => {
-  if (watchId) {
+  if (watchId !== null) {
     Geolocation.clearWatch(watchId);
     watchId = null;
+    isTracking = false;
     console.log('🛑 Tracking stopped');
   }
 };
+
+export const isTrackingActive = () => isTracking;
 
