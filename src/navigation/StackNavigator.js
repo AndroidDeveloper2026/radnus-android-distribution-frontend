@@ -63,6 +63,7 @@ import DistributorList from '../screens/MarketingExecutive/DistributorList';
 import { useSelector } from 'react-redux';
 import { selectAuthState } from '../store/selectors/authSelector';
 import InvoiceViewScreen from '../screens/OrderProduct/InvoiceViewScreen';
+import EmployeeDashboard from '../screens/RadnusEmployee/EmployeeDashboard';
 
 const Stack = createStackNavigator();
 
@@ -76,8 +77,10 @@ const StackNavigator = () => {
   // const role = admin?.role;
 
   const { token, user, isCheckingAuth, role } = useSelector(selectAuthState);
-  const { isCheckingAuth: isAdminChecking } = useSelector(state => state.adminAuth);
-  
+  const { isCheckingAuth: isAdminChecking } = useSelector(
+    state => state.adminAuth,
+  );
+
   const isChecking = isCheckingAuth || isAdminChecking;
 
   const isLoggedIn = !!token && !!user;
@@ -270,6 +273,12 @@ const StackNavigator = () => {
           <Stack.Screen
             name="ProductList"
             component={ProductList}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="EmployeeDashboard"
+            component={EmployeeDashboard}
             options={{ headerShown: false }}
           />
 

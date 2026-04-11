@@ -200,6 +200,13 @@ const AdminDashboard = ({ navigation }) => {
 
           <TouchableOpacity
             style={styles.navItem}
+            onPress={() => navigation.navigate('CustomerListScreen')}
+          >
+            <Text style={styles.navTitle}>CustomerDetails</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.navItem}
             onPress={() => navigation.navigate('AdminFeedbackScreen')}
           >
             <Text style={styles.navTitle}>AdminFeedbackScreen</Text>

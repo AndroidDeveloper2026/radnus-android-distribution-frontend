@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View, Text, FlatList, TextInput, TouchableOpacity,
   ActivityIndicator, RefreshControl, Alert, Modal,
-  KeyboardAvoidingView, Platform, ScrollView, StyleSheet,
+  KeyboardAvoidingView, Platform, ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
@@ -24,6 +24,10 @@ const CustomerListScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const insets = useSafeAreaInsets();
 
+  // ✅ Get admin user from adminAuth slice
+  const { admin } = useSelector(state => state.adminAuth);
+  const isAdmin = !!admin; // true if admin is logged in
+
   const {
     list: customers = [],
     listState,
@@ -35,7 +39,7 @@ const CustomerListScreen = ({ navigation }) => {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
-  // ── Edit Modal State ────────────────────────────────
+  // Edit Modal State
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [editName, setEditName] = useState('');
@@ -43,7 +47,7 @@ const CustomerListScreen = ({ navigation }) => {
   const [editCity, setEditCity] = useState('');
   const [editState, setEditState] = useState('');
 
-  // ✅ DEBOUNCE SEARCH (300ms delay)
+  // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchText);
@@ -51,12 +55,12 @@ const CustomerListScreen = ({ navigation }) => {
     return () => clearTimeout(timer);
   }, [searchText]);
 
-  // ── Fetch on mount ──────────────────────────────────
+  // Fetch on mount
   useEffect(() => {
     dispatch(fetchAllCustomers());
   }, [dispatch]);
 
-  // ── Watch updateState ───────────────────────────────
+  // Watch updateState
   useEffect(() => {
     if (updateState === 'success') {
       setEditModalVisible(false);
@@ -68,25 +72,27 @@ const CustomerListScreen = ({ navigation }) => {
     }
   }, [updateState, error, dispatch]);
 
-  // ── Pull to refresh ─────────────────────────────────
+  // Pull to refresh
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await dispatch(fetchAllCustomers());
     setRefreshing(false);
   }, [dispatch]);
 
-  // ── Open Edit Modal ─────────────────────────────────
-  const openEdit = (customer) => {
+  // Open Edit Modal (only admin)
+  const openEdit = useCallback((customer) => {
+    if (!isAdmin) return;
     setSelectedCustomer(customer);
     setEditName(customer.name || '');
     setEditAddress(customer.address || '');
     setEditCity(customer.city || '');
     setEditState(customer.state || '');
     setEditModalVisible(true);
-  };
+  }, [isAdmin]);
 
-  // ── Save Edit ────────────────────────────────────────
-  const handleSaveEdit = () => {
+  // Save Edit (only admin)
+  const handleSaveEdit = useCallback(() => {
+    if (!isAdmin) return;
     if (!editName.trim()) {
       Alert.alert('Required', 'Customer name cannot be empty.');
       return;
@@ -100,10 +106,11 @@ const CustomerListScreen = ({ navigation }) => {
         state: editState.trim(),
       },
     }));
-  };
+  }, [isAdmin, editName, selectedCustomer, dispatch]);
 
-  // ── Delete ───────────────────────────────────────────
-  const handleDelete = (customer) => {
+  // Delete (only admin)
+  const handleDelete = useCallback((customer) => {
+    if (!isAdmin) return;
     Alert.alert(
       'Delete Customer',
       `Are you sure you want to delete "${customer.name}"?`,
@@ -116,15 +123,14 @@ const CustomerListScreen = ({ navigation }) => {
         },
       ]
     );
-  };
+  }, [isAdmin, dispatch]);
 
-  // ── Memoized filtered customers ──────────────────────
-  const safeCustomers = Array.isArray(customers) ? customers : [];
+  // Memoized filtered customers
+  const safeCustomers = useMemo(() => (Array.isArray(customers) ? customers : []), [customers]);
 
   const filteredCustomers = useMemo(() => {
     const q = debouncedSearch.toLowerCase().trim();
     if (!q) return safeCustomers;
-
     return safeCustomers.filter(c =>
       c.name?.toLowerCase().includes(q) ||
       c.phone?.includes(q) ||
@@ -133,8 +139,8 @@ const CustomerListScreen = ({ navigation }) => {
     );
   }, [debouncedSearch, safeCustomers]);
 
-  // ── Render search bar (OUTSIDE FlatList) ────────────
-  const renderSearchBar = () => (
+  // Search bar component
+  const renderSearchBar = useCallback(() => (
     <View style={styles.searchWrapper}>
       <Search size={16} color="#888" strokeWidth={2} />
       <TextInput
@@ -147,18 +153,15 @@ const CustomerListScreen = ({ navigation }) => {
         blurOnSubmit={false}
       />
       {searchText.length > 0 && (
-        <TouchableOpacity
-          onPress={() => setSearchText('')}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
+        <TouchableOpacity onPress={() => setSearchText('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
           <X size={16} color="#888" strokeWidth={2} />
         </TouchableOpacity>
       )}
     </View>
-  );
+  ), [searchText]);
 
-  // ── Render item ────────────────────────────────────
-  const renderItem = ({ item }) => (
+  // Render item – show edit/delete only if admin
+  const renderItem = useCallback(({ item }) => (
     <TouchableOpacity
       style={styles.card}
       activeOpacity={0.75}
@@ -196,28 +199,30 @@ const CustomerListScreen = ({ navigation }) => {
         ) : null}
       </View>
 
-      {/* Edit & Delete icons */}
-      <View style={styles.actions}>
-        <TouchableOpacity
-          style={styles.iconBtn}
-          hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-          onPress={() => openEdit(item)}
-        >
-          <Pencil size={15} color="#dc2626" strokeWidth={2} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.iconBtn}
-          hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-          onPress={() => handleDelete(item)}
-        >
-          <Trash2 size={15} color="#dc2626" strokeWidth={2} />
-        </TouchableOpacity>
-      </View>
+      {/* ✅ Only show Edit & Delete if admin is logged in */}
+      {isAdmin && (
+        <View style={styles.actions}>
+          <TouchableOpacity
+            style={styles.iconBtn}
+            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+            onPress={() => openEdit(item)}
+          >
+            <Pencil size={15} color="#dc2626" strokeWidth={2} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.iconBtn}
+            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+            onPress={() => handleDelete(item)}
+          >
+            <Trash2 size={15} color="#dc2626" strokeWidth={2} />
+          </TouchableOpacity>
+        </View>
+      )}
     </TouchableOpacity>
-  );
+  ), [isAdmin, navigation, openEdit, handleDelete]);
 
-  // ── Render empty ────────────────────────────────────
-  const renderEmpty = () => {
+  // Empty state
+  const renderEmpty = useCallback(() => {
     if (listState === 'loading') return null;
     return (
       <View style={styles.emptyBox}>
@@ -231,20 +236,17 @@ const CustomerListScreen = ({ navigation }) => {
             : 'Customers added from orders will appear here'}
         </Text>
         {searchText ? (
-          <TouchableOpacity
-            style={styles.clearSearchBtn}
-            onPress={() => setSearchText('')}
-          >
+          <TouchableOpacity style={styles.clearSearchBtn} onPress={() => setSearchText('')}>
             <Text style={styles.clearSearchText}>Clear Search</Text>
           </TouchableOpacity>
         ) : null}
       </View>
     );
-  };
+  }, [listState, searchText]);
 
-  const renderSeparator = () => <View style={styles.separator} />;
+  const renderSeparator = useCallback(() => <View style={styles.separator} />, []);
 
-  // ── Error State ──────────────────────────────────────
+  // Error state
   if (listState === 'error' && safeCustomers.length === 0) {
     return (
       <SafeAreaView style={styles.container} edges={['bottom']}>
@@ -255,10 +257,7 @@ const CustomerListScreen = ({ navigation }) => {
           <Text style={styles.errorSubtitle}>
             {error || 'Failed to load customers.'}
           </Text>
-          <TouchableOpacity
-            style={styles.retryBtn}
-            onPress={() => dispatch(fetchAllCustomers())}
-          >
+          <TouchableOpacity style={styles.retryBtn} onPress={() => dispatch(fetchAllCustomers())}>
             <RefreshCw size={15} color="#fff" strokeWidth={2} />
             <Text style={styles.retryBtnText}> Retry</Text>
           </TouchableOpacity>
@@ -271,10 +270,8 @@ const CustomerListScreen = ({ navigation }) => {
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <Header title="Customers Details" />
 
-      {/* SEARCH BAR (Outside FlatList to prevent keyboard issues) */}
       {renderSearchBar()}
 
-      {/* LIST */}
       {listState === 'loading' && safeCustomers.length === 0 ? (
         <View style={styles.centerBox}>
           <ActivityIndicator size="large" color="#16a34a" />
@@ -304,7 +301,7 @@ const CustomerListScreen = ({ navigation }) => {
         />
       )}
 
-      {/* Count pill - positioned at bottom */}
+      {/* Count pill */}
       {listState === 'success' && safeCustomers.length > 0 && (
         <View style={[styles.countPill, { position: 'absolute', bottom: insets.bottom + 16, alignSelf: 'center' }]}>
           <Text style={styles.countText}>
@@ -315,7 +312,7 @@ const CustomerListScreen = ({ navigation }) => {
         </View>
       )}
 
-      {/* ══ EDIT CUSTOMER MODAL ══ */}
+      {/* Edit Customer Modal (only visible to admin, but safe) */}
       <Modal
         transparent
         visible={editModalVisible}
@@ -323,12 +320,9 @@ const CustomerListScreen = ({ navigation }) => {
         onRequestClose={() => setEditModalVisible(false)}
       >
         <View style={styles.overlay}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          >
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <ScrollView keyboardShouldPersistTaps="handled">
               <View style={styles.sheet}>
-
                 <View style={styles.sheetHeader}>
                   <Pencil size={18} color="#16a34a" strokeWidth={2} />
                   <Text style={styles.sheetTitle}>  Edit Customer</Text>
@@ -337,7 +331,6 @@ const CustomerListScreen = ({ navigation }) => {
                   </TouchableOpacity>
                 </View>
 
-                {/* Phone pill — read only */}
                 <View style={styles.phonePill}>
                   <Phone size={13} color="#16a34a" strokeWidth={2} />
                   <Text style={styles.phonePillText}>
@@ -387,13 +380,11 @@ const CustomerListScreen = ({ navigation }) => {
                     : <Text style={styles.saveBtnText}>Save Changes</Text>
                   }
                 </TouchableOpacity>
-
               </View>
             </ScrollView>
           </KeyboardAvoidingView>
         </View>
       </Modal>
-
     </SafeAreaView>
   );
 };
