@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   CircleUserRound,
   BarChart3,
+  MessageSquare
 } from 'lucide-react-native';
 
 /* SCREENS */
@@ -35,7 +36,7 @@ const ROLE_TABS = {
       icon: LayoutDashboard,
     },
     { name: 'Home', component: HomeScreen, icon: Home },
-    { name: 'Notification', component: AdminFeedbackScreen, icon: BarChart3 },
+    { name: 'FeedBack', component: AdminFeedbackScreen, icon: MessageSquare },
     { name: 'Profile', component: ProfileSettings, icon: CircleUserRound },
   ],
 
