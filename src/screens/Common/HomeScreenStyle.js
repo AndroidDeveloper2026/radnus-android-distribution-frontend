@@ -40,7 +40,7 @@ export default StyleSheet.create({
   list: {
     // backgroundColor:'black',
     paddingHorizontal: 12,
-    paddingVertical:10,
+    paddingVertical: 10,
     paddingBottom: 30,
   },
 
@@ -124,6 +124,18 @@ export default StyleSheet.create({
 
   activeText: {
     color: '#fff',
+    fontWeight: '600',
+  },
+
+  priceContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    // justifyContent: 'center',
+    marginVertical: 4,
+    gap: 8,
+  },
+  priceText: {
+    fontSize: 12,
     fontWeight: '600',
   },
 });
