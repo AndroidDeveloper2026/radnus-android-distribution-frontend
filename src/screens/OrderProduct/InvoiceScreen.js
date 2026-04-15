@@ -3,11 +3,14 @@ import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FileDown } from 'lucide-react-native';
 import RNPrint from 'react-native-print';
+import { useNavigation } from '@react-navigation/native'; // 👈 ADD THIS
 
 import styles from './InvoiceStyle';
 import Header from '../../components/Header';
 
 const InvoiceScreen = ({ route }) => {
+  const navigation = useNavigation(); // 👈 ADD THIS
+
   const {
     invoiceNumber,
     items,
@@ -27,7 +30,7 @@ const InvoiceScreen = ({ route }) => {
   const grandTotal = total + courierCharge;
   const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
 
-  // ── Buyer display helpers ────────────────────────────────────
+  // Buyer display helpers
   const buyerLine1 = buyerName + (buyerPhone ? ` - ${buyerPhone}` : '');
   const buyerLine2 = buyerAddress || '';
   const buyerLine3 = [buyerCity, buyerState].filter(Boolean).join(' - ');
@@ -94,7 +97,6 @@ const InvoiceScreen = ({ route }) => {
 
   const grandTotalWords = `INR ${amountInWords(grandTotal)} Only`;
 
-  // Format reference number with date
   const formatReferenceNo = () => {
     if (!referenceNo) return '';
     const formattedDate = new Date(date).toLocaleDateString('en-IN', {
@@ -105,11 +107,10 @@ const InvoiceScreen = ({ route }) => {
     return `${referenceNo}  dt. ${formattedDate}`;
   };
 
-  // ─────────────────────────────────────────────────────────────
   const generateInvoiceHTML = () => {
     const rows = items
       .map((item, index) => {
-        const price = item.retailerPrice;
+        const price = item.price;
         const amount = item.qty * price;
         return `
         <tr>
@@ -177,9 +178,7 @@ const InvoiceScreen = ({ route }) => {
         <div class="col-right">
           <table>
             <tr><td style="border:1px solid #000;padding:4px"><b>Invoice No.</b></td><td style="border:1px solid #000;padding:4px">${invoiceNumber}</td></tr>
-            <tr><td style="border:1px solid #000;padding:4px"><b>Dated</b></td><td style="border:1px solid #000;padding:4px">${new Date(
-              date,
-            ).toDateString()}</td></tr>
+            <tr><td style="border:1px solid #000;padding:4px"><b>Dated</b></td><td style="border:1px solid #000;padding:4px">${new Date(date).toDateString()}</td></tr>
             <tr><td style="border:1px solid #000;padding:4px"><b>Delivery Note</b></td><td style="border:1px solid #000;padding:4px"></td></tr>
             <tr><td style="border:1px solid #000;padding:4px"><b>Mode/Terms of Payment</b></td><td style="border:1px solid #000;padding:4px">${paymentMode.toUpperCase()}</td></tr>
             <tr><td style="border:1px solid #000;padding:4px"><b>Salesperson</b></td><td style="border:1px solid #000;padding:4px">${salesperson}</td></tr>
@@ -241,6 +240,8 @@ const InvoiceScreen = ({ route }) => {
     try {
       const html = generateInvoiceHTML();
       await RNPrint.print({ html });
+      // ✅ AFTER PRINT SUCCESS → NAVIGATE TO DASHBOARD
+      navigation.navigate('EmployeeDashboard'); // or navigation.goBack() if you prefer
     } catch (error) {
       console.log('Print Error:', error.message);
       Alert.alert('Error', error.message || 'Failed to print. Try again.');
@@ -339,7 +340,7 @@ const InvoiceScreen = ({ route }) => {
 
           {/* ITEMS */}
           {items.map((item, index) => {
-            const price = item.retailerPrice;
+            const price = item.price;
             const amount = item.qty * price;
             return (
               <View key={index} style={styles.tableRow}>
