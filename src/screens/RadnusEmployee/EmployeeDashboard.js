@@ -16,7 +16,7 @@ import { fetchProducts } from '../../services/features/products/productSlice';
 import api from '../../services/API/api';
 
 // ─── Helper functions (unchanged) ─────────────────────────────────
-const formatValue = (num) => {
+const formatValue = num => {
   const value = Number(num);
   if (isNaN(value) || value === undefined) return '₹0';
   if (value >= 100000) return `₹${(value / 100000).toFixed(2)}L`;
@@ -37,14 +37,14 @@ const getNum = (obj, key, fallback = 0) => {
   return fallback;
 };
 
-const getId = (obj) => {
+const getId = obj => {
   if (!obj) return '';
   if (typeof obj === 'string') return obj;
   if (obj.$oid) return obj.$oid;
   return obj;
 };
 
-const parseDate = (dateValue) => {
+const parseDate = dateValue => {
   if (!dateValue) return new Date();
   if (dateValue instanceof Date && !isNaN(dateValue)) return dateValue;
   if (typeof dateValue === 'string') {
@@ -67,13 +67,11 @@ const isSameDay = (d1, d2) =>
 const EmployeeDashboard = ({ navigation }) => {
   const dispatch = useDispatch();
   const insets = useSafeAreaInsets();
-  const user = useSelector((state) => state.auth.user);
-  const { list: products = [] } = useSelector((state) => state.products) || {};
+  const user = useSelector(state => state.auth.user);
+  const { list: products = [] } = useSelector(state => state.products) || {};
 
-  // Local state for today's sales (isolated from Redux invoice)
   const [todaySales, setTodaySales] = useState(0);
   const [todaySalesLoading, setTodaySalesLoading] = useState(true);
-
   const [totalStockValue, setTotalStockValue] = useState(0);
   const [stockValueLoading, setStockValueLoading] = useState(true);
   const [totalInward, setTotalInward] = useState(0);
@@ -81,73 +79,85 @@ const EmployeeDashboard = ({ navigation }) => {
   const [inwardOutwardLoading, setInwardOutwardLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Load products once
   useEffect(() => {
     if (products.length === 0) {
       dispatch(fetchProducts());
     }
   }, [dispatch, products.length]);
 
-  // Fetch today's sales directly (no Redux invoice state)
+  // ✅ MODIFIED: Filter by logged-in user's name AND invoice status must be 'completed' (not 'draft')
   const fetchTodaySales = useCallback(async () => {
     setTodaySalesLoading(true);
     try {
-      const response = await api.get('/api/invoices?filter=today');
+      // Fetch only completed invoices for today
+      // const response = await api.get(
+      //   `/api/invoices?filter=today&billerName=${
+      //     user?.name || ''
+      //   }&status=completed`,
+      // );
+
+      const response = await api.get(
+        `/api/invoices?filter=today&billerName=${user?.name || ''}`,
+      );
       const invoices = response.data || [];
-      const total = invoices.reduce((sum, inv) => sum + (inv.totalAmount || 0), 0);
+      const total = invoices.filter(inv => inv?.status === 'completed')
+      .reduce(
+        (sum, inv) => sum + (inv.totalAmount || 0),
+        0,
+      );
+      // const total = invoices.filter(inv => inv?.status === 'completed') // ✅ IMPORTANT FIX
+      //   .reduce((sum, inv) => {
+      //     return sum + inv.totalAmount;
+      //   }, 0);
       setTodaySales(total);
     } catch (error) {
-      console.error('Failed to fetch today\'s sales:', error);
+      console.error("Failed to fetch today's sales:", error);
       setTodaySales(0);
     } finally {
       setTodaySalesLoading(false);
     }
-  }, []);
+  }, [user?.name]);
 
-  // Compute stock value + today's inward/outward
   const computeStockAndMovements = useCallback(async () => {
     if (products.length === 0) return;
-
     setStockValueLoading(true);
     setInwardOutwardLoading(true);
     try {
+      // Fetch all invoices, but we'll filter for 'completed' status
       const response = await api.get('/api/invoices?filter=all');
-      const allInvoices = response.data || [];
+      const allInvoices = (response.data || []).filter(
+        inv => inv.status !== 'draft',
+      );
       const today = new Date();
 
       let todayInward = 0;
       let todayOutward = 0;
       const stockMap = {};
 
-      // Process products
-      products.forEach((product) => {
+      products.forEach(product => {
         const pid = getId(product._id);
         const moq = getNum(product, 'moq') || 0;
         const stock = getNum(product, 'stock') || moq;
         const price = getNum(product, 'walkinPrice');
         const createdAt = parseDate(product.createdAt);
-
         if (isSameDay(createdAt, today)) {
           todayInward += moq;
         }
-
         stockMap[pid] = {
           currentStock: stock,
           walkinPrice: price,
         };
       });
 
-      // Process invoices
-      allInvoices.forEach((invoice) => {
+      // ✅ Only process completed invoices
+      allInvoices.forEach(invoice => {
         const invDate = parseDate(invoice.createdAt);
         const isToday = isSameDay(invDate, today);
-
-        (invoice.items || []).forEach((item) => {
+        (invoice.items || []).forEach(item => {
           const qty = getNum(item, 'qty');
           if (isToday) {
             todayOutward += qty;
           }
-
           const pid = getId(item.productId);
           if (stockMap[pid]) {
             stockMap[pid].currentStock -= qty;
@@ -155,9 +165,8 @@ const EmployeeDashboard = ({ navigation }) => {
         });
       });
 
-      // Total stock value
       let totalValue = 0;
-      Object.values(stockMap).forEach((item) => {
+      Object.values(stockMap).forEach(item => {
         const val = (item.currentStock || 0) * (item.walkinPrice || 0);
         totalValue += isNaN(val) ? 0 : val;
       });
@@ -176,13 +185,11 @@ const EmployeeDashboard = ({ navigation }) => {
     }
   }, [products]);
 
-  // Load all data on mount
   useEffect(() => {
     fetchTodaySales();
     computeStockAndMovements();
   }, [fetchTodaySales, computeStockAndMovements]);
 
-  // Manual refresh
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await Promise.all([
@@ -193,7 +200,6 @@ const EmployeeDashboard = ({ navigation }) => {
     setRefreshing(false);
   }, [fetchTodaySales, dispatch, computeStockAndMovements]);
 
-  // Navigation handlers
   const handleTodaySalesPress = () => {
     navigation.navigate('InvoiceListScreen', { filter: 'today' });
   };
@@ -213,7 +219,6 @@ const EmployeeDashboard = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Header title="Radnus Sales Dashboard" showBackArrow={false} />
-
       <ScrollView
         contentContainerStyle={[
           styles.content,
@@ -233,9 +238,7 @@ const EmployeeDashboard = ({ navigation }) => {
           <Text style={styles.welcome}>Welcome, {user?.name || 'User'}</Text>
           <Text style={styles.subWelcome}>Business Overview</Text>
         </View>
-
         <View style={styles.grid}>
-          {/* Today Sales - now independent */}
           <StatCard
             icon={
               <Icons
@@ -251,14 +254,12 @@ const EmployeeDashboard = ({ navigation }) => {
               todaySalesLoading ? (
                 <ActivityIndicator size="small" color="#2E7D32" />
               ) : (
-                `₹${todaySales}`
+                `₹${todaySales.toLocaleString('en-IN')}`
               )
             }
             label="Today Sales"
             onPress={handleTodaySalesPress}
           />
-
-          {/* Stock Value */}
           <StatCard
             icon={
               <Icons
@@ -280,8 +281,6 @@ const EmployeeDashboard = ({ navigation }) => {
             label="Stock Value"
             onPress={handleStockValuePress}
           />
-
-          {/* Inward (Today) */}
           <StatCard
             icon={
               <Icons
@@ -303,8 +302,6 @@ const EmployeeDashboard = ({ navigation }) => {
             label="Inward (Today)"
             onPress={handleInwardPress}
           />
-
-          {/* Outward (Today) */}
           <StatCard
             icon={
               <Icons
@@ -327,41 +324,82 @@ const EmployeeDashboard = ({ navigation }) => {
             onPress={handleOutwardPress}
           />
         </View>
-
-        {/* Quick Actions */}
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         <QuickAction
-          icon={<Icons name="Users" size={20} color="#1976D2" circleSize={40} withCircle />}
+          icon={
+            <Icons
+              name="Users"
+              size={20}
+              color="#1976D2"
+              circleSize={40}
+              withCircle
+            />
+          }
           label="Customer Details"
           onPress={() => navigation.navigate('CustomerListScreen')}
         />
         <QuickAction
-          icon={<Icons name="ClipboardList" size={20} color="#d3602f" circleSize={40} withCircle />}
+          icon={
+            <Icons
+              name="ClipboardList"
+              size={20}
+              color="#d3602f"
+              circleSize={40}
+              withCircle
+            />
+          }
           label="Invoice History"
           onPress={() => navigation.navigate('InvoiceListScreen')}
         />
         <QuickAction
-          icon={<Icons name="Package" size={20} color="#D32F2F" circleSize={40} withCircle />}
+          icon={
+            <Icons
+              name="Package"
+              size={20}
+              color="#D32F2F"
+              circleSize={40}
+              withCircle
+            />
+          }
           label="Stock Summary"
           onPress={() => navigation.navigate('StockVisibility')}
         />
         <QuickAction
-          icon={<Icons name="Plus" size={20} color="#2E7D32" circleSize={40} withCircle />}
+          icon={
+            <Icons
+              name="Plus"
+              size={20}
+              color="#2E7D32"
+              circleSize={40}
+              withCircle
+            />
+          }
           label="Order Cart"
           onPress={() => navigation.navigate('OrderCart')}
         />
-        {/* <QuickAction
-          icon={<Icons name="Users" size={20} color="#1976D2" circleSize={40} withCircle />}
-          label="Retailer Sales"
-          onPress={() => navigation.navigate('RetailerSalesTab')}
-        /> */}
         <QuickAction
-          icon={<Icons name="ClipboardList" size={20} color="#6A1B9A" circleSize={40} withCircle />}
+          icon={
+            <Icons
+              name="ClipboardList"
+              size={20}
+              color="#6A1B9A"
+              circleSize={40}
+              withCircle
+            />
+          }
           label="Central Stock"
           onPress={() => navigation.navigate('CentralStock')}
         />
         <QuickAction
-          icon={<Icons name="Wallet" size={20} color="#F9A825" circleSize={40} withCircle />}
+          icon={
+            <Icons
+              name="Wallet"
+              size={20}
+              color="#F9A825"
+              circleSize={40}
+              withCircle
+            />
+          }
           label="Order Billing"
           onPress={() => navigation.navigate('OrderBilling')}
         />
@@ -371,7 +409,11 @@ const EmployeeDashboard = ({ navigation }) => {
 };
 
 const StatCard = ({ icon, value, label, onPress }) => (
-  <TouchableOpacity style={styles.statCard} onPress={onPress} activeOpacity={0.7}>
+  <TouchableOpacity
+    style={styles.statCard}
+    onPress={onPress}
+    activeOpacity={0.7}
+  >
     <View style={styles.statIcon}>{icon}</View>
     <Text style={styles.kpiValue}>{value}</Text>
     <Text style={styles.kpiLabel}>{label}</Text>

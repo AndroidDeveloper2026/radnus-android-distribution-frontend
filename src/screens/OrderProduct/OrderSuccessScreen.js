@@ -21,6 +21,7 @@ import {
   resetCustomer,
   clearAddState,
 } from '../../services/features/customer/customerSlice.js';
+import { reduceStock } from '../../services/features/products/productSlice';
 import LottieView from 'lottie-react-native';
 import {
   FileText,
@@ -40,6 +41,7 @@ import {
   IndianRupee,
 } from 'lucide-react-native';
 import Header from '../../components/Header';
+import API from '../../services/API/api';
 import styles from './OrderSucessStyle';
 
 const SALESPERSONS = [
@@ -82,19 +84,13 @@ const getInvoiceNumber = invoiceNum => {
 };
 
 const OrderSuccessScreen = ({ route, navigation }) => {
-  const {
-    invoiceNumber: rawInvoiceNumber,
-    grandTotal,
-    paymentMode,
-    items,
-    date,
-  } = route.params || {};
-
-  const invoiceNumber = getInvoiceNumber(rawInvoiceNumber);
+  // ✅ Now we receive cartItems instead of invoiceNumber
+  const { cartItems, grandTotal, paymentMode, date } = route.params || {};
   const [referenceNo, setReferenceNo] = useState('');
 
   const dispatch = useDispatch();
   const { data: customer, lookupState, addState, error } = useSelector(s => s.customer);
+  const user = useSelector(state => state.auth.user);
 
   // Phone
   const [buyerPhone, setBuyerPhone] = useState('');
@@ -107,7 +103,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
   const [newCity, setNewCity] = useState('');
   const [newState, setNewState] = useState('');
 
-  // Shipping Address fields (new)
+  // Shipping Address fields
   const [sameAsBuyer, setSameAsBuyer] = useState(true);
   const [shipToName, setShipToName] = useState('');
   const [shipToPhone, setShipToPhone] = useState('');
@@ -122,6 +118,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
 
   // Confirm Modal
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
 
   const [selectedPaymentMode, setSelectedPaymentMode] = useState(
     paymentMode ? { label: paymentMode } : null,
@@ -252,38 +249,68 @@ const OrderSuccessScreen = ({ route, navigation }) => {
     ]).start(() => setConfirmVisible(false));
   };
 
-  const goToInvoice = () => {
+  // ✅ Create invoice and reduce stock ONLY on final confirmation
+  const goToInvoice = async () => {
+    setIsConfirming(true);
     closeConfirmModal();
-    setTimeout(() => {
-      // Prepare shipping address: if sameAsBuyer, use buyer's data
-      const finalShipToName = sameAsBuyer ? (customer?.type === 'shop' ? customer.shopName : customer?.name) : shipToName;
+
+    try {
+      // 1. Create invoice with status = 'completed'
+      const invoiceRes = await API.post("/api/invoices", {
+        billerName: user?.name || "Unknown",
+        items: cartItems,
+        totalAmount: grandTotal,
+        paymentMode: selectedPaymentMode?.label || paymentMode,
+        status: "completed", // ✅ directly completed
+      });
+
+      const invoiceNumber = invoiceRes.data.invoice.invoiceNumber;
+
+      // 2. Reduce stock
+      await dispatch(reduceStock(cartItems)).unwrap();
+
+      // 3. Prepare shipping address
+      const finalShipToName = sameAsBuyer
+        ? (customer?.type === 'shop' ? customer.shopName : customer?.name)
+        : shipToName;
       const finalShipToPhone = sameAsBuyer ? buyerPhone : shipToPhone;
       const finalShipToAddress = sameAsBuyer ? (customer?.address || '') : shipToAddress;
       const finalShipToCity = sameAsBuyer ? (customer?.city || '') : shipToCity;
       const finalShipToState = sameAsBuyer ? (customer?.state || '') : shipToState;
 
-      navigation.navigate('InvoiceScreen', {
-        invoiceNumber,
-        items,
-        total: grandTotal,
-        paymentMode: selectedPaymentMode?.label || paymentMode,
-        date,
-        buyerName: customer?.type === 'shop' ? `${customer.shopName} (${customer.name})` : customer?.name,
-        buyerPhone,
-        buyerAddress: customer?.address || '',
-        buyerCity: customer?.city || '',
-        buyerState: customer?.state || '',
-        courierCharge: parseFloat(courierCharge) || 0,
-        salesperson: selectedSP?.name || '',
-        referenceNo: referenceNo,
-        // New shipping address fields
-        shipToName: finalShipToName,
-        shipToPhone: finalShipToPhone,
-        shipToAddress: finalShipToAddress,
-        shipToCity: finalShipToCity,
-        shipToState: finalShipToState,
-      });
-    }, 300);
+      // 4. Navigate to final invoice view
+      setTimeout(() => {
+        navigation.navigate('InvoiceScreen', {
+          invoiceNumber: getInvoiceNumber(invoiceNumber),
+          items: cartItems,
+          total: grandTotal,
+          paymentMode: selectedPaymentMode?.label || paymentMode,
+          date,
+          buyerName: customer?.type === 'shop'
+            ? `${customer.shopName} (${customer.name})`
+            : customer?.name,
+          buyerPhone,
+          buyerAddress: customer?.address || '',
+          buyerCity: customer?.city || '',
+          buyerState: customer?.state || '',
+          courierCharge: parseFloat(courierCharge) || 0,
+          salesperson: selectedSP?.name || '',
+          referenceNo,
+          shipToName: finalShipToName,
+          shipToPhone: finalShipToPhone,
+          shipToAddress: finalShipToAddress,
+          shipToCity: finalShipToCity,
+          shipToState: finalShipToState,
+        });
+      }, 300);
+    } catch (err) {
+      console.error('Error creating invoice or reducing stock:', err);
+      Alert.alert(
+        'Error',
+        err.message || 'Failed to confirm order. Please try again.',
+        [{ text: 'OK', onPress: () => setIsConfirming(false) }]
+      );
+    }
   };
 
   const grandTotalWithCourier = (grandTotal || 0) + (parseFloat(courierCharge) || 0);
@@ -318,13 +345,13 @@ const OrderSuccessScreen = ({ route, navigation }) => {
             {customer?.type === 'shop' ? `${customer.shopName} (${customer.name})` : customer?.name}
           </Text>
           {customer?.address ? (
-            <View style={ls.subRow}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
               <MapPin size={12} color="#555" strokeWidth={2} />
               <Text style={styles.customerSub}> {customer.address}</Text>
             </View>
           ) : null}
           {customer?.city || customer?.state ? (
-            <View style={ls.subRow}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
               <Building2 size={12} color="#555" strokeWidth={2} />
               <Text style={styles.customerSub}>
                 {'  '}{[customer.city, customer.state].filter(Boolean).join(', ')}
@@ -337,7 +364,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
     if (lookupState === 'notfound') {
       return (
         <View style={styles.notFoundBox}>
-          <View style={ls.subRow}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <AlertTriangle size={13} color="#dc2626" strokeWidth={2} />
             <Text style={[styles.notFoundText, { marginLeft: 5 }]}>No customer found for this number.</Text>
           </View>
@@ -351,7 +378,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
     if (lookupState === 'error') {
       return (
         <View style={styles.notFoundBox}>
-          <View style={ls.subRow}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <WifiOff size={13} color="#dc2626" strokeWidth={2} />
             <Text style={[styles.notFoundText, { marginLeft: 5 }]}>Could not reach server. Check connection.</Text>
           </View>
@@ -373,17 +400,6 @@ const OrderSuccessScreen = ({ route, navigation }) => {
           <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
             <View style={styles.formCard}>
               <Text style={styles.formCardTitle}>Delivery & Invoice Details</Text>
-
-              {/* Invoice Number */}
-              <View style={styles.fieldGroup}>
-                <View style={styles.labelRow}>
-                  <FileText size={14} color="#16a34a" strokeWidth={2} />
-                  <Text style={styles.label}> Invoice No</Text>
-                </View>
-                <View style={styles.readonlyField}>
-                  <Text style={styles.readonlyText}>{invoiceNumber}</Text>
-                </View>
-              </View>
 
               {/* Payment Mode Dropdown */}
               <View style={styles.fieldGroup}>
@@ -415,7 +431,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
                   <Text style={styles.label}> Amount Paid</Text>
                 </View>
                 <View style={styles.readonlyField}>
-                  <Text style={[styles.readonlyText, styles.amountText]}>₹{grandTotal}</Text>
+                  <Text style={[styles.readonlyText, styles.amountText]}>₹{grandTotal?.toLocaleString('en-IN')}</Text>
                 </View>
               </View>
 
@@ -487,7 +503,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
                 {renderLookupResult()}
               </View>
 
-              {/* ══ NEW: Shipping Address Section ══ */}
+              {/* Shipping Address Section */}
               <View style={styles.fieldGroup}>
                 <View style={styles.labelRow}>
                   <Truck size={14} color="#16a34a" strokeWidth={2} />
@@ -522,26 +538,38 @@ const OrderSuccessScreen = ({ route, navigation }) => {
               {/* Grand Total */}
               <View style={styles.totalPreview}>
                 <Text style={styles.totalPreviewLabel}>Grand Total (incl. courier)</Text>
-                <Text style={styles.totalPreviewValue}>₹{grandTotalWithCourier}</Text>
+                <Text style={styles.totalPreviewValue}>₹{grandTotalWithCourier.toLocaleString('en-IN')}</Text>
               </View>
             </View>
 
             {/* Buttons */}
-            <TouchableOpacity style={styles.primaryBtn} onPress={handleViewInvoice}>
+            <TouchableOpacity
+              style={[styles.primaryBtn, isConfirming && { opacity: 0.6 }]}
+              onPress={handleViewInvoice}
+              disabled={isConfirming}
+            >
               <FileText size={18} color="#fff" strokeWidth={2} style={{ marginRight: 8 }} />
               <Text style={styles.primaryText}>View Invoice</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.outlineBtn} onPress={() => navigation.navigate('Dashboard')}>
+            <TouchableOpacity
+              style={styles.outlineBtn}
+              onPress={() => navigation.navigate('Dashboard')}
+              disabled={isConfirming}
+            >
               <Text style={styles.outlineText}>Back to Dashboard</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.ghostBtn} onPress={() => navigation.navigate('ProductList')}>
+            <TouchableOpacity
+              style={styles.ghostBtn}
+              onPress={() => navigation.navigate('ProductList')}
+              disabled={isConfirming}
+            >
               <Text style={styles.ghostText}>Book Another Order</Text>
             </TouchableOpacity>
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Add Customer Modal (unchanged) */}
+      {/* Add Customer Modal */}
       <Modal transparent visible={addModalVisible} animationType="slide" onRequestClose={() => setAddModalVisible(false)}>
         <View style={styles.sheetOverlay}>
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -573,7 +601,7 @@ const OrderSuccessScreen = ({ route, navigation }) => {
         </View>
       </Modal>
 
-      {/* Confirm Modal (unchanged) */}
+      {/* Confirm Modal */}
       <Modal transparent visible={confirmVisible} animationType="none" onRequestClose={closeConfirmModal}>
         <Animated.View style={[styles.backdrop, { opacity: fadeBg }]}>
           <TouchableOpacity style={StyleSheet.absoluteFill} onPress={closeConfirmModal} />
@@ -585,15 +613,13 @@ const OrderSuccessScreen = ({ route, navigation }) => {
             <Text style={styles.popupTitle}>Ready to Generate Invoice?</Text>
             <Text style={styles.popupSubtitle}>Please confirm the order details before proceeding.</Text>
             <View style={styles.popupInfoBox}>
-              <Row label="Invoice No" value={invoiceNumber} />
-              <Divider />
               <Row label="Buyer" value={customer?.type === 'shop' ? `${customer.shopName} (${customer.name})` : customer?.name || '—'} />
               <Divider />
               <Row label="Phone" value={buyerPhone || '—'} />
               <Divider />
               <View style={styles.row}>
                 <Text style={styles.rowLabel}>Address</Text>
-                <Text style={[styles.rowValue, ls.addressValue]}>
+                <Text style={[styles.rowValue, { flex: 1, textAlign: 'right', flexWrap: 'wrap' }]}>
                   {customer?.address ? [customer.address, customer.city, customer.state].filter(Boolean).join(', ') : '—'}
                 </Text>
               </View>
@@ -602,13 +628,25 @@ const OrderSuccessScreen = ({ route, navigation }) => {
               <Divider />
               <Row label="Courier" value={`₹${parseFloat(courierCharge) || 0}`} />
               <Divider />
-              <Row label="Grand Total" value={`₹${grandTotalWithCourier}`} valueStyle={styles.amountText} />
+              <Row label="Grand Total" value={`₹${grandTotalWithCourier.toLocaleString('en-IN')}`} valueStyle={styles.amountText} />
             </View>
-            <TouchableOpacity style={styles.primaryBtn} onPress={goToInvoice}>
-              <FileText size={18} color="#fff" strokeWidth={2} style={{ marginRight: 8 }} />
-              <Text style={styles.primaryText}>Confirm & Generate Invoice</Text>
+            <TouchableOpacity
+              style={[styles.primaryBtn, isConfirming && { opacity: 0.6 }]}
+              onPress={goToInvoice}
+              disabled={isConfirming}
+            >
+              {isConfirming ? (
+                <ActivityIndicator size="small" color="#fff" style={{ marginRight: 8 }} />
+              ) : (
+                <FileText size={18} color="#fff" strokeWidth={2} style={{ marginRight: 8 }} />
+              )}
+              <Text style={styles.primaryText}>{isConfirming ? 'Processing…' : 'Confirm & Generate Invoice'}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.outlineBtn} onPress={closeConfirmModal}>
+            <TouchableOpacity
+              style={styles.outlineBtn}
+              onPress={closeConfirmModal}
+              disabled={isConfirming}
+            >
               <Text style={styles.outlineText}>Go Back & Edit</Text>
             </TouchableOpacity>
           </Animated.View>
@@ -617,11 +655,6 @@ const OrderSuccessScreen = ({ route, navigation }) => {
     </>
   );
 };
-
-const ls = StyleSheet.create({
-  subRow: { flexDirection: 'row', alignItems: 'center', marginTop: 3 },
-  addressValue: { flex: 1, textAlign: 'right', flexWrap: 'wrap' },
-});
 
 const Row = ({ label, value, valueStyle }) => (
   <View style={styles.row}>

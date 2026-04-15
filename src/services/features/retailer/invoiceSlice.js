@@ -1,35 +1,40 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import API from '../../API/api';
 
-// ─── Async Thunks ───────────────────────────────────────────────
+
 
 export const fetchInvoices = createAsyncThunk(
   'invoice/fetchInvoices',
-  async (filter = 'all', { rejectWithValue }) => {
+  async ({ filter = 'all', billerName = '' }, { rejectWithValue }) => {
     try {
-      const res = await API.get(`/api/invoices?filter=${filter}`);
-      console.log('--- fetchInvoices ---', res.data);
+      let url = `/api/invoices?filter=${filter}`;
+      if (billerName && billerName.trim() !== "") {
+        url += `&billerName=${encodeURIComponent(billerName)}`;
+      }
+      const res = await API.get(url);
       return { filter, data: res.data };
     } catch (err) {
-      console.log('--- fetchInvoices (err) ---', err);
+      console.error("fetchInvoices error:", err);
       return rejectWithValue(err.response?.data?.msg || 'Failed to fetch invoices');
     }
-  },
+  }
 );
 
 export const fetchInvoiceCounts = createAsyncThunk(
   'invoice/fetchInvoiceCounts',
-  async (_, { rejectWithValue }) => {
+  async (billerName = '', { rejectWithValue }) => {
     try {
       const filters = ['all', 'today', 'week', 'month'];
       const results = await Promise.all(
-        filters.map(f =>
-          API.get(`/api/invoices?filter=${f}`)
-            .then(r => r.data.length)
-            .catch(() => 0),
-        ),
+        filters.map(async (f) => {
+          let url = `/api/invoices?filter=${f}`;
+          if (billerName && billerName.trim() !== "") {
+            url += `&billerName=${encodeURIComponent(billerName)}`;
+          }
+          const res = await API.get(url);
+          return res.data.length;
+        })
       );
-      console.log('--- fetchInvoiceCounts ---', results);
       return {
         all: results[0],
         today: results[1],
@@ -37,10 +42,10 @@ export const fetchInvoiceCounts = createAsyncThunk(
         month: results[3],
       };
     } catch (err) {
-      console.log('--- fetchInvoiceCounts (err) ---', err);
+      console.error("fetchInvoiceCounts error:", err);
       return rejectWithValue(err.response?.data?.msg || 'Failed to fetch counts');
     }
-  },
+  }
 );
 
 // ─── Slice ───────────────────────────────────────────────────────
@@ -54,15 +59,14 @@ const invoiceSlice = createSlice({
     error: null,
   },
   reducers: {
-    clearInvoices: state => {
+    clearInvoices: (state) => {
       state.data = [];
       state.error = null;
     },
   },
-  extraReducers: builder => {
+  extraReducers: (builder) => {
     builder
-      // fetchInvoices
-      .addCase(fetchInvoices.pending, state => {
+      .addCase(fetchInvoices.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
@@ -74,8 +78,6 @@ const invoiceSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
-      // fetchInvoiceCounts
       .addCase(fetchInvoiceCounts.fulfilled, (state, action) => {
         state.counts = action.payload;
       });
