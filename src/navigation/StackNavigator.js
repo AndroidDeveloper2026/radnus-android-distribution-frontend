@@ -64,6 +64,7 @@ import { useSelector } from 'react-redux';
 import { selectAuthState } from '../store/selectors/authSelector';
 import InvoiceViewScreen from '../screens/OrderProduct/InvoiceViewScreen';
 import EmployeeDashboard from '../screens/RadnusEmployee/EmployeeDashboard';
+import ActivityLogScreen from '../screens/Common/ActivityLogScreen';
 
 const Stack = createStackNavigator();
 
@@ -195,6 +196,12 @@ const StackNavigator = () => {
           <Stack.Screen
             name="FSEDashboard"
             component={FSEDashboard}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="ActivityLogScreen"
+            component={ActivityLogScreen}
             options={{ headerShown: false }}
           />
 

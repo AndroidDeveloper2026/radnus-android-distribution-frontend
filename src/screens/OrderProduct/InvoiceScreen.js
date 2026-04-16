@@ -178,7 +178,9 @@ const InvoiceScreen = ({ route }) => {
         <div class="col-right">
           <table>
             <tr><td style="border:1px solid #000;padding:4px"><b>Invoice No.</b></td><td style="border:1px solid #000;padding:4px">${invoiceNumber}</td></tr>
-            <tr><td style="border:1px solid #000;padding:4px"><b>Dated</b></td><td style="border:1px solid #000;padding:4px">${new Date(date).toDateString()}</td></tr>
+            <tr><td style="border:1px solid #000;padding:4px"><b>Dated</b></td><td style="border:1px solid #000;padding:4px">${new Date(
+              date,
+            ).toDateString()}</td></tr>
             <tr><td style="border:1px solid #000;padding:4px"><b>Delivery Note</b></td><td style="border:1px solid #000;padding:4px"></td></tr>
             <tr><td style="border:1px solid #000;padding:4px"><b>Mode/Terms of Payment</b></td><td style="border:1px solid #000;padding:4px">${paymentMode.toUpperCase()}</td></tr>
             <tr><td style="border:1px solid #000;padding:4px"><b>Salesperson</b></td><td style="border:1px solid #000;padding:4px">${salesperson}</td></tr>
@@ -240,8 +242,15 @@ const InvoiceScreen = ({ route }) => {
     try {
       const html = generateInvoiceHTML();
       await RNPrint.print({ html });
-      // ✅ AFTER PRINT SUCCESS → NAVIGATE TO DASHBOARD
-      navigation.navigate('EmployeeDashboard'); // or navigation.goBack() if you prefer
+
+      navigation.navigate('MainTabs', {
+        screen: 'Dashboard', // this is the tab name
+        params: {
+          role: 'Radnus', // IMPORTANT (must match your ROLE_TABS key)
+        },
+      });
+
+      // navigation.navigate('EmployeeDashboard'); // or navigation.goBack() if you prefer
     } catch (error) {
       console.log('Print Error:', error.message);
       Alert.alert('Error', error.message || 'Failed to print. Try again.');

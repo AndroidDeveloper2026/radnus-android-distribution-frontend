@@ -44,16 +44,29 @@ const ProductMaster = ({ navigation }) => {
     setSelectedId(null);
   };
 
-  // 🔎 SEARCH FILTER
-  const filteredProducts = useMemo(() => {
-    if (!search) return products;
+  // // 🔎 SEARCH FILTER
+  // const filteredProducts = useMemo(() => {
+  //   if (!search) return products;
 
-    return products.filter(
-      product =>
-        product.name.toLowerCase().includes(search.toLowerCase()) ||
-        product.sku.toLowerCase().includes(search.toLowerCase()),
-    );
-  }, [products, search]);
+  //   return products.filter(
+  //     product =>
+  //       product.name.toLowerCase().includes(search.toLowerCase()) ||
+  //       product.sku.toLowerCase().includes(search.toLowerCase()),
+  //   );
+  // }, [products, search]);
+
+const filteredProducts = useMemo(() => {
+  const searchText = search?.trim().toLowerCase();
+
+  if (!searchText) return products;
+
+  return products.filter(product => {
+    const name = product?.name?.toLowerCase() || '';
+    const sku = product?.sku?.toLowerCase() || '';
+
+    return name.includes(searchText) || sku.includes(searchText);
+  });
+}, [products, search]);
 
   return (
    <SafeAreaView style={ProductsMasterStyle.container} edges={['bottom']}>

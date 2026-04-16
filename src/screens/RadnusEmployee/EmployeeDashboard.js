@@ -89,26 +89,14 @@ const EmployeeDashboard = ({ navigation }) => {
   const fetchTodaySales = useCallback(async () => {
     setTodaySalesLoading(true);
     try {
-      // Fetch only completed invoices for today
-      // const response = await api.get(
-      //   `/api/invoices?filter=today&billerName=${
-      //     user?.name || ''
-      //   }&status=completed`,
-      // );
-
       const response = await api.get(
         `/api/invoices?filter=today&billerName=${user?.name || ''}`,
       );
       const invoices = response.data || [];
-      const total = invoices.filter(inv => inv?.status === 'completed')
-      .reduce(
-        (sum, inv) => sum + (inv.totalAmount || 0),
-        0,
-      );
-      // const total = invoices.filter(inv => inv?.status === 'completed') // ✅ IMPORTANT FIX
-      //   .reduce((sum, inv) => {
-      //     return sum + inv.totalAmount;
-      //   }, 0);
+      const total = invoices
+        .filter(inv => inv?.status === 'completed')
+        .reduce((sum, inv) => sum + (inv.totalAmount || 0), 0);
+
       setTodaySales(total);
     } catch (error) {
       console.error("Failed to fetch today's sales:", error);
@@ -350,6 +338,19 @@ const EmployeeDashboard = ({ navigation }) => {
           }
           label="Invoice History"
           onPress={() => navigation.navigate('InvoiceListScreen')}
+        />
+        <QuickAction
+          icon={
+            <Icons
+              name="Plus"
+              size={20}
+              color="#680303"
+              circleSize={40}
+              withCircle
+            />
+          }
+          label="ProductMaster"
+          onPress={() => navigation.navigate('ProductMaster')}
         />
         <QuickAction
           icon={
