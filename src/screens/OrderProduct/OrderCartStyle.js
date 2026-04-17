@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flex: 1,
     backgroundColor: '#F4F5F7',
   },
 
@@ -20,8 +20,8 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    padding: 16,
-    paddingBottom: 120,
+    paddingHorizontal: 16,
+    // paddingBottom: 120,
   },
 
   card: {
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
 
   footer: {
     position: 'absolute',
-    bottom: 40,
+    bottom: 0,
     left: 0,
     right: 0,
     backgroundColor: '#FFFFFF',
@@ -160,6 +160,7 @@ const styles = StyleSheet.create({
   wrapper: {
     paddingHorizontal: 16,
     paddingVertical: 10,
+    marginBottom:10,
     backgroundColor: '#fff',
   },
   inputBox: {
