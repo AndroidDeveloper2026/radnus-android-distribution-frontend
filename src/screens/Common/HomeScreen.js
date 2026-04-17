@@ -112,13 +112,13 @@ const HomeScreen = ({ navigation }) => {
           ) : role === 'Radnus' ? (
             <>
               <Text style={[styles.priceText, { color: priceColors.distributor }]}>
-                D: ₹{dp}
+                Distributor price: ₹{dp}
               </Text>
               <Text style={[styles.priceText, { color: priceColors.retailer }]}>
-                R: ₹{rp}
+                Retailer price: ₹{rp}
               </Text>
               <Text style={[styles.priceText, { color: priceColors.walkin }]}>
-                W: ₹{wp}
+                Walk-in price: ₹{wp}
               </Text>
             </>
           ) : role === 'Distributor' ? (

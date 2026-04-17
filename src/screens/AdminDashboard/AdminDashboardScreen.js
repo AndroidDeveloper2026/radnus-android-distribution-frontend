@@ -28,6 +28,7 @@ import {
   MessageSquare,
   ChevronRight,
   UserCog,
+  Logs,
 } from 'lucide-react-native';
 
 const AdminDashboard = ({ navigation }) => {
@@ -338,7 +339,7 @@ const AdminDashboard = ({ navigation }) => {
           activeOpacity={0.7}
         >
           <View style={styles.navIconWrapper}>
-            <MessageSquare size={22} color="#EC4899" strokeWidth={1.8} />
+            <Logs size={22} color="#d51010" strokeWidth={1.8} />
           </View>
           <View style={styles.navTextContainer}>
             <Text style={styles.navTitle}>Activity Log</Text>
