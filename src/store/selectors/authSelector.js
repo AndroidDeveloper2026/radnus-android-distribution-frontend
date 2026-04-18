@@ -30,8 +30,6 @@ export const selectAuthState = (state) => {
                      state.auth.user?.role || 
                      (state.auth.user?.authenticated ? null : null);
     
-    console.log('[selectAuthState] User role:', userRole);
-    console.log('[selectAuthState] Full user:', state.auth.user);
     
     return {
       token: state.auth.token,

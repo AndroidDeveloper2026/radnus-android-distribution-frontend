@@ -77,7 +77,6 @@ const DistributorList = ({ navigation }) => {
                 style={styles.card}
                 activeOpacity={0.75}
                 onPress={() => {
-                  console.log("--- DistributorDetails ---", item);
                   navigation.navigate("DistributorDetails", {
                     distributor: item,
                   });

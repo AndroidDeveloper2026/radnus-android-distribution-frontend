@@ -34,7 +34,6 @@ const FSEOnboarding = ({ navigation }) => {
 
   const capturePhoto = () => {
     openCamera((image) => {
-      console.log("📸 IMAGE:", image);
       setPhoto(image); // ✅ FULL OBJECT
     });
   };
@@ -72,7 +71,7 @@ const FSEOnboarding = ({ navigation }) => {
 
               navigation.goBack();
             } catch (err) {
-              console.log('ERROR:', err);
+          
             }
           }}
 

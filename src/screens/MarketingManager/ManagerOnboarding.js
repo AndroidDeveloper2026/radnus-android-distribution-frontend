@@ -41,7 +41,7 @@ const ManagerOnboarding = ({ navigation }) => {
 
   const captureImage = () => {
     openCamera(image => {
-      console.log('📸 IMAGE:', image);
+
       setProfile(image);
     });
   };
@@ -82,7 +82,7 @@ const ManagerOnboarding = ({ navigation }) => {
 
             navigation.goBack();
           } catch (error) {
-            console.log('ADD MANAGER ERROR:', error);
+          
             alert('Failed to create manager');
           }
         }}

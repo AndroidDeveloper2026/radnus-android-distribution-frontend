@@ -25,19 +25,19 @@ const AppContent = () => {
 
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async remoteMessage => {
-      console.log("FCM MESSAGE:", JSON.stringify(remoteMessage, null, 2));
+
       await displayNotification(remoteMessage);
     });
 
     messaging().onNotificationOpenedApp(remoteMessage => {
-      console.log("Opened from background:", remoteMessage);
+ 
     });
 
     messaging()
       .getInitialNotification()
       .then(remoteMessage => {
         if (remoteMessage) {
-          console.log("Opened from killed state:", remoteMessage);
+  
         }
       });
 

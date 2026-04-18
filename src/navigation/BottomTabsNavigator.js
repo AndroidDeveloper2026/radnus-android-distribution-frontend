@@ -96,7 +96,7 @@ const BottomTabs = ({ route }) => {
 
   const tabs = ROLE_TABS[role] || [];
 
-  console.log('--- bottom Tab (role)---', role);
+ 
 
   return (
     <Tab.Navigator

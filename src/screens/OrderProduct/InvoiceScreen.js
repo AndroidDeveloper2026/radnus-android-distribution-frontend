@@ -250,9 +250,9 @@ const InvoiceScreen = ({ route }) => {
         },
       });
 
-      // navigation.navigate('EmployeeDashboard'); // or navigation.goBack() if you prefer
+      
     } catch (error) {
-      console.log('Print Error:', error.message);
+      
       Alert.alert('Error', error.message || 'Failed to print. Try again.');
     }
   };

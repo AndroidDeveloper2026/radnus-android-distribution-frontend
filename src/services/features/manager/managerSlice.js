@@ -7,15 +7,8 @@ export const getManagers = createAsyncThunk(
     try {
       const res = await API.get("/api/managers");
 
-      console.log("GET MANAGERS:", res.data);
-
       return res.data;
     } catch (error) {
-      console.log(
-        "GET MANAGERS ERROR:",
-        error.response?.data || error.message
-      );
-
       return rejectWithValue(error.response?.data);
     }
   }
@@ -32,15 +25,8 @@ export const addManager = createAsyncThunk(
         },
       });
 
-      console.log("ADD MANAGER SUCCESS:", res.data);
-
       return res.data;
     } catch (error) {
-      console.log(
-        "ADD MANAGER ERROR:",
-        error.response?.data || error.message
-      );
-
       return rejectWithValue(error.response?.data);
     }
   }
@@ -53,14 +39,8 @@ export const deleteManager = createAsyncThunk(
     try {
       await API.delete(`/api/managers/${id}`);
 
-      console.log("DELETE MANAGER:", id);
-
       return id;
     } catch (error) {
-      console.log(
-        "DELETE MANAGER ERROR:",
-        error.response?.data || error.message
-      );
 
       return rejectWithValue(error.response?.data);
     }
@@ -74,14 +54,8 @@ export const updateManager = createAsyncThunk(
     try {
       const res = await API.put(`/api/managers/${id}`, data);
 
-      console.log("UPDATE MANAGER:", res.data);
-
       return res.data;
     } catch (error) {
-      console.log(
-        "UPDATE MANAGER ERROR:",
-        error.response?.data || error.message
-      );
 
       return rejectWithValue(error.response?.data);
     }

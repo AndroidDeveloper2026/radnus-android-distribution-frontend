@@ -16,7 +16,6 @@ export const useAuthValidation = (navigation) => {
         return false;
       }
 
-      console.log('[Auth] Token found - user is logged in');
       return true;
       
 
@@ -29,7 +28,7 @@ export const useAuthValidation = (navigation) => {
 
 
   const handleAppResume = useCallback(async () => {
-    console.log('[Auth] App resumed from background');
+
 
     try {
       const isValid = await validateToken();
@@ -41,7 +40,7 @@ export const useAuthValidation = (navigation) => {
           routes: [{ name: 'Login' }],
         });
       } else {
-        console.log('[Auth] User still logged in - continuing');
+
       }
     } catch (error) {
       console.error('[Auth] Error on app resume:', error);
@@ -55,7 +54,6 @@ export const useAuthValidation = (navigation) => {
 
 
   const handleAppBackground = useCallback(async () => {
-    console.log('[Auth] App going to background');
   }, []);
 
   return {

@@ -29,7 +29,6 @@ export const useAppStateHandler = (onAppResume = null, onAppBackground = null) =
       currentState.match(/active/) &&
       nextAppState.match(/inactive|background/)
     ) {
-      console.log('[AppState] App is going to background/inactive');
  
       // Cancel all pending API requests
       cancelAllRequests();
@@ -49,7 +48,6 @@ export const useAppStateHandler = (onAppResume = null, onAppBackground = null) =
       currentState.match(/inactive|background/) &&
       nextAppState === 'active'
     ) {
-      console.log('[AppState] App is resuming to foreground');
  
       // Call custom resume handler if provided
       if (onAppResume) {

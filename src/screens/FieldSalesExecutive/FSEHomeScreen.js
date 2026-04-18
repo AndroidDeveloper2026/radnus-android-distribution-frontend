@@ -61,7 +61,6 @@ const FSEHomeScreen = ({ navigation }) => {
     try {
       const savedSession = await getSessionId();
       if (savedSession) {
-        console.log('Restored session:', savedSession);
         setSessionId(savedSession);
         setAttendanceMarked(true);
         dispatch(startTracking(savedSession));
@@ -69,7 +68,7 @@ const FSEHomeScreen = ({ navigation }) => {
         await checkTodaySession();
       }
     } catch (err) {
-      console.log('Session restore error:', err);
+
     }
   };
 
@@ -77,18 +76,17 @@ const FSEHomeScreen = ({ navigation }) => {
     try {
       const userId = user?._id || user?.id;
       if (!userId) {
-        console.log('User ID not available yet');
+
         return;
       }
       const res = await API.get(`/api/session/today/${userId}`);
-      console.log('Existing session found:', res.data);
       if (res.data) {
         setAttendanceMarked(true);
         setSessionId(res.data._id);
         dispatch(startTracking(res.data._id));
       }
     } catch (err) {
-      console.log('No existing session for today:', err.response?.status);
+
     }
   };
 
@@ -283,7 +281,7 @@ const FSEHomeScreen = ({ navigation }) => {
       setStartingDay(false);
       navigation.navigate('FSETracking', { sessionId: newSessionId });
     } catch (err) {
-      console.log('markAttendance error:', err);
+
       Alert.alert('Error', 'Failed to start day. Please try again.');
       setStartingDay(false);
     }

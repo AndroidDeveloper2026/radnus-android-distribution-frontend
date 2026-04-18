@@ -46,7 +46,6 @@ export const openCamera = async (onSuccess) => {
       if (res.didCancel) return;
 
       if (res.errorCode) {
-        console.log('Camera Error:', res.errorMessage);
         Alert.alert('Error', res.errorMessage || 'Camera error');
         return;
       }
@@ -59,7 +58,7 @@ export const openCamera = async (onSuccess) => {
           type: asset.type || 'image/jpeg',
           name: asset.fileName || `photo_${Date.now()}.jpg`,
         };
-console.log('📸 IMAGE:', image);
+
         onSuccess(image); // 🔥 return image to caller
       }
     }

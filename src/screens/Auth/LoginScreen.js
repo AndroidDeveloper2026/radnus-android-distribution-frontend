@@ -32,7 +32,6 @@ const LoginScreen = ({ navigation }) => {
   };
 
   const onSubmitLogin = (values, { setSubmitting, setErrors }) => {
-    console.log('--- loginform (values) ---', values);
 
     dispatch(
       loginUser({
@@ -43,11 +42,9 @@ const LoginScreen = ({ navigation }) => {
     )
       .unwrap()
       .then(res => {
-        // console.log('LOGIN SUCCESS', res);
+
       })
       .catch(err => {
-        console.log('-- login form (error) --', err);
-        // showToast('Server Running Slow!','short')
         setErrors({ general: err?.message || err || 'Login failed' });
       })
       .finally(() => {

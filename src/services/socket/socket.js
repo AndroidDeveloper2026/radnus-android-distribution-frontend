@@ -24,15 +24,15 @@ export const getSocket = () => {
     });
 
     socket.on('connect', () => {
-      console.log('🔌 Socket connected:', socket.id);
+
     });
 
     socket.on('disconnect', (reason) => {
-      console.log('🔌 Socket disconnected:', reason);
+
     });
 
     socket.on('connect_error', (err) => {
-      console.log('❌ Socket connection error:', err.message);
+
     });
   }
 

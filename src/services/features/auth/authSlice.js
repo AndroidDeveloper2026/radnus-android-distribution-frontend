@@ -31,26 +31,20 @@ export const logoutUser = createAsyncThunk('auth/logoutUser', async () => {
 export const checkAuth = createAsyncThunk(
   'auth/checkAuth',
   async (_, { rejectWithValue }) => {
-    try {
-      console.log('[checkAuth] Starting auth check...');
-      
+    try {      
       // Check for token
       const accessToken = await getAccessToken();
       if (!accessToken) {
-        console.log('[checkAuth] No token found');
         return rejectWithValue('No token found');
       }
       
       // ✅ GET USER DATA FROM ASYNCSTORAGE
       const userDataStr = await AsyncStorage.getItem(USER_DATA_KEY);
       if (!userDataStr) {
-        console.log('[checkAuth] No user data found');
         return rejectWithValue('No user data found');
       }
       
-      const userData = JSON.parse(userDataStr);
-      console.log('[checkAuth] User restored:', userData);
-      
+      const userData = JSON.parse(userDataStr);      
       return {
         user: userData,  // ✅ FULL USER DATA WITH ROLE
         accessToken,
@@ -114,14 +108,12 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(checkAuth.fulfilled, (state, action) => {
-        console.log('[authSlice] checkAuth fulfilled - user is logged in');
         state.isCheckingAuth = false;
         state.user = action.payload.user;
         state.token = action.payload.accessToken;
         state.error = null;
       })
       .addCase(checkAuth.rejected, (state, action) => {
-        console.log('[authSlice] checkAuth rejected - user not logged in');
         state.isCheckingAuth = false;
         state.user = null;
         state.token = null;

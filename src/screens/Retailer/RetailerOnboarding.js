@@ -46,7 +46,7 @@ const RetailerOnboarding = ({ navigation }) => {
         setShopPhoto(image);
       });
     } catch (err) {
-      console.log('Camera Error:', err);
+      
     }
   };
 

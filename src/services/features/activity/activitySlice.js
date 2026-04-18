@@ -7,7 +7,7 @@ export const fetchActivityLogs = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await api.get('/api/activity-logs');
-      console.log("API RESPONSE:", res.data);
+      
       return res.data; // must be array
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -45,9 +45,6 @@ const activitySlice = createSlice({
       })
       .addCase(fetchActivityLogs.fulfilled, (state, action) => {
         state.loading = false;
-
-        console.log("API RESPONSE:", action.payload); // ✅ DEBUG
-
         state.logs = Array.isArray(action.payload)
           ? action.payload
           : action.payload.logs || []; // ✅ SAFE FIX

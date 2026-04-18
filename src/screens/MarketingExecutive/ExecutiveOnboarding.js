@@ -42,7 +42,6 @@ const ExecutiveOnboarding = ({ navigation }) => {
 
   const captureImage = () => {
     openCamera(image => {
-      console.log('📸 IMAGE:', image);
       setProfile(image);
     });
   };
@@ -61,22 +60,10 @@ const ExecutiveOnboarding = ({ navigation }) => {
           address: '',
         }}
         validationSchema={validationSchema}
-        // onSubmit={(values) => {
-        //   const formData = new FormData();
 
-        //   Object.keys(values).forEach((key) => {
-        //     formData.append(key, values[key]);
-        //   });
-
-        //   formData.append("profile", profile);
-
-        //   console.log("EXECUTIVE DATA:", formData);
-
-        //   navigation.goBack();
-        // }}
         onSubmit={async values => {
           try {
-            console.log('--- executive ---', values);
+
 
             const formData = new FormData();
 
@@ -93,7 +80,7 @@ const ExecutiveOnboarding = ({ navigation }) => {
             navigation.goBack();
           } catch (error) {
             alert('failed !', error)
-            console.log('Error while adding executive:', error);
+            
           }
         }}
       >

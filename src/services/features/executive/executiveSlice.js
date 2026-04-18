@@ -9,14 +9,9 @@ export const getExecutives = createAsyncThunk(
     try {
       const res = await API.get("/api/executives");
 
-      console.log("GET EXECUTIVES:", res.data);
 
       return res.data;
     } catch (error) {
-      console.log(
-        "GET EXECUTIVES ERROR:",
-        error.response?.data || error.message
-      );
       return rejectWithValue(error.response?.data);
     }
   }
@@ -34,14 +29,9 @@ export const addExecutive = createAsyncThunk(
         },
       });
 
-      console.log("--- ADD EXECUTIVE SUCCESS: ---", res.data);
 
       return res.data;
     } catch (error) {
-      console.log(
-        "ADD EXECUTIVE ERROR:",
-        error.response?.data || error.message
-      );
       return rejectWithValue(error.response?.data);
     }
   }
@@ -55,14 +45,9 @@ export const deleteExecutive = createAsyncThunk(
     try {
       await API.delete(`/api/executives/${id}`);
 
-      console.log("DELETE EXECUTIVE:", id);
-
       return id;
     } catch (error) {
-      console.log(
-        "DELETE EXECUTIVE ERROR:",
-        error.response?.data || error.message
-      );
+
       return rejectWithValue(error.response?.data);
     }
   }
@@ -76,14 +61,10 @@ export const updateExecutive = createAsyncThunk(
     try {
       const res = await API.put(`/api/executives/${id}`, data);
 
-      console.log("UPDATE EXECUTIVE:", res.data);
 
       return res.data;
     } catch (error) {
-      console.log(
-        "UPDATE EXECUTIVE ERROR:",
-        error.response?.data || error.message
-      );
+
       return rejectWithValue(error.response?.data);
     }
   }
@@ -99,14 +80,9 @@ export const approveExecutive = createAsyncThunk(
         status: "APPROVED",
       });
 
-      console.log("APPROVE EXECUTIVE:", res.data);
-
       return res.data;
     } catch (error) {
-      console.log(
-        "APPROVE EXECUTIVE ERROR:",
-        error.response?.data || error.message
-      );
+
       return rejectWithValue(error.response?.data);
     }
   }

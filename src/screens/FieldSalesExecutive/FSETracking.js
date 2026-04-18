@@ -18,7 +18,7 @@ const FSETracking = ({ route }) => {
   // ✅ FETCH SESSION DATA INITIALLY & REAL-TIME UPDATES
   useEffect(() => {
     if (!sessionId) {
-      console.log('❌ No sessionId provided');
+
       return;
     }
 
@@ -28,7 +28,7 @@ const FSETracking = ({ route }) => {
         const data = res.data;
 
         if (!data) {
-          console.log('❌ No session data found');
+
           return;
         }
 
@@ -43,9 +43,9 @@ const FSETracking = ({ route }) => {
         // ✅ Set total distance
         setDistanceKm(data.totalDistanceKm || 0);
 
-        console.log('✅ Session data fetched:', data._id);
+
       } catch (err) {
-        console.log('❌ Route fetch error:', err.message);
+
       }
     };
 
@@ -61,7 +61,7 @@ const FSETracking = ({ route }) => {
   // ✅ REAL-TIME SOCKET UPDATES
   useEffect(() => {
     const handleLocationUpdate = (data) => {
-      console.log('📍 Real-time location received:', data);
+     
 
       setCoords(prevCoords => [
         ...prevCoords,

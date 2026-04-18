@@ -39,7 +39,6 @@ const login = async (userData) => {
     if (res.data.token) {
       try {
         await setToken(res.data.token);
-        console.log('Token stored successfully');
       } catch (storageError) {
         console.error('Failed to store token, but returning login response:', storageError);
       }
@@ -125,9 +124,7 @@ const validateToken = async () => {
  * This is called when app comes back to foreground
  */
 const refreshAuth = async () => {
-  try {
-    console.log('[AuthService] Refreshing auth...');
-    
+  try {    
     const result = await validateToken();
 
     if (!result.valid) {
@@ -136,7 +133,6 @@ const refreshAuth = async () => {
       throw new Error('Token invalid or expired');
     }
 
-    console.log('[AuthService] Auth refresh successful');
     return result;
   } catch (error) {
     console.error('[AuthService] Auth refresh failed:', error.message);

@@ -11,12 +11,12 @@ import { displayNotification } from './src/utils/notificationService';
 
 notifee.onBackgroundEvent(async ({ type, detail }) => {
   if (type === EventType.PRESS) {
-    console.log('Notification pressed (background)', detail);
+    
   }
 });
 
 messaging().setBackgroundMessageHandler(async remoteMessage => {
-  console.log('Background message:', remoteMessage);
+
 
   await displayNotification(remoteMessage);
 });

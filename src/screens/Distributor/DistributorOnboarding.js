@@ -45,7 +45,6 @@ const DistributorOnboarding = ({ navigation }) => {
 
   const captureImage = () => {
    openCamera((image) => {
-    console.log("📸 IMAGE:", image);
     setProfile(image); // ✅ FULL OBJECT
   });
   };

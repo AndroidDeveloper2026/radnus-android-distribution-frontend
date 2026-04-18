@@ -37,7 +37,7 @@
 //         validationSchema={AdminRegisterSchema}
 //         onSubmit={values => {
 //           dispatch(adminRegister(values))
-//           console.log(values);
+//           
 //         }}
 //       >
 //         {({

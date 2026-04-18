@@ -13,7 +13,7 @@ export const startTrackingService = (userId, sessionId) => {
   }
 
   if (isTracking) {
-    console.log('⚠️ Tracking already active, restarting for new session:', sessionId);
+    // console.log('⚠️ Tracking already active, restarting for new session:', sessionId);
   }
 
   isTracking = true;
@@ -39,13 +39,12 @@ export const startTrackingService = (userId, sessionId) => {
           timestamp,
         });
 
-        console.log(`📍 Route point: ${latitude}, ${longitude}`);
       } catch (error) {
-        console.log('❌ Location update error:', error.message);
+       
       }
     },
     (error) => {
-      console.log('❌ GPS watch error:', error);
+
     },
     {
       enableHighAccuracy: true,
@@ -56,7 +55,7 @@ export const startTrackingService = (userId, sessionId) => {
     }
   );
 
-  console.log('🚀 Tracking started for session:', sessionId);
+
 };
 
 export const stopTrackingService = () => {
@@ -64,7 +63,6 @@ export const stopTrackingService = () => {
     Geolocation.clearWatch(watchId);
     watchId = null;
     isTracking = false;
-    console.log('🛑 Tracking stopped');
   }
 };
 

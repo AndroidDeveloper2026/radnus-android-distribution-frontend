@@ -9,8 +9,7 @@ export const adminLogin = createAsyncThunk(
   'adminAuth/login',
   async (data, { rejectWithValue }) => {
     try {
-      const res = await API.post('/api/auth/admin', data);
-      console.log("✅ Admin login response:", res.data);
+      const res = await API.post('/api/auth/admin', data);      
       
       // ✅ Store tokens using the SAME method as user login
       if (res.data.accessToken && res.data.refreshToken) {
@@ -27,7 +26,6 @@ export const adminLogin = createAsyncThunk(
         token: res.data.accessToken,
       };
     } catch (err) {
-      console.log("❌ Admin login error:", err.response?.data);
       return rejectWithValue(err.response?.data?.message || 'Admin login failed');
     }
   }
@@ -44,25 +42,20 @@ export const adminLogout = createAsyncThunk('adminAuth/logout', async () => {
 export const checkAdminAuth = createAsyncThunk(
   'adminAuth/checkAuth',
   async (_, { rejectWithValue }) => {
-    try {
-      console.log('[Admin checkAuth] Starting...');
-      
+    try {  
       // Check for token
       const accessToken = await getAccessToken();
       if (!accessToken) {
-        console.log('[Admin checkAuth] No token found');
         return rejectWithValue('No token found');
       }
       
       // Get admin user data
       const adminDataStr = await AsyncStorage.getItem(ADMIN_USER_KEY);
       if (!adminDataStr) {
-        console.log('[Admin checkAuth] No admin data found');
         return rejectWithValue('No admin data');
       }
       
       const adminData = JSON.parse(adminDataStr);
-      console.log('[Admin checkAuth] Admin restored:', adminData);
       
       return {
         admin: adminData,

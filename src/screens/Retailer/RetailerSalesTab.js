@@ -55,8 +55,7 @@ var Status = "APPROVED";
     <TouchableOpacity
       style={styles.card}
       onPress={() => {
-        // Invoice details screen later
-        console.log("Invoice:", item.id);
+
       }}
     >
       <View style={styles.row}>

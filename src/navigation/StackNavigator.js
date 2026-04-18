@@ -86,10 +86,7 @@ const StackNavigator = () => {
 
   const isLoggedIn = !!token && !!user;
 
-  console.log('--token--', token);
-  console.log('--user--', user);
-  console.log('--isCheckingAuth--', isCheckingAuth);
-  console.log('--role--', role);
+
 
   // Show splash screen while checking authentication
   if (isChecking) {
