@@ -19,6 +19,8 @@ import {
 import Header from '../../components/Header';
 import styles from '../../screens/Common/CustomerListStyle';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { computeChanges } from '../../utils/diff';
+import { createActivityLog } from '../../services/features/activity/activitySlice';
 
 const CustomerListScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -90,24 +92,98 @@ const CustomerListScreen = ({ navigation }) => {
     setEditModalVisible(true);
   }, [isAdmin]);
 
-  // Save Edit (only admin)
-  const handleSaveEdit = useCallback(() => {
-    if (!isAdmin) return;
-    if (!editName.trim()) {
-      Alert.alert('Required', 'Customer name cannot be empty.');
-      return;
-    }
-    dispatch(updateCustomer({
-      phone: selectedCustomer.phone,
-      data: {
-        name: editName.trim(),
-        address: editAddress.trim(),
-        city: editCity.trim(),
-        state: editState.trim(),
-      },
-    }));
-  }, [isAdmin, editName, selectedCustomer, dispatch]);
+  // // Save Edit (only admin)
+  // const handleSaveEdit = useCallback(() => {
+  //   if (!isAdmin) return;
+  //   if (!editName.trim()) {
+  //     Alert.alert('Required', 'Customer name cannot be empty.');
+  //     return;
+  //   }
+  //   dispatch(updateCustomer({
+  //     phone: selectedCustomer.phone,
+  //     data: {
+  //       name: editName.trim(),
+  //       address: editAddress.trim(),
+  //       city: editCity.trim(),
+  //       state: editState.trim(),
+  //     },
+  //   }));
+  // }, [isAdmin, editName, selectedCustomer, dispatch]);
 
+//   const handleSaveEdit = useCallback(() => {
+//   if (!isAdmin) return;
+//   if (!editName.trim()) {
+//     Alert.alert('Required', 'Customer name cannot be empty.');
+//     return;
+//   }
+
+//   const oldData = {
+//     name: selectedCustomer.name || '',
+//     address: selectedCustomer.address || '',
+//     city: selectedCustomer.city || '',
+//     state: selectedCustomer.state || '',
+//     type: selectedCustomer.type || 'customer',
+//     shopName: selectedCustomer.shopName || '',
+//   };
+
+//   const newData = {
+//     name: editName.trim(),
+//     address: editAddress.trim(),
+//     city: editCity.trim(),
+//     state: editState.trim(),
+//     type: selectedCustomer.type || 'customer', // type not editable here, keep old
+//     shopName: selectedCustomer.shopName || '',
+//   };
+
+//   const changes = computeChanges(oldData, newData);
+
+//   dispatch(updateCustomer({
+//     phone: selectedCustomer.phone,
+//     data: {
+//       name: editName.trim(),
+//       address: editAddress.trim(),
+//       city: editCity.trim(),
+//       state: editState.trim(),
+//     },
+//   })).then((result) => {
+//     if (result.meta.requestStatus === 'fulfilled' && changes) {
+//       dispatch(createActivityLog({
+//         action: 'EDIT_CUSTOMER',
+//         productId: null,
+//         productName: null,
+//         changes: changes,
+//       }));
+//     }
+//   });
+// }, [isAdmin, editName, editAddress, editCity, editState, selectedCustomer, dispatch]);
+
+
+const handleSaveEdit = useCallback(() => {
+  if (!isAdmin) return;
+  if (!editName.trim()) {
+    Alert.alert('Required', 'Customer name cannot be empty.');
+    return;
+  }
+
+  const oldData = { /* ... */ };
+  const newData = { /* ... */ };
+  const changes = computeChanges(oldData, newData);
+
+  dispatch(updateCustomer({
+    phone: selectedCustomer.phone,
+    data: { name: editName.trim(), address: editAddress.trim(), city: editCity.trim(), state: editState.trim() },
+  })).then((result) => {
+    if (result.meta.requestStatus === 'fulfilled' && changes) {
+      dispatch(createActivityLog({
+        action: 'EDIT_CUSTOMER',
+        productId: null,
+        productName: null,
+        customerIdentifier: `${selectedCustomer.name} (${selectedCustomer.phone})`,
+        changes: changes,
+      }));
+    }
+  });
+}, [isAdmin, editName, editAddress, editCity, editState, selectedCustomer, dispatch]);
   // Delete (only admin)
   const handleDelete = useCallback((customer) => {
     if (!isAdmin) return;
