@@ -268,6 +268,36 @@ const AdminDashboard = ({ navigation }) => {
           <ChevronRight size={18} color="#9CA3AF" strokeWidth={1.8} />
         </TouchableOpacity>
 
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigation.navigate('ManagerOnboarding')}
+          activeOpacity={0.7}
+        >
+          <View style={styles.navIconWrapper}>
+            <UserCheck size={22} color="#10B981" strokeWidth={1.8} />
+          </View>
+          <View style={styles.navTextContainer}>
+            <Text style={styles.navTitle}>ManagerOnboarding</Text>
+            <Text style={styles.navSubTitle}>Onboard Managers</Text>
+          </View>
+          <ChevronRight size={18} color="#9CA3AF" strokeWidth={1.8} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigation.navigate('ManagerManagement')}
+          activeOpacity={0.7}
+        >
+          <View style={styles.navIconWrapper}>
+            <UserCheck size={22} color="#10B981" strokeWidth={1.8} />
+          </View>
+          <View style={styles.navTextContainer}>
+            <Text style={styles.navTitle}>ManagerManagement</Text>
+            <Text style={styles.navSubTitle}>Edit Delete Managers</Text>
+          </View>
+          <ChevronRight size={18} color="#9CA3AF" strokeWidth={1.8} />
+        </TouchableOpacity>
+
         {/* 🧩 MASTER & CONTROL */}
         <Text style={styles.sectionTitle}>Master & Control</Text>
 

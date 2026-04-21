@@ -209,13 +209,13 @@ const ExecutiveDashboard = ({ navigation }) => {
             <Text style={styles.navSubTitle}>ExecutiveOnboarding</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.navItem}
             onPress={() => navigation.navigate('ManagerOnboarding')}
           >
             <Text style={styles.navTitle}>ManagerOnboarding</Text>
             <Text style={styles.navSubTitle}>ManagerOnboarding</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           <TouchableOpacity
             style={styles.navItem}
@@ -225,13 +225,13 @@ const ExecutiveDashboard = ({ navigation }) => {
             <Text style={styles.navSubTitle}>ExecutiveManagement</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.navItem}
             onPress={() => navigation.navigate('ManagerManagement')}
           >
             <Text style={styles.navTitle}>ManagerManagement</Text>
             <Text style={styles.navSubTitle}>ManagerManagement</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */} 
 
           <TouchableOpacity
             style={styles.navItem}

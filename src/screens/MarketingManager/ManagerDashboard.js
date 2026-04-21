@@ -133,7 +133,7 @@ const ManagerDashboard = ({ navigation }) => {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.navItem}
             onPress={() => navigation.navigate("ProductMaster")}
           >
@@ -141,7 +141,7 @@ const ManagerDashboard = ({ navigation }) => {
             <Text style={styles.navSubTitle}>
               Products · Pricing · MOQ
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           <TouchableOpacity
             style={styles.navItem}
