@@ -222,6 +222,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 22,
   },
+  // Add to your existing StyleSheet
+// card: {
+//   backgroundColor: '#fff',
+//   borderRadius: 12,
+//   padding: 12,
+//   marginBottom: 12,
+//   flexDirection: 'row',
+//   alignItems: 'center',
+//   justifyContent: 'space-between',
+//   shadowColor: '#000',
+//   shadowOffset: { width: 0, height: 1 },
+//   shadowOpacity: 0.1,
+//   shadowRadius: 2,
+//   elevation: 2,
+// },
+downloadBtn: {
+  padding: 8,
+  marginLeft: 8,
+},
 });
 
 export default styles;

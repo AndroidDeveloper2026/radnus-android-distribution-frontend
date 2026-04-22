@@ -86,4 +86,20 @@ export default StyleSheet.create({
     marginTop: 20,
     color: '#999',
   },
+  downloadButton: {
+    backgroundColor: '#d32f2f',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginTop: 20,
+    marginBottom: 30,
+  },
+  downloadButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });
