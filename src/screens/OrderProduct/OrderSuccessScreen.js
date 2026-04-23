@@ -179,42 +179,6 @@ const OrderSuccessScreen = ({ route, navigation }) => {
     }
   }, [addState, error, dispatch]);
 
-  // ✅ Watch updateCustomer state
-  // useEffect(() => {
-  //   if (updateState === 'success') {
-  //     setEditModalVisible(false);
-  //     // Refresh customer data after successful update
-  //     dispatch(lookupCustomer(buyerPhone));
-  //     dispatch(clearUpdateState());
-  //     Alert.alert('Success', 'Customer details updated successfully.');
-  //   }
-  //   if (updateState === 'error' && error) {
-  //     Alert.alert('Error', error);
-  //     dispatch(clearUpdateState());
-  //   }
-  // }, [updateState, error, dispatch, buyerPhone]);
-
-//   useEffect(() => {
-//   if (updateState === 'success') {
-//     setEditModalVisible(false);
-//     // Refresh customer data after successful update
-//     dispatch(lookupCustomer(buyerPhone));
-    
-//     // ✅ Log the customer edit activity
-//     dispatch(createActivityLog({
-//       action: 'EDIT_CUSTOMER',
-//       productId: null,           // not applicable for customer edit
-//       productName: null,
-//     }));
-    
-//     dispatch(clearUpdateState());
-//     Alert.alert('Success', 'Customer details updated successfully.');
-//   }
-//   if (updateState === 'error' && error) {
-//     Alert.alert('Error', error);
-//     dispatch(clearUpdateState());
-//   }
-// }, [updateState, error, dispatch, buyerPhone]);
 
 useEffect(() => {
   if (updateState === 'success') {
@@ -322,69 +286,6 @@ useEffect(() => {
     ]).start(() => setConfirmVisible(false));
   };
 
-  // // ✅ Create invoice and reduce stock ONLY on final confirmation
-  // const goToInvoice = async () => {
-  //   setIsConfirming(true);
-  //   closeConfirmModal();
-
-  //   try {
-  //     // 1. Create invoice with status = 'completed'
-  //     const invoiceRes = await API.post("/api/invoices", {
-  //       billerName: user?.name || "Unknown",
-  //       items: cartItems,
-  //       totalAmount: grandTotal,
-  //       paymentMode: selectedPaymentMode?.label || paymentMode,
-  //       status: "completed", // ✅ directly completed
-  //     });
-
-  //     const invoiceNumber = invoiceRes.data.invoice.invoiceNumber;
-
-  //     // 2. Reduce stock
-  //     await dispatch(reduceStock(cartItems)).unwrap();
-
-  //     // 3. Prepare shipping address
-  //     const finalShipToName = sameAsBuyer
-  //       ? (customer?.type === 'shop' ? customer.shopName : customer?.name)
-  //       : shipToName;
-  //     const finalShipToPhone = sameAsBuyer ? buyerPhone : shipToPhone;
-  //     const finalShipToAddress = sameAsBuyer ? (customer?.address || '') : shipToAddress;
-  //     const finalShipToCity = sameAsBuyer ? (customer?.city || '') : shipToCity;
-  //     const finalShipToState = sameAsBuyer ? (customer?.state || '') : shipToState;
-
-  //     // 4. Navigate to final invoice view
-  //     setTimeout(() => {
-  //       navigation.navigate('InvoiceScreen', {
-  //         invoiceNumber: getInvoiceNumber(invoiceNumber),
-  //         items: cartItems,
-  //         total: grandTotal,
-  //         paymentMode: selectedPaymentMode?.label || paymentMode,
-  //         date,
-  //         buyerName: customer?.type === 'shop'
-  //           ? `${customer.shopName} (${customer.name})`
-  //           : customer?.name,
-  //         buyerPhone,
-  //         buyerAddress: customer?.address || '',
-  //         buyerCity: customer?.city || '',
-  //         buyerState: customer?.state || '',
-  //         courierCharge: parseFloat(courierCharge) || 0,
-  //         salesperson: selectedSP?.name || '',
-  //         referenceNo,
-  //         shipToName: finalShipToName,
-  //         shipToPhone: finalShipToPhone,
-  //         shipToAddress: finalShipToAddress,
-  //         shipToCity: finalShipToCity,
-  //         shipToState: finalShipToState,
-  //       });
-  //     }, 300);
-  //   } catch (err) {
-  //     console.error('Error creating invoice or reducing stock:', err);
-  //     Alert.alert(
-  //       'Error',
-  //       err.message || 'Failed to confirm order. Please try again.',
-  //       [{ text: 'OK', onPress: () => setIsConfirming(false) }]
-  //     );
-  //   }
-  // };
 
   const goToInvoice = async () => {
   setIsConfirming(true);
