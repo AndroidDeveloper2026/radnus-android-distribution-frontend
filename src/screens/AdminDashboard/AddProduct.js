@@ -22,9 +22,10 @@ const validationSchema = Yup.object().shape({
   gst: Yup.number().typeError('GST must be a number').required('GST required').min(0),
   moq: Yup.number().typeError('MOQ must be a number').required('MOQ required').positive(),
   walkinPrice: Yup.number().typeError('Walk-in price must be a number').required('Walk-in price required').positive(),
-  batchNo: Yup.string().trim().optional(),
-  rackNo: Yup.string().trim().optional(),
-  vendorName: Yup.string().trim().optional(),   // ✅ NEW
+  // 👇 changed from optional to required
+  batchNo: Yup.string().trim().required('Batch number is required'),
+  rackNo: Yup.string().trim().required('Rack number is required'),
+  vendorName: Yup.string().trim().required('Vendor name is required'),
 });
 
 const AddProduct = ({ navigation }) => {
@@ -71,7 +72,7 @@ const AddProduct = ({ navigation }) => {
           walkinPrice: '',
           batchNo: '',
           rackNo: '',
-          vendorName: '',   // ✅ NEW
+          vendorName: '',
         }}
         validationSchema={validationSchema}
         onSubmit={async values => {
@@ -204,29 +205,38 @@ const AddProduct = ({ navigation }) => {
                 <Text style={AddProductStyle.errorText}>{errors.sku}</Text>
               )}
 
-              {/* BATCH NO */}
+              {/* BATCH NO – now required with error display */}
               <Input
-                label="Batch No"
+                label="Batch No *"
                 value={values.batchNo}
                 onChangeText={handleChange('batchNo')}
                 editable={!isSubmitting}
               />
+              {errors.batchNo && touched.batchNo && (
+                <Text style={AddProductStyle.errorText}>{errors.batchNo}</Text>
+              )}
 
-              {/* RACK NO */}
+              {/* RACK NO – now required with error display */}
               <Input
-                label="Rack No"
+                label="Rack No *"
                 value={values.rackNo}
                 onChangeText={handleChange('rackNo')}
                 editable={!isSubmitting}
               />
+              {errors.rackNo && touched.rackNo && (
+                <Text style={AddProductStyle.errorText}>{errors.rackNo}</Text>
+              )}
 
-              {/* VENDOR NAME – NEW */}
+              {/* VENDOR NAME – now required with error display */}
               <Input
-                label="Vendor Name"
+                label="Vendor Name *"
                 value={values.vendorName}
                 onChangeText={handleChange('vendorName')}
                 editable={!isSubmitting}
               />
+              {errors.vendorName && touched.vendorName && (
+                <Text style={AddProductStyle.errorText}>{errors.vendorName}</Text>
+              )}
 
               {/* ITEM COST */}
               <Input
@@ -302,7 +312,7 @@ const AddProduct = ({ navigation }) => {
 
               {/* MOQ */}
               <Input
-                label="MOQ (Units) *"
+                label="Stock (Units) *"
                 keyboardType="numeric"
                 value={values.moq}
                 onChangeText={handleChange('moq')}

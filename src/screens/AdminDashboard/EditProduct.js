@@ -203,7 +203,7 @@ const EditProduct = ({ route, navigation }) => {
           onChangeText={v => onChange('gst', v)}
         />
         <Input
-          label="MOQ (Units)"
+          label="Stock (Units)"
           keyboardType="numeric"
           value={form.moq?.toString()}
           onChangeText={v => onChange('moq', v)}
