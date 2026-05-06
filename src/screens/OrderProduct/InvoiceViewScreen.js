@@ -2,55 +2,62 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  FlatList,
   TouchableOpacity,
   ActivityIndicator,
   Alert,
   ScrollView,
 } from 'react-native';
 import RNPrint from 'react-native-print';
-import { Download } from 'lucide-react-native';
+import { Download, FileText, MapPin, Phone, CreditCard, Calendar } from 'lucide-react-native';
 import Header from '../../components/Header';
-import styles from './InvoiceViewStyle';
+import styles from './InvoiceViewStyle'; // 👈 Ensure this file exists and is the new one I gave
 
 const InvoiceViewScreen = ({ route }) => {
   const { invoice } = route.params;
   const [downloading, setDownloading] = useState(false);
 
-  // Helper to generate invoice HTML from invoice object (same as InvoiceListScreen)
-  const generateInvoiceHTML = (invoice) => {
-    const {
-      invoiceNumber,
-      createdAt,
-      customerName,
-      customerPhone,
-      customerAddress,
-      customerCity,
-      customerState,
-      customerType,
-      shopName,
-      sameAsBuyer,
-      shippingAddress,
-      items,
-      courierCharge,
-      totalAmount,
-      paymentMode,
-      salesperson,
-      referenceNo,
-      billerName: biller,
-    } = invoice;
+  // Extract data
+  const {
+    invoiceNumber,
+    createdAt,
+    customerName,
+    customerPhone,
+    customerAddress,
+    customerCity,
+    customerState,
+    customerType,
+    shopName,
+    sameAsBuyer,
+    shippingAddress,
+    items = [],
+    totalAmount,
+    paymentMode,
+    subtotal: storeSubtotal,
+    discount = 0,
+    courierCharge = 0,
+    billerName,
+    salesperson,
+    referenceNo,
+  } = invoice;
 
-    // Buyer display name
-    const buyerDisplay = customerType === 'shop' && shopName
-      ? `${shopName} (${customerName})`
-      : customerName;
+  // Computed subtotal (fallback to items calculation)
+  const subtotal =
+    storeSubtotal ||
+    items.reduce((sum, item) => sum + item.qty * item.price, 0);
+  const grandTotal = totalAmount;
 
-    // Buyer address lines
+  // ── PDF Generator ──────────────────────────────────────
+  const generateInvoiceHTML = () => {
+    const buyerDisplay =
+      customerType === 'shop' && shopName
+        ? `${shopName} (${customerName})`
+        : customerName;
+
     const buyerLine1 = `${buyerDisplay} - ${customerPhone}`;
     const buyerLine2 = customerAddress || '';
     const buyerLine3 = [customerCity, customerState].filter(Boolean).join(' - ');
 
-    // Consignee (ship to) details
+    // Shipping details
     let shipName = buyerDisplay;
     let shipPhone = customerPhone;
     let shipAddress = customerAddress;
@@ -67,7 +74,7 @@ const InvoiceViewScreen = ({ route }) => {
     const shipLine2 = shipAddress || '';
     const shipLine3 = [shipCity, shipState].filter(Boolean).join(' - ');
 
-    // Items rows
+    // Item rows
     let itemsRows = '';
     items.forEach((item, idx) => {
       const amount = item.qty * item.price;
@@ -80,36 +87,24 @@ const InvoiceViewScreen = ({ route }) => {
           <td style="text-align:right;padding:6px;border:1px solid #000">₹${item.price}</td>
           <td style="text-align:center;padding:6px;border:1px solid #000">NOS</td>
           <td style="text-align:right;padding:6px;border:1px solid #000">₹${amount}.00</td>
-        </tr>
-      `;
+        </tr>`;
     });
 
-    // Courier row
-    const courierRow = `
+    // Discount row
+    const discountRow = discount > 0
+      ? `
       <tr>
         <td style="border:1px solid #000;padding:6px"> </td>
-        <td style="border:1px solid #000;padding:6px">COURIER CHARGE</td>
+        <td style="border:1px solid #000;padding:6px">DISCOUNT</td>
         <td style="border:1px solid #000;padding:6px"> </td>
         <td style="border:1px solid #000;padding:6px"> </td>
         <td style="border:1px solid #000;padding:6px"> </td>
         <td style="border:1px solid #000;padding:6px"> </td>
-        <td style="border:1px solid #000;padding:6px;text-align:right">₹${courierCharge || 0}.00</td>
-      </tr>
-    `;
+        <td style="border:1px solid #000;padding:6px;text-align:right">₹${discount}.00</td>
+      </tr>`
+      : '';
 
-    // Total row
     const totalQty = items.reduce((sum, i) => sum + i.qty, 0);
-    const totalRow = `
-      <tr>
-        <td style="border:1px solid #000;padding:6px"> </td>
-        <td style="border:1px solid #000;padding:6px"><b>Total</b></td>
-        <td style="border:1px solid #000;padding:6px"> </td>
-        <td style="border:1px solid #000;padding:6px;text-align:center"><b>${totalQty} NOS</b></td>
-        <td style="border:1px solid #000;padding:6px"> </td>
-        <td style="border:1px solid #000;padding:6px"> </td>
-        <td style="border:1px solid #000;padding:6px;text-align:right"><b>₹${totalAmount}.00</b></td>
-      </tr>
-    `;
 
     // Amount in words
     const amountInWords = (num) => {
@@ -122,13 +117,13 @@ const InvoiceViewScreen = ({ route }) => {
       if (num < 100000) return amountInWords(Math.floor(num / 1000)) + ' Thousand' + (num % 1000 ? ' ' + amountInWords(num % 1000) : '');
       return amountInWords(Math.floor(num / 100000)) + ' Lakh' + (num % 100000 ? ' ' + amountInWords(num % 100000) : '');
     };
-    const grandTotalWords = `INR ${amountInWords(totalAmount)} Only`;
+    const grandTotalWords = `INR ${amountInWords(grandTotal)} Only`;
 
-    // Reference No with date
-    const refDate = createdAt ? new Date(createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+    const refDate = createdAt
+      ? new Date(createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+      : '';
     const refDisplay = referenceNo ? `${referenceNo} dt. ${refDate}` : '';
 
-    // Build HTML
     return `
       <html>
       <head>
@@ -159,9 +154,8 @@ const InvoiceViewScreen = ({ route }) => {
           <p class="company-name">RADNUS COMMUNICATION</p>
           <p class="company-address">No.242/44, MG Road, Sinnaya Plaza, Near Fish Market</p>
           <p class="company-address">Puducherry - 605001</p>
-          <p class="company-address">State Name: Puducherry, Code: 34</p>
+          <p class="company-address">State Name: Puducherry, Code: 605001</p>
           <p class="company-address">E-Mail: sundar12134@gmail.com</p>
-          <p class="company-address"><b>GST: 34AAHFR8679B</b></p>
         </div>
         <div style="text-align:center;font-weight:bold;font-size:13px;padding:6px;border-bottom:1px solid #000;">INVOICE</div>
         <div class="two-col">
@@ -176,7 +170,7 @@ const InvoiceViewScreen = ({ route }) => {
             ${buyerLine3 ? `<p style="margin:2px 0">${buyerLine3}</p>` : ''}
           </div>
           <div class="col-right">
-            <table style="width:100%; border-collapse:collapse;">
+            <table>
               <tr><td style="border:1px solid #000;padding:4px"><b>Invoice No.</b></td><td style="border:1px solid #000;padding:4px">${invoiceNumber}</td></tr>
               <tr><td style="border:1px solid #000;padding:4px"><b>Dated</b></td><td style="border:1px solid #000;padding:4px">${new Date(createdAt).toDateString()}</td></tr>
               <tr><td style="border:1px solid #000;padding:4px"><b>Delivery Note</b></td><td style="border:1px solid #000;padding:4px"></td></tr>
@@ -204,8 +198,25 @@ const InvoiceViewScreen = ({ route }) => {
           </thead>
           <tbody>
             ${itemsRows}
-            ${courierRow}
-            ${totalRow}
+            ${discountRow}
+            <tr>
+              <td style="border:1px solid #000;padding:6px"> </td>
+              <td style="border:1px solid #000;padding:6px">COURIER CHARGE</td>
+              <td style="border:1px solid #000;padding:6px"> </td>
+              <td style="border:1px solid #000;padding:6px"> </td>
+              <td style="border:1px solid #000;padding:6px"> </td>
+              <td style="border:1px solid #000;padding:6px"> </td>
+              <td style="border:1px solid #000;padding:6px;text-align:right">₹${courierCharge}.00</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;padding:6px"> </td>
+              <td style="border:1px solid #000;padding:6px"><b>Total</b></td>
+              <td style="border:1px solid #000;padding:6px"> </td>
+              <td style="border:1px solid #000;padding:6px;text-align:center"><b>${totalQty} NOS</b></td>
+              <td style="border:1px solid #000;padding:6px"> </td>
+              <td style="border:1px solid #000;padding:6px"> </td>
+              <td style="border:1px solid #000;padding:6px;text-align:right"><b>₹${grandTotal}.00</b></td>
+            </tr>
           </tbody>
         </table>
         <div class="amount-words"><b>Amount Chargeable (in words)</b><br/><b>${grandTotalWords}</b></div>
@@ -217,8 +228,7 @@ const InvoiceViewScreen = ({ route }) => {
         <div class="footer">This is a Computer Generated Invoice</div>
       </div>
       </body>
-      </html>
-    `;
+      </html>`;
   };
 
   const downloadPDF = async () => {
@@ -227,93 +237,131 @@ const InvoiceViewScreen = ({ route }) => {
       const html = generateInvoiceHTML(invoice);
       await RNPrint.print({ html });
     } catch (error) {
-      Alert.alert('Error', 'Failed to generate PDF. Please try again.');
+      Alert.alert('Error', 'Failed to generate PDF.');
       console.error(error);
     } finally {
       setDownloading(false);
     }
   };
 
+  // ── UI ─────────────────────────────────────────────────
+  const customerDisplay = customerName || '—';
+  const addressParts = [
+    customerAddress,
+    customerCity,
+    customerState,
+  ].filter(Boolean).join(', ') || '—';
+
   return (
     <View style={styles.container}>
       <Header title="Invoice Details" />
 
-      <ScrollView contentContainerStyle={styles.content}>
-        {/* Invoice Info Card */}
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Invoice Meta + Customer */}
         <View style={styles.card}>
-          <Text style={styles.title}>Invoice Info</Text>
-
-          <View style={styles.row}>
-            <Text style={styles.label}>Invoice No</Text>
-            <Text style={styles.value}>{invoice.invoiceNumber}</Text>
+          <View style={styles.invoiceHeaderRow}>
+            <Text style={styles.invoiceNumber}>{invoiceNumber}</Text>
+            <View style={styles.dateBadge}>
+              <Calendar size={12} color="#B45309" />
+              <Text style={styles.dateText}>
+                {new Date(createdAt).toDateString()}
+              </Text>
+            </View>
           </View>
 
-          <View style={styles.row}>
-            <Text style={styles.label}>Biller</Text>
-            <Text style={styles.value}>{invoice.billerName}</Text>
+          <View style={styles.infoRow}>
+            <FileText size={16} color="#6B7280" style={styles.infoIcon} />
+            <Text style={styles.infoText}>Biller: {billerName || '—'}</Text>
           </View>
-
-          <View style={styles.row}>
-            <Text style={styles.label}>Date</Text>
-            <Text style={styles.value}>
-              {new Date(invoice.createdAt).toDateString()}
-            </Text>
-          </View>
-
-          <View style={styles.row}>
-            <Text style={styles.label}>Payment Mode</Text>
-            <Text style={styles.value}>{invoice.paymentMode}</Text>
-          </View>
+          {salesperson ? (
+            <View style={styles.infoRow}>
+              <FileText size={16} color="#6B7280" style={styles.infoIcon} />
+              <Text style={styles.infoText}>Salesperson: {salesperson}</Text>
+            </View>
+          ) : null}
 
           <View style={styles.divider} />
 
-          <View style={styles.row}>
-            <Text style={styles.label}>Total Amount</Text>
-            <Text style={styles.total}>₹{invoice.totalAmount}</Text>
+          <Text style={styles.cardTitle}>Customer</Text>
+          <View style={styles.infoRow}>
+            <Phone size={16} color="#6B7280" style={styles.infoIcon} />
+            <Text style={styles.infoText}>
+              {customerDisplay} – {customerPhone || '—'}
+            </Text>
+          </View>
+          <View style={styles.infoRow}>
+            <MapPin size={16} color="#6B7280" style={styles.infoIcon} />
+            <Text style={styles.infoText}>{addressParts}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <CreditCard size={16} color="#6B7280" style={styles.infoIcon} />
+            <Text style={styles.infoText}>
+              Payment: {paymentMode?.toUpperCase()}
+            </Text>
           </View>
         </View>
 
-        {/* Items Card */}
+        {/* Items */}
         <View style={styles.card}>
-          <Text style={styles.title}>Items</Text>
-
-          {/* Header */}
-          <View style={styles.itemHeader}>
-            <Text style={[styles.itemName, { fontWeight: 'bold' }]}>Item</Text>
-            <Text style={[styles.itemText, { fontWeight: 'bold' }]}>Qty</Text>
-            <Text style={[styles.itemText, { fontWeight: 'bold' }]}>Price</Text>
+          <Text style={styles.cardTitle}>Items ({items.length})</Text>
+          <View style={styles.itemsHeader}>
+            <Text style={[styles.headerText, styles.itemNameFlex]}>Item</Text>
+            <Text style={[styles.headerText, styles.itemQtyFlex]}>Qty</Text>
+            <Text style={[styles.headerText, styles.itemPriceFlex]}>Price</Text>
           </View>
-
-          {invoice.items?.length === 0 ? (
-            <Text style={styles.emptyText}>No items found</Text>
-          ) : (
-            <FlatList
-              data={invoice.items}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <View style={styles.itemRow}>
-                  <Text style={styles.itemName}>{item.name}</Text>
-                  <Text style={styles.itemText}>{item.qty}</Text>
-                  <Text style={styles.itemText}>₹{item.price}</Text>
-                </View>
-              )}
-              scrollEnabled={false}
-            />
-          )}
+          {items.map((item, index) => (
+            <View key={index} style={styles.itemRow}>
+              <Text style={styles.itemName}>{item.name}</Text>
+              <Text style={styles.itemQty}>{item.qty}</Text>
+              <Text style={styles.itemPrice}>₹{item.qty * item.price}</Text>
+            </View>
+          ))}
         </View>
 
-        {/* Download PDF Button */}
+        {/* Payment Summary */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Payment Summary</Text>
+
+          <View style={styles.breakdownRow}>
+            <Text style={styles.breakdownLabel}>Subtotal</Text>
+            <Text style={styles.breakdownValue}>₹{subtotal}</Text>
+          </View>
+
+          {discount > 0 && (
+            <View style={styles.breakdownRow}>
+              <Text style={styles.breakdownLabel}>Discount</Text>
+              <Text style={[styles.breakdownValue, styles.discountValue]}>
+                - ₹{discount}
+              </Text>
+            </View>
+          )}
+
+          <View style={styles.breakdownRow}>
+            <Text style={styles.breakdownLabel}>Courier Charge</Text>
+            <Text style={styles.breakdownValue}>₹{courierCharge}</Text>
+          </View>
+
+          <View style={[styles.breakdownRow, styles.totalRow]}>
+            <Text style={styles.totalLabel}>Grand Total</Text>
+            <Text style={styles.totalValue}>₹{grandTotal}</Text>
+          </View>
+        </View>
+
+        {/* Download Button */}
         <TouchableOpacity
-          style={styles.downloadButton}
+          style={styles.downloadBtn}
           onPress={downloadPDF}
           disabled={downloading}
         >
           {downloading ? (
-            <ActivityIndicator size="small" color="#fff" />
+            <ActivityIndicator color="#FFF" size="small" />
           ) : (
             <>
-              <Download size={18} color="#fff" style={{ marginRight: 8 }} />
-              <Text style={styles.downloadButtonText}>Download PDF</Text>
+              <Download size={20} color="#FFFFFF" />
+              <Text style={styles.downloadText}>Download Invoice PDF</Text>
             </>
           )}
         </TouchableOpacity>

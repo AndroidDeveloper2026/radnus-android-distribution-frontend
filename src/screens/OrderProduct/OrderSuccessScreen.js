@@ -129,6 +129,9 @@ const OrderSuccessScreen = ({ route, navigation }) => {
   const [selectedSP, setSelectedSP] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  // 🆕 DISCOUNT FIELD
+  const [discount, setDiscount] = useState('0');
+
   // Confirm Modal
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
@@ -179,29 +182,28 @@ const OrderSuccessScreen = ({ route, navigation }) => {
     }
   }, [addState, error, dispatch]);
 
-
-useEffect(() => {
-  if (updateState === 'success') {
-    setEditModalVisible(false);
-    // Refresh customer data after successful update
-    dispatch(lookupCustomer(buyerPhone));
-    
-    // ✅ Log the customer edit activity WITH customer identifier
-    dispatch(createActivityLog({
-      action: 'EDIT_CUSTOMER',
-      productId: null,
-      productName: null,
-      customerIdentifier: buyerPhone,   // ✅ store the phone number as identifier
-    }));
-    
-    dispatch(clearUpdateState());
-    Alert.alert('Success', 'Customer details updated successfully.');
-  }
-  if (updateState === 'error' && error) {
-    Alert.alert('Error', error);
-    dispatch(clearUpdateState());
-  }
-}, [updateState, error, dispatch, buyerPhone]);
+  useEffect(() => {
+    if (updateState === 'success') {
+      setEditModalVisible(false);
+      // Refresh customer data after successful update
+      dispatch(lookupCustomer(buyerPhone));
+      
+      // ✅ Log the customer edit activity WITH customer identifier
+      dispatch(createActivityLog({
+        action: 'EDIT_CUSTOMER',
+        productId: null,
+        productName: null,
+        customerIdentifier: buyerPhone,   // ✅ store the phone number as identifier
+      }));
+      
+      dispatch(clearUpdateState());
+      Alert.alert('Success', 'Customer details updated successfully.');
+    }
+    if (updateState === 'error' && error) {
+      Alert.alert('Error', error);
+      dispatch(clearUpdateState());
+    }
+  }, [updateState, error, dispatch, buyerPhone]);
 
   const triggerShake = () => {
     shakeAnim.setValue(0);
@@ -286,110 +288,118 @@ useEffect(() => {
     ]).start(() => setConfirmVisible(false));
   };
 
-
   const goToInvoice = async () => {
-  setIsConfirming(true);
-  closeConfirmModal();
+    setIsConfirming(true);
+    closeConfirmModal();
 
-  try {
-    // Prepare items in the format expected by backend
-    const invoiceItems = cartItems.map(item => ({
-      productId: item.id || item.productId,
-      name: item.name,
-      qty: item.qty,
-      price: item.price,
-    }));
+    try {
+      // Prepare items in the format expected by backend
+      const invoiceItems = cartItems.map(item => ({
+        productId: item.id || item.productId,
+        name: item.name,
+        qty: item.qty,
+        price: item.price,
+      }));
 
-    const subtotal = grandTotal;                           // without courier
-    const courier = parseFloat(courierCharge) || 0;
-    const totalWithCourier = subtotal + courier;
+      const subtotal = grandTotal;                           // without courier
+      const discountAmount = parseFloat(discount) || 0;     // 🆕 discount
+      const afterDiscount = Math.max(subtotal - discountAmount, 0);
+      const courier = parseFloat(courierCharge) || 0;
+      const totalWithCourier = afterDiscount + courier;
 
-    // Prepare shipping address (Consignee)
-    const finalShipToName = sameAsBuyer
-      ? (customer?.type === 'shop' ? customer.shopName : customer?.name)
-      : shipToName;
-    const finalShipToPhone = sameAsBuyer ? buyerPhone : shipToPhone;
-    const finalShipToAddress = sameAsBuyer ? (customer?.address || '') : shipToAddress;
-    const finalShipToCity = sameAsBuyer ? (customer?.city || '') : shipToCity;
-    const finalShipToState = sameAsBuyer ? (customer?.state || '') : shipToState;
+      // Prepare shipping address (Consignee)
+      const finalShipToName = sameAsBuyer
+        ? (customer?.type === 'shop' ? customer.shopName : customer?.name)
+        : shipToName;
+      const finalShipToPhone = sameAsBuyer ? buyerPhone : shipToPhone;
+      const finalShipToAddress = sameAsBuyer ? (customer?.address || '') : shipToAddress;
+      const finalShipToCity = sameAsBuyer ? (customer?.city || '') : shipToCity;
+      const finalShipToState = sameAsBuyer ? (customer?.state || '') : shipToState;
 
-    // Full payload for invoice creation
-    const payload = {
-      // Existing required fields
-      billerName: user?.name || "Unknown",
-      items: invoiceItems,
-      totalAmount: totalWithCourier,        // grand total including courier
-      paymentMode: selectedPaymentMode?.label || paymentMode,
-      status: "completed",
+      // Full payload for invoice creation
+      const payload = {
+        // Existing required fields
+        billerName: user?.name || "Unknown",
+        items: invoiceItems,
+        totalAmount: totalWithCourier,        // grand total including courier (after discount)
+        paymentMode: selectedPaymentMode?.label || paymentMode,
+        status: "completed",
 
-      // Customer (Bill To) details
-      customerPhone: buyerPhone,
-      customerName: customer?.name,
-      customerType: customer?.type,
-      shopName: customer?.shopName,
-      customerAddress: customer?.address,
-      customerCity: customer?.city,
-      customerState: customer?.state,
+        // Customer (Bill To) details
+        customerPhone: buyerPhone,
+        customerName: customer?.name,
+        customerType: customer?.type,
+        shopName: customer?.shopName,
+        customerAddress: customer?.address,
+        customerCity: customer?.city,
+        customerState: customer?.state,
 
-      // Consignee (Ship To)
-      sameAsBuyer: sameAsBuyer,
-      shippingAddress: {
-        name: finalShipToName,
-        phone: finalShipToPhone,
-        address: finalShipToAddress,
-        city: finalShipToCity,
-        state: finalShipToState,
-      },
+        // Consignee (Ship To)
+        sameAsBuyer: sameAsBuyer,
+        shippingAddress: {
+          name: finalShipToName,
+          phone: finalShipToPhone,
+          address: finalShipToAddress,
+          city: finalShipToCity,
+          state: finalShipToState,
+        },
 
-      // Additional invoice metadata
-      subtotal: subtotal,                   // without courier
-      courierCharge: courier,
-      salesperson: selectedSP?.name || '',
-      referenceNo: referenceNo || '',
-      invoiceDate: date || new Date().toISOString(),
-    };
+        // Additional invoice metadata
+        subtotal: subtotal,                   // original items total
+        discount: discountAmount,             // 🆕 discount field
+        courierCharge: courier,
+        salesperson: selectedSP?.name || '',
+        referenceNo: referenceNo || '',
+        invoiceDate: date || new Date().toISOString(),
+      };
 
-    // 1. Create invoice with full details
-    const invoiceRes = await API.post("/api/invoices", payload);
-    const invoiceNumber = invoiceRes.data.invoice.invoiceNumber; // already in format RC2025-2026/001
+      // 1. Create invoice with full details
+      const invoiceRes = await API.post("/api/invoices", payload);
+      const invoiceNumber = invoiceRes.data.invoice.invoiceNumber; // already in format RC2025-2026/001
 
-    // 2. Reduce stock
-    await dispatch(reduceStock(cartItems)).unwrap();
+      // 2. Reduce stock
+      await dispatch(reduceStock(cartItems)).unwrap();
 
-    // 3. Navigate to InvoiceScreen with all data (including shipping address)
-    navigation.navigate('InvoiceScreen', {
-      invoiceNumber: invoiceNumber,
-      items: cartItems,
-      total: grandTotal,
-      paymentMode: selectedPaymentMode?.label || paymentMode,
-      date: date,
-      buyerName: customer?.type === 'shop'
-        ? `${customer.shopName} (${customer.name})`
-        : customer?.name,
-      buyerPhone: buyerPhone,
-      buyerAddress: customer?.address || '',
-      buyerCity: customer?.city || '',
-      buyerState: customer?.state || '',
-      courierCharge: courier,
-      salesperson: selectedSP?.name || '',
-      referenceNo: referenceNo,
-      shipToName: finalShipToName,
-      shipToPhone: finalShipToPhone,
-      shipToAddress: finalShipToAddress,
-      shipToCity: finalShipToCity,
-      shipToState: finalShipToState,
-    });
-  } catch (err) {
-    console.error('Error creating invoice or reducing stock:', err);
-    Alert.alert(
-      'Error',
-      err.message || 'Failed to confirm order. Please try again.',
-      [{ text: 'OK', onPress: () => setIsConfirming(false) }]
-    );
-  }
-};
+      // 3. Navigate to InvoiceScreen with all data (including discount)
+      navigation.navigate('InvoiceScreen', {
+        invoiceNumber: invoiceNumber,
+        items: cartItems,
+        total: grandTotal,                          // original subtotal (without discount)
+        paymentMode: selectedPaymentMode?.label || paymentMode,
+        date: date,
+        buyerName: customer?.type === 'shop'
+          ? `${customer.shopName} (${customer.name})`
+          : customer?.name,
+        buyerPhone: buyerPhone,
+        buyerAddress: customer?.address || '',
+        buyerCity: customer?.city || '',
+        buyerState: customer?.state || '',
+        courierCharge: courier,
+        discount: discountAmount,                  // 🆕
+        salesperson: selectedSP?.name || '',
+        referenceNo: referenceNo,
+        shipToName: finalShipToName,
+        shipToPhone: finalShipToPhone,
+        shipToAddress: finalShipToAddress,
+        shipToCity: finalShipToCity,
+        shipToState: finalShipToState,
+      });
+    } catch (err) {
+      console.error('Error creating invoice or reducing stock:', err);
+      Alert.alert(
+        'Error',
+        err.message || 'Failed to confirm order. Please try again.',
+        [{ text: 'OK', onPress: () => setIsConfirming(false) }]
+      );
+    }
+  };
 
-  const grandTotalWithCourier = (grandTotal || 0) + (parseFloat(courierCharge) || 0);
+  // 🆕 Computed values for the UI
+  const discountAmount = parseFloat(discount) || 0;
+  const subtotal = grandTotal || 0;
+  const afterDiscount = Math.max(subtotal - discountAmount, 0);
+  const courier = parseFloat(courierCharge) || 0;
+  const grandTotalWithCourier = afterDiscount + courier;
 
   const renderLookupResult = () => {
     if (lookupState === 'loading') {
@@ -506,15 +516,31 @@ useEffect(() => {
                 )}
               </View>
 
-              {/* Amount Paid */}
+              {/* 🆕 Subtotal (read-only) */}
               <View style={styles.fieldGroup}>
                 <View style={styles.labelRow}>
                   <IndianRupee size={14} color="#16a34a" strokeWidth={2} />
-                  <Text style={styles.label}> Amount Paid</Text>
+                  <Text style={styles.label}> Subtotal</Text>
                 </View>
                 <View style={styles.readonlyField}>
-                  <Text style={[styles.readonlyText, styles.amountText]}>₹{grandTotal?.toLocaleString('en-IN')}</Text>
+                  <Text style={[styles.readonlyText, styles.amountText]}>₹{subtotal.toLocaleString('en-IN')}</Text>
                 </View>
+              </View>
+
+              {/* 🆕 Discount */}
+              <View style={styles.fieldGroup}>
+                <View style={styles.labelRow}>
+                  <IndianRupee size={14} color="#16a34a" strokeWidth={2} />
+                  <Text style={styles.label}> Discount</Text>
+                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="0"
+                  placeholderTextColor="#bbb"
+                  keyboardType="numeric"
+                  value={discount}
+                  onChangeText={setDiscount}
+                />
               </View>
 
               {/* Invoice Date */}
@@ -617,10 +643,27 @@ useEffect(() => {
                 <TextInput style={styles.input} placeholder="e.g. 80" placeholderTextColor="#bbb" keyboardType="numeric" value={courierCharge} onChangeText={setCourierCharge} />
               </View>
 
-              {/* Grand Total */}
+              {/* 🆕 Grand Total Preview – with discount breakdown */}
               <View style={styles.totalPreview}>
-                <Text style={styles.totalPreviewLabel}>Grand Total (incl. courier)</Text>
-                <Text style={styles.totalPreviewValue}>₹{grandTotalWithCourier.toLocaleString('en-IN')}</Text>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>Subtotal</Text>
+                  <Text style={styles.summaryValue}>₹{subtotal.toLocaleString('en-IN')}</Text>
+                </View>
+                {discountAmount > 0 && (
+                  <View style={styles.summaryRow}>
+                    <Text style={styles.summaryLabel}>Discount</Text>
+                    <Text style={[styles.summaryValue, { color: '#16a34a' }]}>- ₹{discountAmount.toLocaleString('en-IN')}</Text>
+                  </View>
+                )}
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>Courier Charge</Text>
+                  <Text style={styles.summaryValue}>₹{courier.toLocaleString('en-IN')}</Text>
+                </View>
+                <View style={styles.divider} />
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryTotalLabel}>Grand Total</Text>
+                  <Text style={styles.summaryTotalValue}>₹{grandTotalWithCourier.toLocaleString('en-IN')}</Text>
+                </View>
               </View>
             </View>
 
@@ -809,7 +852,13 @@ useEffect(() => {
               <Divider />
               <Row label="Salesperson" value={selectedSP?.name || '—'} />
               <Divider />
-              <Row label="Courier" value={`₹${parseFloat(courierCharge) || 0}`} />
+              <Row label="Courier" value={`₹${courier}`} />
+              {discountAmount > 0 && (
+                <>
+                  <Divider />
+                  <Row label="Discount" value={`₹${discountAmount}`} />
+                </>
+              )}
               <Divider />
               <Row label="Grand Total" value={`₹${grandTotalWithCourier.toLocaleString('en-IN')}`} valueStyle={styles.amountText} />
             </View>

@@ -23,57 +23,88 @@ import styles from './OrderCartStyle';
 import Header from '../../components/Header';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// ─── Memoised Product Row Component ─────────────────────────────
-const ProductRow = React.memo(({ item, onUpdateQty }) => {
-  const price = Number(item.retailerPrice) || 0;
+// ─── Price Type Selector (Horizontal Buttons) ─────────────────
+const PriceTypeSelector = ({ priceType, onSelectPriceType }) => {
+  const options = [
+    { label: 'Retailer', value: 'retailerPrice' },
+    { label: 'Distributor', value: 'distributorPrice' },
+    { label: 'Walk‑in', value: 'walkinPrice' },
+    { label: 'MRP', value: 'mrp' },
+  ];
+  return (
+    <View style={styles.priceSelectorRow}>
+      {options.map(opt => (
+        <TouchableOpacity
+          key={opt.value}
+          style={[
+            styles.priceOption,
+            priceType === opt.value && styles.priceOptionActive,
+          ]}
+          onPress={() => onSelectPriceType(opt.value)}
+        >
+          <Text
+            style={[
+              styles.priceOptionText,
+              priceType === opt.value && styles.priceOptionTextActive,
+            ]}
+          >
+            {opt.label}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+};
+
+// ─── Memoised Product Row Component (receives price prop) ─────
+const ProductRow = React.memo(({ item, onUpdateQty, price }) => {
   const stock = Number(item.currentStock) || 0;
   return (
-   
-      <View style={styles.card}>
-        <View style={styles.cardRow}>
-          <View style={styles.imageBox}>
-            {item.image ? (
-              <Image source={{ uri: item.image }} style={styles.productImage} />
-            ) : (
-              <View
-                style={[
-                  styles.productImage,
-                  {
-                    backgroundColor: '#f0f0f0',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  },
-                ]}
-              >
-                <Text style={{ fontSize: 10, color: '#aaa' }}>No Image</Text>
-              </View>
-            )}
-          </View>
-          <View style={styles.infoContainer}>
-            <Text style={styles.productName}>{item.name}</Text>
-            <Text style={styles.sku}>SKU: {item.sku}</Text>
-            <Text style={styles.price}>₹{price.toLocaleString('en-IN')}</Text>
-            <Text style={styles.moqText}>Stock: {stock} units</Text>
-          </View>
-          <View style={styles.stepperBtn}>
-            <View style={styles.qtyBox}>
-              <TouchableOpacity
-                style={styles.qtyBtn}
-                onPress={() => onUpdateQty(item.id, 'dec')}
-              >
-                <Text>-</Text>
-              </TouchableOpacity>
-              <Text style={styles.qtyText}>{item.qty}</Text>
-              <TouchableOpacity
-                style={styles.qtyBtn}
-                onPress={() => onUpdateQty(item.id, 'inc')}
-              >
-                <Text>+</Text>
-              </TouchableOpacity>
+    <View style={styles.card}>
+      <View style={styles.cardRow}>
+        <View style={styles.imageBox}>
+          {item.image ? (
+            <Image source={{ uri: item.image }} style={styles.productImage} />
+          ) : (
+            <View
+              style={[
+                styles.productImage,
+                {
+                  backgroundColor: '#f0f0f0',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                },
+              ]}
+            >
+              <Text style={{ fontSize: 10, color: '#aaa' }}>No Image</Text>
             </View>
+          )}
+        </View>
+        <View style={styles.infoContainer}>
+          <Text style={styles.productName}>{item.name}</Text>
+          <Text style={styles.sku}>SKU: {item.sku}</Text>
+          <Text style={styles.price}>₹{price.toLocaleString('en-IN')}</Text>
+          <Text style={styles.moqText}>Stock: {stock} units</Text>
+        </View>
+        <View style={styles.stepperBtn}>
+          <View style={styles.qtyBox}>
+            <TouchableOpacity
+              style={styles.qtyBtn}
+              onPress={() => onUpdateQty(item.id, 'dec')}
+            >
+              <Text>-</Text>
+            </TouchableOpacity>
+            <Text style={styles.qtyText}>{item.qty}</Text>
+            <TouchableOpacity
+              style={styles.qtyBtn}
+              onPress={() => onUpdateQty(item.id, 'inc')}
+            >
+              <Text>+</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
+    </View>
   );
 });
 
@@ -85,6 +116,7 @@ const OrderCart = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [cart, setCart] = useState([]);
+  const [priceType, setPriceType] = useState('retailerPrice'); // NEW: selected price field
   const isMounted = useRef(true);
   const hasInitialized = useRef(false);
 
@@ -124,7 +156,7 @@ const OrderCart = ({ navigation }) => {
     return map;
   }, [invoices]);
 
-  // Initial cart build (once)
+  // Initial cart build – store ALL price fields
   useEffect(() => {
     if (!products?.length) return;
     if (hasInitialized.current) return;
@@ -137,6 +169,7 @@ const OrderCart = ({ navigation }) => {
         sku: p.sku ?? '-',
         retailerPrice: Number(p.retailerPrice) || 0,
         distributorPrice: Number(p.distributorPrice) || 0,
+        walkinPrice: Number(p.walkinPrice) || 0,
         mrp: Number(p.mrp) || 0,
         qty: 0,
         moq,
@@ -148,7 +181,7 @@ const OrderCart = ({ navigation }) => {
     hasInitialized.current = true;
   }, [products, soldMap]);
 
-  // Fast quantity update (only changes one item)
+  // Fast quantity update
   const updateQty = useCallback((id, type) => {
     setCart(prevCart => {
       const index = prevCart.findIndex(item => item.id === id);
@@ -177,10 +210,15 @@ const OrderCart = ({ navigation }) => {
     );
   }, [cart, searchQuery]);
 
+  // Total amount – uses the selected price type
   const totalAmount = useMemo(() => {
-    return cart.reduce((sum, item) => sum + item.retailerPrice * item.qty, 0);
-  }, [cart]);
+    return cart.reduce((sum, item) => {
+      const unitPrice = item[priceType] || 0;
+      return sum + unitPrice * item.qty;
+    }, 0);
+  }, [cart, priceType]);
 
+  // Place order – uses the current price type for each item
   const placeOrder = async () => {
     const orderedItems = cart
       .filter(item => item.qty > 0)
@@ -188,7 +226,7 @@ const OrderCart = ({ navigation }) => {
         productId: item.id,
         name: item.name,
         qty: item.qty,
-        price: item.retailerPrice,
+        price: item[priceType] || 0, // ✅ use selected price
       }));
     if (orderedItems.length === 0) {
       Alert.alert('Empty Order', 'Please add at least one item.');
@@ -227,6 +265,8 @@ const OrderCart = ({ navigation }) => {
       <View style={[styles.container, { flex: 1 }]}>
         <Header title="Order Cart" />
 
+        {/* Price Type Selector */}
+
         {/* Search Bar */}
         <View style={styles.wrapper}>
           <View style={styles.inputBox}>
@@ -259,6 +299,11 @@ const OrderCart = ({ navigation }) => {
               found
             </Text>
           )}
+
+          <PriceTypeSelector
+            priceType={priceType}
+            onSelectPriceType={setPriceType}
+          />
         </View>
 
         {/* Fast FlatList with memoised rows */}
@@ -266,9 +311,11 @@ const OrderCart = ({ navigation }) => {
           data={filteredCart}
           keyExtractor={item => item.id}
           renderItem={({ item }) => (
-            <View style={styles.content}>
-            <ProductRow item={item} onUpdateQty={updateQty} />
-            </View>
+            <ProductRow
+              item={item}
+              onUpdateQty={updateQty}
+              price={item[priceType] || 0} // ✅ pass the effective price
+            />
           )}
           initialNumToRender={20}
           maxToRenderPerBatch={30}

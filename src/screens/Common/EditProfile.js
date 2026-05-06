@@ -1,21 +1,18 @@
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  Image,
+  View, Text, TextInput, TouchableOpacity, ScrollView, Image, Alert
 } from "react-native";
 import styles from "./EditProfileStyle";
 import Header from "../../components/Header";
 import { launchImageLibrary } from "react-native-image-picker";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Camera, Store, Building2, User } from "lucide-react-native";
+import { updateProfile } from "../../services/features/profile/profileSlice";   // adjust if needed
+import { openCamera } from "../../utils/cameraHelper";
 
-// ─────────────────────────────────────────────
-// Role → initial form fields (from DB schema)
-// ─────────────────────────────────────────────
+// ============================================================
+// Role-based initial form values (same as before)
+// ============================================================
 const getInitialForm = (role, profileData, authUser) => {
   switch (role) {
     case "Distributor":
@@ -28,7 +25,6 @@ const getInitialForm = (role, profileData, authUser) => {
         address: profileData?.address || "",
         communicationAddress: profileData?.communicationAddress || "",
       };
-
     case "Retailer":
       return {
         shopName: profileData?.shopName || "",
@@ -36,7 +32,6 @@ const getInitialForm = (role, profileData, authUser) => {
         mobile: profileData?.mobile || authUser?.mobile || "",
         gps: profileData?.gps || "",
       };
-
     case "Executive":
       return {
         name: profileData?.name || authUser?.name || "",
@@ -46,8 +41,7 @@ const getInitialForm = (role, profileData, authUser) => {
         alternatePhone: profileData?.alternatePhone || "",
         address: profileData?.address || "",
       };
-
-    case "Agent":
+    case "Radnus":
       return {
         name: profileData?.name || authUser?.name || "",
         dob: profileData?.dob || "",
@@ -56,8 +50,8 @@ const getInitialForm = (role, profileData, authUser) => {
         altPhone: profileData?.altPhone || "",
         address: profileData?.address || "",
         altAddress: profileData?.altAddress || "",
+        photo: profileData?.photo || null,
       };
-
     default:
       return {
         name: authUser?.name || "",
@@ -67,9 +61,9 @@ const getInitialForm = (role, profileData, authUser) => {
   }
 };
 
-// ─────────────────────────────────────────────
-// Role → form field definitions
-// ─────────────────────────────────────────────
+// ============================================================
+// Role-based form sections (same as before)
+// ============================================================
 const getFormSections = (role) => {
   switch (role) {
     case "Distributor":
@@ -79,45 +73,24 @@ const getFormSections = (role) => {
           fields: [
             { key: "businessName", label: "Business Name", editable: true },
             { key: "mobile", label: "Mobile Number", editable: false },
-            {
-              key: "alternateMobile",
-              label: "Alternate Mobile",
-              editable: true,
-              keyboardType: "phone-pad",
-            },
+            { key: "alternateMobile", label: "Alternate Mobile", editable: true, keyboardType: "phone-pad" },
           ],
         },
         {
           title: "Registration",
           fields: [
-            {
-              key: "gst",
-              label: "GST Number",
-              editable: true,
-              autoCapitalize: "characters",
-            },
+            { key: "gst", label: "GST Number", editable: true, autoCapitalize: "characters" },
             { key: "msme", label: "MSME Number", editable: true },
           ],
         },
         {
           title: "Address",
           fields: [
-            {
-              key: "address",
-              label: "Business Address",
-              editable: true,
-              multiline: true,
-            },
-            {
-              key: "communicationAddress",
-              label: "Communication Address",
-              editable: true,
-              multiline: true,
-            },
+            { key: "address", label: "Business Address", editable: true, multiline: true },
+            { key: "communicationAddress", label: "Communication Address", editable: true, multiline: true },
           ],
         },
       ];
-
     case "Retailer":
       return [
         {
@@ -135,7 +108,6 @@ const getFormSections = (role) => {
           ],
         },
       ];
-
     case "Executive":
       return [
         {
@@ -150,12 +122,7 @@ const getFormSections = (role) => {
           title: "Contact Details",
           fields: [
             { key: "phone", label: "Phone Number", editable: false, keyboardType: "phone-pad" },
-            {
-              key: "alternatePhone",
-              label: "Alternate Phone",
-              editable: true,
-              keyboardType: "phone-pad",
-            },
+            { key: "alternatePhone", label: "Alternate Phone", editable: true, keyboardType: "phone-pad" },
           ],
         },
         {
@@ -165,7 +132,6 @@ const getFormSections = (role) => {
           ],
         },
       ];
-
     case "Agent":
       return [
         {
@@ -180,12 +146,7 @@ const getFormSections = (role) => {
           title: "Contact Details",
           fields: [
             { key: "phone", label: "Phone Number", editable: false, keyboardType: "phone-pad" },
-            {
-              key: "altPhone",
-              label: "Alternate Phone",
-              editable: true,
-              keyboardType: "phone-pad",
-            },
+            { key: "altPhone", label: "Alternate Phone", editable: true, keyboardType: "phone-pad" },
           ],
         },
         {
@@ -196,7 +157,6 @@ const getFormSections = (role) => {
           ],
         },
       ];
-
     default:
       return [
         {
@@ -211,101 +171,90 @@ const getFormSections = (role) => {
   }
 };
 
-
-const PHOTO_ROLES = ["Executive", "Agent", "Retailer"];
-
 const EditProfile = ({ navigation }) => {
-  // Adjust redux slice paths as needed
+  const dispatch = useDispatch();
   const authUser = useSelector((state) => state.auth?.user);
   const profileData = useSelector((state) => state.profile?.data);
   const role = authUser?.role || "Distributor";
 
   const [profileImage, setProfileImage] = useState(
-    profileData?.photo ||
-    profileData?.shopPhoto ||
-    null
+    profileData?.photo || profileData?.shopPhoto || null
   );
-
-  const [form, setForm] = useState(
-    getInitialForm(role, profileData, authUser)
-  );
+  const [imageToUpload, setImageToUpload] = useState(null);
+  const [form, setForm] = useState(getInitialForm(role, profileData, authUser));
 
   const sections = getFormSections(role);
-  const showPhoto = PHOTO_ROLES.includes(role);
 
-  const onChange = (key, value) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
-  };
+  const onChange = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
-  const pickImage = () => {
-    launchImageLibrary({ mediaType: "photo", quality: 0.8 }, (response) => {
-      if (!response.didCancel && response.assets) {
-        setProfileImage(response.assets[0].uri);
+  const pickFromGallery = () => {
+    launchImageLibrary({ mediaType: "photo", quality: 0.8 }, response => {
+      if (!response.didCancel && response.assets?.length > 0) {
+        const asset = response.assets[0];
+        setProfileImage(asset.uri);
+        setImageToUpload({
+          uri: asset.uri,
+          type: asset.type || "image/jpeg",
+          name: asset.fileName || `gallery_${Date.now()}.jpg`,
+        });
       }
     });
   };
 
-  const onSave = () => {
-    // 🔗 API CALL — dispatch update thunk with { role, form, profileImage }
-    // e.g. dispatch(updateProfile({ role, data: form, photo: profileImage }))
-    navigation.goBack();
+  const pickFromCamera = () => {
+    openCamera(image => {
+      setProfileImage(image.uri);
+      setImageToUpload(image); // { uri, type, name }
+    });
   };
 
-  // Avatar icon by role
-  const AvatarIcon = role === "Retailer"
-    ? <Store size={28} color="#D32F2F" />
-    : role === "Distributor"
-    ? <Building2 size={28} color="#D32F2F" />
+  const handlePhotoOptions = () => {
+    Alert.alert("Profile Photo", "Choose from...", [
+      { text: "Camera", onPress: pickFromCamera },
+      { text: "Gallery", onPress: pickFromGallery },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  };
+
+  const onSave = async () => {
+    try {
+      await dispatch(updateProfile({ role, data: form, photo: imageToUpload })).unwrap();
+      Alert.alert("Success", "Profile updated!");
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert("Error", error.message || "Update failed");
+    }
+  };
+
+  const AvatarIcon = role === "Retailer" ? <Store size={28} color="#D32F2F" />
+    : role === "Distributor" ? <Building2 size={28} color="#D32F2F" />
     : <User size={28} color="#D32F2F" />;
 
   return (
     <View style={styles.container}>
       <Header title="Edit Profile" />
-
       <ScrollView contentContainerStyle={styles.content}>
-
-        {/* ── PHOTO / AVATAR ── */}
         <View style={styles.imageSection}>
-          <View style={styles.imageWrapper}>
-            {showPhoto ? (
-              <Image
-                source={
-                  profileImage
-                    ? { uri: profileImage }
-                    : require("../../assets/logo/radnus-logo.png")
-                }
-                style={styles.profileImage}
-              />
+          <TouchableOpacity style={styles.imageWrapper} onPress={handlePhotoOptions}>
+            {profileImage ? (
+              <Image source={{ uri: profileImage }} style={styles.profileImage} />
             ) : (
-              // Distributor: icon avatar (no photo upload needed)
-              <View style={styles.iconAvatar}>
-                {AvatarIcon}
-              </View>
+              <View style={styles.iconAvatar}>{AvatarIcon}</View>
             )}
-
-            {showPhoto && (
-              <TouchableOpacity style={styles.cameraButton} onPress={pickImage}>
-                <Camera size={16} color="#FFF" />
-              </TouchableOpacity>
-            )}
-          </View>
-
-          {showPhoto && (
-            <Text style={styles.imageHint}>Tap camera to change photo</Text>
-          )}
-
-          {/* Role badge */}
+            <View style={styles.cameraButton}>
+              <Camera size={16} color="#FFF" />
+            </View>
+          </TouchableOpacity>
+          <Text style={styles.imageHint}>Tap to change photo</Text>
           <View style={styles.roleBadge}>
             <Text style={styles.roleBadgeText}>{role}</Text>
           </View>
         </View>
 
-        {/* ── DYNAMIC FORM SECTIONS ── */}
         {sections.map((section, sIdx) => (
           <View key={sIdx} style={styles.card}>
             <Text style={styles.sectionTitle}>{section.title}</Text>
-
-            {section.fields.map((field) => (
+            {section.fields.map(field => (
               <View key={field.key}>
                 <Label text={field.label} disabled={!field.editable} />
                 <TextInput
@@ -315,7 +264,7 @@ const EditProfile = ({ navigation }) => {
                     field.multiline && styles.multilineInput,
                   ]}
                   value={form[field.key] ?? ""}
-                  onChangeText={(v) => onChange(field.key, v)}
+                  onChangeText={v => onChange(field.key, v)}
                   editable={field.editable !== false}
                   keyboardType={field.keyboardType || "default"}
                   autoCapitalize={field.autoCapitalize || "sentences"}
@@ -327,20 +276,14 @@ const EditProfile = ({ navigation }) => {
           </View>
         ))}
 
-        {/* ── ACTIONS ── */}
         <View style={styles.actionRow}>
-          <TouchableOpacity
-            style={styles.cancelBtn}
-            onPress={() => navigation.goBack()}
-          >
+          <TouchableOpacity style={styles.cancelBtn} onPress={() => navigation.goBack()}>
             <Text style={styles.cancelText}>Cancel</Text>
           </TouchableOpacity>
-
           <TouchableOpacity style={styles.saveBtn} onPress={onSave}>
             <Text style={styles.saveText}>Save Changes</Text>
           </TouchableOpacity>
         </View>
-
       </ScrollView>
     </View>
   );
@@ -351,3 +294,6 @@ const Label = ({ text, disabled }) => (
 );
 
 export default EditProfile;
+
+
+

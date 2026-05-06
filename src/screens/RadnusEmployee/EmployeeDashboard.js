@@ -15,7 +15,7 @@ import Icons from '../../components/Icon';
 import { fetchProducts } from '../../services/features/products/productSlice';
 import api from '../../services/API/api';
 
-// ─── Helper functions (unchanged) ─────────────────────────────────
+// ─── Helper functions (unchanged) ────────────────────────────────
 const formatValue = num => {
   const value = Number(num);
   if (isNaN(value) || value === undefined) return '₹0';
@@ -41,6 +41,7 @@ const getId = obj => {
   if (!obj) return '';
   if (typeof obj === 'string') return obj;
   if (obj.$oid) return obj.$oid;
+  if (obj._id) return getId(obj._id);
   return obj;
 };
 
@@ -74,6 +75,8 @@ const EmployeeDashboard = ({ navigation }) => {
   const [todaySalesLoading, setTodaySalesLoading] = useState(true);
   const [totalStockValue, setTotalStockValue] = useState(0);
   const [stockValueLoading, setStockValueLoading] = useState(true);
+  const [totalItemCostValue, setTotalItemCostValue] = useState(0);   // ✅ NEW
+  const [itemCostLoading, setItemCostLoading] = useState(true);      // ✅ NEW
   const [totalInward, setTotalInward] = useState(0);
   const [totalOutward, setTotalOutward] = useState(0);
   const [inwardOutwardLoading, setInwardOutwardLoading] = useState(true);
@@ -85,7 +88,7 @@ const EmployeeDashboard = ({ navigation }) => {
     }
   }, [dispatch, products.length]);
 
-  // ✅ MODIFIED: Filter by logged-in user's name AND invoice status must be 'completed' (not 'draft')
+  // Fetch today's completed sales for the logged-in user
   const fetchTodaySales = useCallback(async () => {
     setTodaySalesLoading(true);
     try {
@@ -96,7 +99,6 @@ const EmployeeDashboard = ({ navigation }) => {
       const total = invoices
         .filter(inv => inv?.status === 'completed')
         .reduce((sum, inv) => sum + (inv.totalAmount || 0), 0);
-
       setTodaySales(total);
     } catch (error) {
       console.error("Failed to fetch today's sales:", error);
@@ -110,8 +112,9 @@ const EmployeeDashboard = ({ navigation }) => {
     if (products.length === 0) return;
     setStockValueLoading(true);
     setInwardOutwardLoading(true);
+    setItemCostLoading(true);   // ✅ NEW
     try {
-      // Fetch all invoices, but we'll filter for 'completed' status
+      // Fetch all invoices (only completed ones are used inside)
       const response = await api.get('/api/invoices?filter=all');
       const allInvoices = (response.data || []).filter(
         inv => inv.status !== 'draft',
@@ -126,18 +129,20 @@ const EmployeeDashboard = ({ navigation }) => {
         const pid = getId(product._id);
         const moq = getNum(product, 'moq') || 0;
         const stock = getNum(product, 'stock') || moq;
-        const price = getNum(product, 'walkinPrice');
+        const walkinPrice = getNum(product, 'walkinPrice');
+        const itemCost = getNum(product, 'itemCost');    // ✅ NEW: cost price
         const createdAt = parseDate(product.createdAt);
         if (isSameDay(createdAt, today)) {
           todayInward += moq;
         }
         stockMap[pid] = {
           currentStock: stock,
-          walkinPrice: price,
+          walkinPrice: walkinPrice,
+          itemCost: itemCost,                           // ✅ NEW
         };
       });
 
-      // ✅ Only process completed invoices
+      // Process all completed invoices to deduct sold quantities
       allInvoices.forEach(invoice => {
         const invDate = parseDate(invoice.createdAt);
         const isToday = isSameDay(invDate, today);
@@ -154,22 +159,29 @@ const EmployeeDashboard = ({ navigation }) => {
       });
 
       let totalValue = 0;
+      let totalCostValue = 0;   // ✅ NEW
       Object.values(stockMap).forEach(item => {
-        const val = (item.currentStock || 0) * (item.walkinPrice || 0);
-        totalValue += isNaN(val) ? 0 : val;
+        const current = item.currentStock || 0;
+        const value = current * (item.walkinPrice || 0);
+        const cost = current * (item.itemCost || 0);    // ✅ NEW
+        totalValue += isNaN(value) ? 0 : value;
+        totalCostValue += isNaN(cost) ? 0 : cost;
       });
 
       setTotalStockValue(totalValue);
+      setTotalItemCostValue(totalCostValue);            // ✅ NEW
       setTotalInward(todayInward);
       setTotalOutward(todayOutward);
     } catch (error) {
       console.error('Failed to compute data:', error);
       setTotalStockValue(0);
+      setTotalItemCostValue(0);                         // ✅ NEW
       setTotalInward(0);
       setTotalOutward(0);
     } finally {
       setStockValueLoading(false);
       setInwardOutwardLoading(false);
+      setItemCostLoading(false);                        // ✅ NEW
     }
   }, [products]);
 
@@ -194,6 +206,10 @@ const EmployeeDashboard = ({ navigation }) => {
 
   const handleStockValuePress = () => {
     navigation.navigate('StockVisibility');
+  };
+
+  const handleItemCostValuePress = () => {            // ✅ NEW
+    navigation.navigate('StockVisibility');           // Reuse same screen (shows both values)
   };
 
   const handleInwardPress = () => {
@@ -248,7 +264,7 @@ const EmployeeDashboard = ({ navigation }) => {
             label="Today Sales"
             onPress={handleTodaySalesPress}
           />
-          <StatCard
+          {/* <StatCard
             icon={
               <Icons
                 name="Package"
@@ -263,11 +279,32 @@ const EmployeeDashboard = ({ navigation }) => {
               stockValueLoading ? (
                 <ActivityIndicator size="small" color="#D32F2F" />
               ) : (
-                formatValue(totalStockValue)
+                `₹${Math.round(totalStockValue).toLocaleString('en-IN')}`
               )
             }
-            label="Stock Value"
+            label="Stock Value (MRP)"
             onPress={handleStockValuePress}
+          /> */}
+          <StatCard
+            icon={
+              <Icons
+                name="Coins"
+                size={20}
+                color="#F9A825"
+                circleSize={50}
+                withCircle
+                backgroundColor="#fff3e0"
+              />
+            }
+            value={
+              itemCostLoading ? (
+                <ActivityIndicator size="small" color="#F9A825" />
+              ) : (
+                `₹${Math.round(totalItemCostValue).toLocaleString('en-IN')}`
+              )
+            }
+            label="Item Cost Total"
+            onPress={handleItemCostValuePress}
           />
           <StatCard
             icon={

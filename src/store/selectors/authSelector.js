@@ -1,15 +1,4 @@
 export const selectAuthState = (state) => {
-  // // Check for admin auth first
-  // if (state.adminAuth?.token) {
-  //   return {
-  //     token: state.adminAuth.token,
-  //     role: 'Admin',
-  //     user: state.adminAuth.admin,
-  //     loading: state.adminAuth.loading || false,
-  //     error: state.adminAuth.error || null,
-  //     isCheckingAuth: false,
-  //   };
-  // }
 
     // ✅ Check for admin auth first
   if (state.adminAuth?.token && state.adminAuth?.admin) {

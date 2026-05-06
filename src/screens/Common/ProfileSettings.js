@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
 import styles from "./ProfileSettingsStyle";
 import Header from "../../components/Header";
 import { useDispatch, useSelector } from "react-redux";
+import { fetchProfile } from "../../services/features/profile/profileSlice"; 
 import { globalLogout } from "../../store/actions/globalLogout";
 import {
   User,
@@ -29,6 +30,7 @@ import {
   Calendar,
   Navigation,
 } from "lucide-react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 // ─────────────────────────────────────────────
 // Role-based profile header config
@@ -75,7 +77,7 @@ const getProfileHeader = (role, profileData, authUser) => {
         status: profileData?.status,
       };
 
-    case "Agent":
+    case "Radnus":
       return {
         name: profileData?.name || authUser?.name || "—",
         lines: [
@@ -85,8 +87,7 @@ const getProfileHeader = (role, profileData, authUser) => {
         ].filter(Boolean),
         photo: profileData?.photo || null,
         status: profileData?.status,
-      };
-
+      }
     default:
       return {
         name: authUser?.name || "—",
@@ -292,6 +293,14 @@ const ProfileSettings = ({ navigation }) => {
   const authUser = useSelector((state) => state.auth?.user);
   const profileData = useSelector((state) => state.profile?.data);
   const role = authUser?.role || "Distributor"; // fallback for safety
+
+  console.log("--- profile image data ---", profileData?.photo);
+    // Refresh profile every time screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(fetchProfile());
+    }, [dispatch])
+  );
 
   const { name, lines, photo, status } = getProfileHeader(
     role,

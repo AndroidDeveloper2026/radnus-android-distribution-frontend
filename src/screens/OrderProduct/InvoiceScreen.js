@@ -3,18 +3,18 @@ import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FileDown } from 'lucide-react-native';
 import RNPrint from 'react-native-print';
-import { useNavigation } from '@react-navigation/native'; // 👈 ADD THIS
+import { useNavigation } from '@react-navigation/native';
 
 import styles from './InvoiceStyle';
 import Header from '../../components/Header';
 
 const InvoiceScreen = ({ route }) => {
-  const navigation = useNavigation(); // 👈 ADD THIS
+  const navigation = useNavigation();
 
   const {
     invoiceNumber,
     items,
-    total,
+    total,                     // original subtotal (without discount/courier)
     paymentMode,
     date,
     buyerName = '—',
@@ -23,11 +23,13 @@ const InvoiceScreen = ({ route }) => {
     buyerCity = '',
     buyerState = '',
     courierCharge = 80,
+    discount = 0,              // 🆕 discount extracted from params
     salesperson = '',
     referenceNo = '',
   } = route.params;
 
-  const grandTotal = total + courierCharge;
+  const discountedSubtotal = total - discount;                // after discount
+  const grandTotal = discountedSubtotal + courierCharge;
   const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
 
   // Buyer display helpers
@@ -114,20 +116,30 @@ const InvoiceScreen = ({ route }) => {
         const amount = item.qty * price;
         return `
         <tr>
-          <td style="text-align:center;padding:6px;border:1px solid #000">${
-            index + 1
-          }</td>
+          <td style="text-align:center;padding:6px;border:1px solid #000">${index + 1}</td>
           <td style="padding:6px;border:1px solid #000">${item.name}</td>
           <td style="text-align:center;padding:6px;border:1px solid #000">-</td>
-          <td style="text-align:center;padding:6px;border:1px solid #000">${
-            item.qty
-          } NOS</td>
+          <td style="text-align:center;padding:6px;border:1px solid #000">${item.qty} NOS</td>
           <td style="text-align:right;padding:6px;border:1px solid #000">&#8377;${price}</td>
           <td style="text-align:center;padding:6px;border:1px solid #000">NOS</td>
           <td style="text-align:right;padding:6px;border:1px solid #000">&#8377;${amount}.00</td>
         </tr>`;
       })
       .join('');
+
+    // Discount row (only if >0)
+    const discountRow = discount > 0
+      ? `
+      <tr>
+        <td style="border:1px solid #000;padding:6px"></td>
+        <td style="border:1px solid #000;padding:6px">DISCOUNT</td>
+        <td style="border:1px solid #000;padding:6px"></td>
+        <td style="border:1px solid #000;padding:6px"></td>
+        <td style="border:1px solid #000;padding:6px"></td>
+        <td style="border:1px solid #000;padding:6px"></td>
+        <td style="border:1px solid #000;padding:6px;text-align:right">&#8377;${discount}.00</td>
+      </tr>`
+      : '';
 
     return `
     <html>
@@ -159,9 +171,8 @@ const InvoiceScreen = ({ route }) => {
         <p class="company-name">RADNUS COMMUNICATION</p>
         <p class="company-address">No.242/44, MG Road, Sinnaya Plaza, Near Fish Market</p>
         <p class="company-address">Puducherry - 605001</p>
-        <p class="company-address">State Name: Puducherry, Code: 34</p>
+        <p class="company-address">State Name: Puducherry, Code: 605001</p>
         <p class="company-address">E-Mail: sundar12134@gmail.com</p>
-        <p class="company-address"><b>GST: 34AAHFR8679B</b></p>
       </div>
       <div style="text-align:center;font-weight:bold;font-size:13px;padding:6px;border-bottom:1px solid #000;">INVOICE</div>
       <div class="two-col">
@@ -178,9 +189,7 @@ const InvoiceScreen = ({ route }) => {
         <div class="col-right">
           <table>
             <tr><td style="border:1px solid #000;padding:4px"><b>Invoice No.</b></td><td style="border:1px solid #000;padding:4px">${invoiceNumber}</td></tr>
-            <tr><td style="border:1px solid #000;padding:4px"><b>Dated</b></td><td style="border:1px solid #000;padding:4px">${new Date(
-              date,
-            ).toDateString()}</td></tr>
+            <tr><td style="border:1px solid #000;padding:4px"><b>Dated</b></td><td style="border:1px solid #000;padding:4px">${new Date(date).toDateString()}</td></tr>
             <tr><td style="border:1px solid #000;padding:4px"><b>Delivery Note</b></td><td style="border:1px solid #000;padding:4px"></td></tr>
             <tr><td style="border:1px solid #000;padding:4px"><b>Mode/Terms of Payment</b></td><td style="border:1px solid #000;padding:4px">${paymentMode.toUpperCase()}</td></tr>
             <tr><td style="border:1px solid #000;padding:4px"><b>Salesperson</b></td><td style="border:1px solid #000;padding:4px">${salesperson}</td></tr>
@@ -206,6 +215,7 @@ const InvoiceScreen = ({ route }) => {
         </thead>
         <tbody>
           ${rows}
+          ${discountRow}
           <tr>
             <td style="border:1px solid #000;padding:6px"></td>
             <td style="border:1px solid #000;padding:6px">COURIER CHARGE</td>
@@ -244,15 +254,12 @@ const InvoiceScreen = ({ route }) => {
       await RNPrint.print({ html });
 
       navigation.navigate('MainTabs', {
-        screen: 'Dashboard', // this is the tab name
+        screen: 'Dashboard',
         params: {
-          role: 'Radnus', // IMPORTANT (must match your ROLE_TABS key)
+          role: 'Radnus',
         },
       });
-
-      
     } catch (error) {
-      
       Alert.alert('Error', error.message || 'Failed to print. Try again.');
     }
   };
@@ -276,12 +283,12 @@ const InvoiceScreen = ({ route }) => {
               Near Fish Market, Puducherry - 605001
             </Text>
             <Text style={styles.companyText}>
-              State Name: Puducherry, Code: 34
+              State Name: Puducherry, Code: 605001
             </Text>
             <Text style={styles.companyText}>
               E-Mail: sundar12134@gmail.com
             </Text>
-            <Text style={styles.companyTextBold}>GST: 34AAHFR8679B</Text>
+           
           </View>
 
           {/* INVOICE TITLE */}
@@ -357,24 +364,29 @@ const InvoiceScreen = ({ route }) => {
                   {index + 1}
                 </Text>
                 <Text style={[styles.td, { flex: 2 }]}>{item.name}</Text>
-                <Text style={[styles.td, { flex: 0.8, textAlign: 'center' }]}>
-                  -
-                </Text>
+                <Text style={[styles.td, { flex: 0.8, textAlign: 'center' }]}>-</Text>
                 <Text style={[styles.td, { flex: 0.8, textAlign: 'center' }]}>
                   {item.qty} NOS
                 </Text>
-                <Text style={[styles.td, { flex: 0.8, textAlign: 'right' }]}>
-                  ₹{price}
-                </Text>
-                <Text style={[styles.td, { flex: 0.5, textAlign: 'center' }]}>
-                  NOS
-                </Text>
-                <Text style={[styles.td, { flex: 1, textAlign: 'right' }]}>
-                  ₹{amount}.00
-                </Text>
+                <Text style={[styles.td, { flex: 0.8, textAlign: 'right' }]}>₹{price}</Text>
+                <Text style={[styles.td, { flex: 0.5, textAlign: 'center' }]}>NOS</Text>
+                <Text style={[styles.td, { flex: 1, textAlign: 'right' }]}>₹{amount}.00</Text>
               </View>
             );
           })}
+
+          {/* DISCOUNT ROW */}
+          {discount > 0 && (
+            <View style={styles.tableRow}>
+              <Text style={[styles.td, { flex: 0.4 }]}></Text>
+              <Text style={[styles.td, { flex: 2 }]}>Discount</Text>
+              <Text style={[styles.td, { flex: 0.8 }]}></Text>
+              <Text style={[styles.td, { flex: 0.8 }]}></Text>
+              <Text style={[styles.td, { flex: 0.8 }]}></Text>
+              <Text style={[styles.td, { flex: 0.5 }]}></Text>
+              <Text style={[styles.td, { flex: 1, textAlign: 'right' }]}>₹{discount}.00</Text>
+            </View>
+          )}
 
           {/* COURIER ROW */}
           <View style={styles.tableRow}>
@@ -384,43 +396,23 @@ const InvoiceScreen = ({ route }) => {
             <Text style={[styles.td, { flex: 0.8 }]}></Text>
             <Text style={[styles.td, { flex: 0.8 }]}></Text>
             <Text style={[styles.td, { flex: 0.5 }]}></Text>
-            <Text style={[styles.td, { flex: 1, textAlign: 'right' }]}>
-              ₹{courierCharge}.00
-            </Text>
+            <Text style={[styles.td, { flex: 1, textAlign: 'right' }]}>₹{courierCharge}.00</Text>
           </View>
 
           {/* TOTAL ROW */}
           <View style={styles.tableRow}>
             <Text style={[styles.td, { flex: 0.4 }]}></Text>
-            <Text style={[styles.td, { flex: 2, fontWeight: 'bold' }]}>
-              Total
-            </Text>
+            <Text style={[styles.td, { flex: 2, fontWeight: 'bold' }]}>Total</Text>
             <Text style={[styles.td, { flex: 0.8 }]}></Text>
-            <Text
-              style={[
-                styles.td,
-                { flex: 0.8, textAlign: 'center', fontWeight: 'bold' },
-              ]}
-            >
-              {totalQty} NOS
-            </Text>
+            <Text style={[styles.td, { flex: 0.8, textAlign: 'center', fontWeight: 'bold' }]}>{totalQty} NOS</Text>
             <Text style={[styles.td, { flex: 0.8 }]}></Text>
             <Text style={[styles.td, { flex: 0.5 }]}></Text>
-            <Text
-              style={[
-                styles.td,
-                { flex: 1, textAlign: 'right', fontWeight: 'bold' },
-              ]}
-            >
-              ₹{grandTotal}.00
-            </Text>
+            <Text style={[styles.td, { flex: 1, textAlign: 'right', fontWeight: 'bold' }]}>₹{grandTotal}.00</Text>
           </View>
 
           {/* AMOUNT IN WORDS */}
           <View style={styles.amountWords}>
-            <Text style={styles.amountWordsLabel}>
-              Amount Chargeable (in words)
-            </Text>
+            <Text style={styles.amountWordsLabel}>Amount Chargeable (in words)</Text>
             <Text style={styles.amountWordsValue}>{grandTotalWords}</Text>
           </View>
 
@@ -428,8 +420,7 @@ const InvoiceScreen = ({ route }) => {
           <View style={styles.declaration}>
             <Text style={styles.declarationTitle}>Declaration</Text>
             <Text style={styles.declarationText}>
-              We declare that this invoice shows the actual price of the goods
-              described and that all particulars are true and correct.
+              We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.
             </Text>
           </View>
 

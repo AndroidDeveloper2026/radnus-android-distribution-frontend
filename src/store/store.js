@@ -18,6 +18,7 @@ import sessionReducer  from '../services/features/fse/sessionSlice';
 import invoiceReducer from '../services/features/retailer/invoiceSlice';
 import feedbackReducer from "../services/features/retailer/feedbackSlice";
 import activityReducer from '../services/features/activity/activitySlice';
+import profileReducer from "../services/features/profile/profileSlice";
 
 export const store = configureStore({
   reducer: {
@@ -40,5 +41,6 @@ export const store = configureStore({
     invoice: invoiceReducer,
     feedback: feedbackReducer,
     activity: activityReducer,
+    profile: profileReducer, 
   },
 });

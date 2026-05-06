@@ -196,6 +196,39 @@ const styles = StyleSheet.create({
     color: '#aaa',
     textAlign: 'center',
   },
+  // Price selector styles
+priceSelectorRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-around',
+  backgroundColor: '#fff',
+  paddingVertical: 8,
+  paddingHorizontal: 16,
+  marginTop: 8,
+  marginHorizontal: 16,
+  borderRadius: 30,
+  shadowColor: '#000',
+  shadowOpacity: 0.05,
+  shadowRadius: 4,
+  elevation: 2,
+},
+priceOption: {
+  paddingVertical: 6,
+  paddingHorizontal: 14,
+  borderRadius: 20,
+  backgroundColor: '#f5f5f5',
+},
+priceOptionActive: {
+  backgroundColor: '#D32F2F',
+},
+priceOptionText: {
+  fontSize: 12,
+  fontWeight: '600',
+  color: '#444',
+},
+priceOptionTextActive: {
+  color: '#fff',
+},
+
 });
 
 export default styles;
