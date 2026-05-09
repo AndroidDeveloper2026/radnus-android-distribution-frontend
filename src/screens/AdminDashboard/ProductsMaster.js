@@ -12,6 +12,7 @@ import Header from '../../components/Header';
 import { Plus, Search } from 'lucide-react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts } from '../../services/features/products/productSlice';
+import { fetchInvoices } from '../../services/features/retailer/invoiceSlice';
 import { deleteProduct } from '../../services/features/products/productSlice';
 import PopupModal from '../../components/PopupModal';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,6 +21,7 @@ const ProductMaster = ({ navigation }) => {
   const dispatch = useDispatch();
   const insets = useSafeAreaInsets();
   const products = useSelector(state => state.products.list);
+    const { data: invoices } = useSelector(state => state.invoice || { data: [] });
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
@@ -28,8 +30,18 @@ const ProductMaster = ({ navigation }) => {
 
   useEffect(() => {
     dispatch(fetchProducts());
+    dispatch(fetchInvoices("all"));
   }, [dispatch]);
 
+  // 🧮 Calculate current stock (same logic as HomeScreen)
+  const getCurrentStock = (productId, moq) => {
+    if (!invoices || invoices.length === 0) return moq;
+    const totalSold = invoices.reduce((sum, invoice) => {
+      const item = invoice.items?.find(i => i.productId === productId);
+      return sum + (item?.qty || 0);
+    }, 0);
+    return Math.max(0, moq - totalSold);
+  };
 
   const handleDelete = id => {
     setSelectedId(id);
@@ -94,7 +106,7 @@ const filteredProducts = useMemo(() => {
         </TouchableOpacity>
       </View>
 
-      <FlatList
+      {/* <FlatList
         data={filteredProducts}
         keyExtractor={(item, index) =>
           item?._id ? item._id.toString() : index.toString()
@@ -107,6 +119,35 @@ const filteredProducts = useMemo(() => {
           />
         )}
         contentContainerStyle={[ProductsMasterStyle.list,{ paddingBottom: insets.bottom + 20 }]}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={() => (
+          <View style={ProductsMasterStyle.emptyContainer}>
+            <Text style={ProductsMasterStyle.emptyText}>No Products Found</Text>
+          </View>
+        )}
+      /> */}
+
+      <FlatList
+        data={filteredProducts}
+        keyExtractor={(item, index) =>
+          item?._id ? item._id.toString() : index.toString()
+        }
+        renderItem={({ item }) => {
+          // 👇 compute live stock for each product
+          const currentStock = getCurrentStock(item._id, item.moq);
+          return (
+            <ProductCard
+              item={item}
+              currentStock={currentStock}      // 👈 pass to ProductCard
+              onEdit={() => navigation.navigate('EditProduct', { id: item._id })}
+              onDelete={() => handleDelete(item._id)}
+            />
+          );
+        }}
+        contentContainerStyle={[
+          ProductsMasterStyle.list,
+          { paddingBottom: insets.bottom + 20 }
+        ]}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={() => (
           <View style={ProductsMasterStyle.emptyContainer}>

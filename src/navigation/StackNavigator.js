@@ -65,6 +65,8 @@ import { selectAuthState } from '../store/selectors/authSelector';
 import InvoiceViewScreen from '../screens/OrderProduct/InvoiceViewScreen';
 import EmployeeDashboard from '../screens/RadnusEmployee/EmployeeDashboard';
 import ActivityLogScreen from '../screens/Common/ActivityLogScreen';
+import SalesReturnScreen from '../screens/Returns/SalesReturnScreen';
+import PurchaseReturnScreen from '../screens/Returns/PurchaseReturnScreen';
 
 const Stack = createStackNavigator();
 
@@ -85,8 +87,6 @@ const StackNavigator = () => {
   const isChecking = isCheckingAuth || isAdminChecking;
 
   const isLoggedIn = !!token && !!user;
-
-
 
   // Show splash screen while checking authentication
   if (isChecking) {
@@ -456,6 +456,18 @@ const StackNavigator = () => {
           <Stack.Screen
             name="Reports"
             component={Reports}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="SalesReturnScreen"
+            component={SalesReturnScreen}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="PurchaseReturnScreen"
+            component={PurchaseReturnScreen}
             options={{ headerShown: false }}
           />
         </>

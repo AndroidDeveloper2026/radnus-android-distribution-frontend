@@ -6,7 +6,7 @@ const GREEN = '#2E7D32';
 const RED = '#D32F2F';
 const GRAY = '#757575';
 
-const ProductCard = ({ item, onEdit, onDelete }) => {
+const ProductCard = ({ item, onEdit, onDelete, currentStock }) => {
   return (
     <View style={styles.card}>
       {/* TOP — image + actions */}
@@ -22,7 +22,9 @@ const ProductCard = ({ item, onEdit, onDelete }) => {
           </Text>
           <Text style={styles.sku}>SKU: {item.sku}</Text>
           <Text style={styles.vendor}>Vendor: {item.vendorName || '—'}</Text>
-          <Text style={styles.stockText}>Stock: {item.moq ?? 0}</Text>
+          {/* <Text style={styles.stockText}>Stock: {item.moq ?? 0}</Text> */}
+          <Text style={styles.stockText}>Stock:{currentStock ?? 0}</Text>
+
 
           {/* STATUS BADGE */}
           <View style={styles.statusBadge}>

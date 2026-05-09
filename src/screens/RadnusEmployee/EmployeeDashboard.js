@@ -75,8 +75,8 @@ const EmployeeDashboard = ({ navigation }) => {
   const [todaySalesLoading, setTodaySalesLoading] = useState(true);
   const [totalStockValue, setTotalStockValue] = useState(0);
   const [stockValueLoading, setStockValueLoading] = useState(true);
-  const [totalItemCostValue, setTotalItemCostValue] = useState(0);   // ✅ NEW
-  const [itemCostLoading, setItemCostLoading] = useState(true);      // ✅ NEW
+  const [totalItemCostValue, setTotalItemCostValue] = useState(0); // ✅ NEW
+  const [itemCostLoading, setItemCostLoading] = useState(true); // ✅ NEW
   const [totalInward, setTotalInward] = useState(0);
   const [totalOutward, setTotalOutward] = useState(0);
   const [inwardOutwardLoading, setInwardOutwardLoading] = useState(true);
@@ -112,7 +112,7 @@ const EmployeeDashboard = ({ navigation }) => {
     if (products.length === 0) return;
     setStockValueLoading(true);
     setInwardOutwardLoading(true);
-    setItemCostLoading(true);   // ✅ NEW
+    setItemCostLoading(true); // ✅ NEW
     try {
       // Fetch all invoices (only completed ones are used inside)
       const response = await api.get('/api/invoices?filter=all');
@@ -130,7 +130,7 @@ const EmployeeDashboard = ({ navigation }) => {
         const moq = getNum(product, 'moq') || 0;
         const stock = getNum(product, 'stock') || moq;
         const walkinPrice = getNum(product, 'walkinPrice');
-        const itemCost = getNum(product, 'itemCost');    // ✅ NEW: cost price
+        const itemCost = getNum(product, 'itemCost'); // ✅ NEW: cost price
         const createdAt = parseDate(product.createdAt);
         if (isSameDay(createdAt, today)) {
           todayInward += moq;
@@ -138,7 +138,7 @@ const EmployeeDashboard = ({ navigation }) => {
         stockMap[pid] = {
           currentStock: stock,
           walkinPrice: walkinPrice,
-          itemCost: itemCost,                           // ✅ NEW
+          itemCost: itemCost, // ✅ NEW
         };
       });
 
@@ -159,29 +159,29 @@ const EmployeeDashboard = ({ navigation }) => {
       });
 
       let totalValue = 0;
-      let totalCostValue = 0;   // ✅ NEW
+      let totalCostValue = 0; // ✅ NEW
       Object.values(stockMap).forEach(item => {
         const current = item.currentStock || 0;
         const value = current * (item.walkinPrice || 0);
-        const cost = current * (item.itemCost || 0);    // ✅ NEW
+        const cost = current * (item.itemCost || 0); // ✅ NEW
         totalValue += isNaN(value) ? 0 : value;
         totalCostValue += isNaN(cost) ? 0 : cost;
       });
 
       setTotalStockValue(totalValue);
-      setTotalItemCostValue(totalCostValue);            // ✅ NEW
+      setTotalItemCostValue(totalCostValue); // ✅ NEW
       setTotalInward(todayInward);
       setTotalOutward(todayOutward);
     } catch (error) {
       console.error('Failed to compute data:', error);
       setTotalStockValue(0);
-      setTotalItemCostValue(0);                         // ✅ NEW
+      setTotalItemCostValue(0); // ✅ NEW
       setTotalInward(0);
       setTotalOutward(0);
     } finally {
       setStockValueLoading(false);
       setInwardOutwardLoading(false);
-      setItemCostLoading(false);                        // ✅ NEW
+      setItemCostLoading(false); // ✅ NEW
     }
   }, [products]);
 
@@ -208,8 +208,9 @@ const EmployeeDashboard = ({ navigation }) => {
     navigation.navigate('StockVisibility');
   };
 
-  const handleItemCostValuePress = () => {            // ✅ NEW
-    navigation.navigate('StockVisibility');           // Reuse same screen (shows both values)
+  const handleItemCostValuePress = () => {
+    // ✅ NEW
+    navigation.navigate('StockVisibility'); // Reuse same screen (shows both values)
   };
 
   const handleInwardPress = () => {
@@ -428,6 +429,35 @@ const EmployeeDashboard = ({ navigation }) => {
           label="Central Stock"
           onPress={() => navigation.navigate('CentralStock')}
         />
+
+        <QuickAction
+          icon={
+            <Icons
+              name="RotateCcw"
+              size={20}
+              color="#ce7d21"
+              circleSize={40}
+              withCircle
+            />
+          }
+          label="Sales Return"
+          onPress={() => navigation.navigate('SalesReturnScreen')}
+        />
+
+        <QuickAction
+          icon={
+            <Icons
+              name="PackageX"
+              size={20}
+              color="#D32F2F"
+              circleSize={40}
+              withCircle
+            />
+          }
+          label="Purchase Return"
+          onPress={() => navigation.navigate('PurchaseReturnScreen')}
+        />
+
         <QuickAction
           icon={
             <Icons
