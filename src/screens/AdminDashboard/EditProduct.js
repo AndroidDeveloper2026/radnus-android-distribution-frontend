@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -10,7 +10,11 @@ import {
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { updateProduct, fetchProducts } from '../../services/features/products/productSlice';
+import {
+  updateProduct,
+  fetchProducts,
+} from '../../services/features/products/productSlice';
+import { fetchInvoices } from '../../services/features/retailer/invoiceSlice'; // <-- Added
 import { createActivityLog } from '../../services/features/activity/activitySlice';
 import Input from '../../components/Input';
 import AddProductStyle from './AddProductStyle';
@@ -19,25 +23,47 @@ import Header from '../../components/Header';
 const EditProduct = ({ route, navigation }) => {
   const { id } = route.params;
   const dispatch = useDispatch();
+
   const currentUser = useSelector(state => state.auth.user);
   const productsList = useSelector(state => state.products.list);
+  const invoices = useSelector(state => state.invoice?.data || []);   // <-- Get invoices
+
   const product = productsList.find(p => p._id === id);
+
+  // ✅ Calculate total sold for this product (same as on the web)
+  const totalSold = useMemo(() => {
+    if (!product || !invoices.length) return 0;
+    return invoices.reduce((sum, inv) => {
+      const item = inv.items?.find(i => i.productId === product._id);
+      return sum + (item?.qty || 0);
+    }, 0);
+  }, [product, invoices]);
 
   const [form, setForm] = useState({});
   const [loading, setLoading] = useState(false);
   const [imageChanged, setImageChanged] = useState(false);
 
+  // Fetch products if not already loaded
   useEffect(() => {
     if (productsList.length === 0) {
       dispatch(fetchProducts());
     }
   }, [dispatch, productsList.length]);
 
+  // Fetch invoices if not already loaded (so totalSold is accurate)
+  useEffect(() => {
+    if (!invoices.length) {
+      dispatch(fetchInvoices('all')); // adjust if your thunk expects a different argument
+    }
+  }, [dispatch, invoices.length]);
+
+  // Populate form when product is available, including corrected stock
   useEffect(() => {
     if (product) {
-      setForm(product);
+      const displayStock = Math.max(0, (product.moq ?? 0) - totalSold);
+      setForm({ ...product, moq: displayStock }); // Override moq with display stock
     }
-  }, [product]);
+  }, [product, totalSold]);
 
   const onChange = (key, value) => {
     setForm({ ...form, [key]: value });
@@ -45,10 +71,7 @@ const EditProduct = ({ route, navigation }) => {
 
   const pickImage = () => {
     launchImageLibrary(
-      {
-        mediaType: 'photo',
-        quality: 0.7,
-      },
+      { mediaType: 'photo', quality: 0.7 },
       response => {
         if (response.didCancel) return;
         if (response.assets && response.assets.length > 0) {
@@ -60,7 +83,10 @@ const EditProduct = ({ route, navigation }) => {
   };
 
   const validateForm = () => {
-    const required = ['name', 'category', 'sku', 'mrp', 'distributorPrice', 'retailerPrice', 'itemCost', 'gst', 'moq', 'walkinPrice'];
+    const required = [
+      'name', 'category', 'sku', 'mrp', 'distributorPrice',
+      'retailerPrice', 'itemCost', 'gst', 'moq', 'walkinPrice',
+    ];
     for (let field of required) {
       if (!form[field] || form[field].toString().trim() === '') {
         Alert.alert('Validation Error', `${field} is required`);
@@ -81,16 +107,23 @@ const EditProduct = ({ route, navigation }) => {
     try {
       const formData = new FormData();
 
+      // ✅ Convert displayed stock back to real moq
+      const finalForm = { ...form };
+      finalForm.moq = Number(form.moq) + totalSold; // real stock = displayed + sold
+
       const allowedFields = [
         'name', 'category', 'sku', 'batchNo', 'rackNo',
         'mrp', 'distributorPrice', 'retailerPrice', 'walkinPrice',
-        'itemCost', 'gst', 'moq', 'status', 'vendorName'
+        'itemCost', 'gst', 'moq', 'status', 'vendorName',
       ];
 
       for (let key of allowedFields) {
-        if (form[key] !== undefined && form[key] !== null && form[key] !== '') {
-          const numericFields = ['mrp', 'distributorPrice', 'retailerPrice', 'walkinPrice', 'itemCost', 'gst', 'moq'];
-          let value = form[key];
+        if (finalForm[key] !== undefined && finalForm[key] !== null && finalForm[key] !== '') {
+          const numericFields = [
+            'mrp', 'distributorPrice', 'retailerPrice', 'walkinPrice',
+            'itemCost', 'gst', 'moq',
+          ];
+          let value = finalForm[key];
           if (numericFields.includes(key)) {
             value = Number(value);
             if (isNaN(value)) continue;
@@ -107,16 +140,22 @@ const EditProduct = ({ route, navigation }) => {
         });
       }
 
-      const resultAction = await dispatch(updateProduct({ id, formData })).unwrap();
+      const resultAction = await dispatch(
+        updateProduct({ id, formData })
+      ).unwrap();
 
       await dispatch(
         createActivityLog({
           action: 'EDIT_PRODUCT',
           productId: resultAction._id,
           productName: resultAction.name,
-          user: currentUser?.name || currentUser?.fullName || currentUser?.email || 'Unknown',
+          user:
+            currentUser?.name ||
+            currentUser?.fullName ||
+            currentUser?.email ||
+            'Unknown',
           role: currentUser?.role || 'Radnus',
-        }),
+        })
       ).unwrap();
 
       Alert.alert('Success', 'Product updated successfully');
@@ -202,6 +241,7 @@ const EditProduct = ({ route, navigation }) => {
           value={form.gst?.toString()}
           onChangeText={v => onChange('gst', v)}
         />
+        {/* ✅ Stock field now shows current stock, not raw moq */}
         <Input
           label="Stock (Units)"
           keyboardType="numeric"
