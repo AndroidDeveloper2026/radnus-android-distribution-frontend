@@ -73,10 +73,8 @@ const EmployeeDashboard = ({ navigation }) => {
 
   const [todaySales, setTodaySales] = useState(0);
   const [todaySalesLoading, setTodaySalesLoading] = useState(true);
-  const [totalStockValue, setTotalStockValue] = useState(0);
-  const [stockValueLoading, setStockValueLoading] = useState(true);
-  const [totalItemCostValue, setTotalItemCostValue] = useState(0); // ✅ NEW
-  const [itemCostLoading, setItemCostLoading] = useState(true); // ✅ NEW
+  const [totalItemCostValue, setTotalItemCostValue] = useState(0);
+  const [itemCostLoading, setItemCostLoading] = useState(true);
   const [totalInward, setTotalInward] = useState(0);
   const [totalOutward, setTotalOutward] = useState(0);
   const [inwardOutwardLoading, setInwardOutwardLoading] = useState(true);
@@ -108,109 +106,86 @@ const EmployeeDashboard = ({ navigation }) => {
     }
   }, [user?.name]);
 
-  const computeStockAndMovements = useCallback(async () => {
-    if (products.length === 0) return;
-    setStockValueLoading(true);
-    setInwardOutwardLoading(true);
-    setItemCostLoading(true); // ✅ NEW
+  // ✅ CORRECTED: Simple item cost total (matches web dashboard)
+  const computeItemCost = useCallback(() => {
+    setItemCostLoading(true);
     try {
-      // Fetch all invoices (only completed ones are used inside)
-      const response = await api.get('/api/invoices?filter=all');
-      const allInvoices = (response.data || []).filter(
-        inv => inv.status !== 'draft',
-      );
+      let totalCost = 0;
+      products.forEach(product => {
+        const stock = getNum(product, 'stock') || getNum(product, 'moq', 0);
+        const itemCost = getNum(product, 'itemCost', 0);
+        totalCost += stock * itemCost;
+      });
+      setTotalItemCostValue(totalCost);
+    } catch (error) {
+      console.error('Failed to compute item cost:', error);
+      setTotalItemCostValue(0);
+    } finally {
+      setItemCostLoading(false);
+    }
+  }, [products]);
+
+  // ✅ CORRECTED: Inward / Outward (matches web dashboard)
+  const computeInwardOutward = useCallback(async () => {
+    if (products.length === 0) return;
+    setInwardOutwardLoading(true);
+    try {
       const today = new Date();
 
+      // Inward: sum moq of products created today
       let todayInward = 0;
-      let todayOutward = 0;
-      const stockMap = {};
-
       products.forEach(product => {
-        const pid = getId(product._id);
-        const moq = getNum(product, 'moq') || 0;
-        const stock = getNum(product, 'stock') || moq;
-        const walkinPrice = getNum(product, 'walkinPrice');
-        const itemCost = getNum(product, 'itemCost'); // ✅ NEW: cost price
         const createdAt = parseDate(product.createdAt);
         if (isSameDay(createdAt, today)) {
-          todayInward += moq;
+          todayInward += getNum(product, 'moq', 0);
         }
-        stockMap[pid] = {
-          currentStock: stock,
-          walkinPrice: walkinPrice,
-          itemCost: itemCost, // ✅ NEW
-        };
       });
 
-      // Process all completed invoices to deduct sold quantities
-      allInvoices.forEach(invoice => {
-        const invDate = parseDate(invoice.createdAt);
-        const isToday = isSameDay(invDate, today);
+      // Outward: sum quantities from today's completed invoices
+      const response = await api.get('/api/invoices?filter=today');
+      const todayInvoices = (response.data || []).filter(
+        inv => inv.status !== 'draft',
+      );
+      let todayOutward = 0;
+      todayInvoices.forEach(invoice => {
         (invoice.items || []).forEach(item => {
-          const qty = getNum(item, 'qty');
-          if (isToday) {
-            todayOutward += qty;
-          }
-          const pid = getId(item.productId);
-          if (stockMap[pid]) {
-            stockMap[pid].currentStock -= qty;
-          }
+          todayOutward += getNum(item, 'qty', 0);
         });
       });
 
-      let totalValue = 0;
-      let totalCostValue = 0; // ✅ NEW
-      Object.values(stockMap).forEach(item => {
-        const current = item.currentStock || 0;
-        const value = current * (item.walkinPrice || 0);
-        const cost = current * (item.itemCost || 0); // ✅ NEW
-        totalValue += isNaN(value) ? 0 : value;
-        totalCostValue += isNaN(cost) ? 0 : cost;
-      });
-
-      setTotalStockValue(totalValue);
-      setTotalItemCostValue(totalCostValue); // ✅ NEW
       setTotalInward(todayInward);
       setTotalOutward(todayOutward);
     } catch (error) {
-      console.error('Failed to compute data:', error);
-      setTotalStockValue(0);
-      setTotalItemCostValue(0); // ✅ NEW
+      console.error('Failed to compute inward/outward:', error);
       setTotalInward(0);
       setTotalOutward(0);
     } finally {
-      setStockValueLoading(false);
       setInwardOutwardLoading(false);
-      setItemCostLoading(false); // ✅ NEW
     }
   }, [products]);
 
   useEffect(() => {
     fetchTodaySales();
-    computeStockAndMovements();
-  }, [fetchTodaySales, computeStockAndMovements]);
+    computeItemCost();
+    computeInwardOutward();
+  }, [fetchTodaySales, computeItemCost, computeInwardOutward]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await Promise.all([
       fetchTodaySales(),
-      dispatch(fetchProducts()),
-      computeStockAndMovements(),
+      computeItemCost(),
+      computeInwardOutward(),
     ]);
     setRefreshing(false);
-  }, [fetchTodaySales, dispatch, computeStockAndMovements]);
+  }, [fetchTodaySales, computeItemCost, computeInwardOutward]);
 
   const handleTodaySalesPress = () => {
     navigation.navigate('InvoiceListScreen', { filter: 'today' });
   };
 
-  const handleStockValuePress = () => {
-    navigation.navigate('StockVisibility');
-  };
-
   const handleItemCostValuePress = () => {
-    // ✅ NEW
-    navigation.navigate('StockVisibility'); // Reuse same screen (shows both values)
+    navigation.navigate('StockVisibility');
   };
 
   const handleInwardPress = () => {
@@ -265,27 +240,6 @@ const EmployeeDashboard = ({ navigation }) => {
             label="Today Sales"
             onPress={handleTodaySalesPress}
           />
-          {/* <StatCard
-            icon={
-              <Icons
-                name="Package"
-                size={20}
-                color="#D32F2F"
-                circleSize={50}
-                withCircle
-                backgroundColor="#ffd6d6"
-              />
-            }
-            value={
-              stockValueLoading ? (
-                <ActivityIndicator size="small" color="#D32F2F" />
-              ) : (
-                `₹${Math.round(totalStockValue).toLocaleString('en-IN')}`
-              )
-            }
-            label="Stock Value (MRP)"
-            onPress={handleStockValuePress}
-          /> */}
           <StatCard
             icon={
               <Icons
@@ -429,7 +383,6 @@ const EmployeeDashboard = ({ navigation }) => {
           label="Central Stock"
           onPress={() => navigation.navigate('CentralStock')}
         />
-
         <QuickAction
           icon={
             <Icons
@@ -443,7 +396,6 @@ const EmployeeDashboard = ({ navigation }) => {
           label="Sales Return"
           onPress={() => navigation.navigate('SalesReturnScreen')}
         />
-
         <QuickAction
           icon={
             <Icons
@@ -457,7 +409,6 @@ const EmployeeDashboard = ({ navigation }) => {
           label="Purchase Return"
           onPress={() => navigation.navigate('PurchaseReturnScreen')}
         />
-
         <QuickAction
           icon={
             <Icons
@@ -470,6 +421,19 @@ const EmployeeDashboard = ({ navigation }) => {
           }
           label="Order Billing"
           onPress={() => navigation.navigate('OrderBilling')}
+        />
+        <QuickAction
+          icon={
+            <Icons
+              name="Wallet"
+              size={20}
+              color="#F9A825"
+              circleSize={40}
+              withCircle
+            />
+          }
+          label="Reports"
+          onPress={() => navigation.navigate('Reports')}
         />
       </ScrollView>
     </View>
