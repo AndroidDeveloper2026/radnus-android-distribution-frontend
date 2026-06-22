@@ -14,13 +14,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts } from "../../services/features/products/productSlice";
 import { fetchInvoices } from "../../services/features/retailer/invoiceSlice";
 
-// ─── HELPER: Format ₹ value ────────────────────────
+// ─── HELPER: Format ₹ value (full comma‑formatted digits) ────────────────────────
 const formatValue = (num) => {
   const value = Number(num);
   if (isNaN(value) || value === undefined) return "₹0";
-  if (value >= 100000) return `₹${(value / 100000).toFixed(2)}L`;
-  if (value >= 1000) return `₹${(value / 1000).toFixed(1)}K`; 
-  return `₹${value.toFixed(2)}`;
+  return `₹${value.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 };
 
 // ─── HELPER: Parse MongoDB $date format or any date ────────────────────────
@@ -40,12 +41,10 @@ const parseDate = (dateValue) => {
 
 // ─── HELPER: Get numeric value (handles trailing space keys) ────────────────────────
 const getNum = (obj, key, fallback = 0) => {
-  // Try exact key
   if (obj[key] !== undefined && obj[key] !== null) {
     const val = Number(obj[key]);
     if (!isNaN(val)) return val;
   }
-  // Try with trailing space (your JSON has "key ": value)
   const spacedKey = key + ' ';
   if (obj[spacedKey] !== undefined && obj[spacedKey] !== null) {
     const val = Number(obj[spacedKey]);
@@ -133,17 +132,19 @@ const CentralStock = () => {
     setRefreshing(false);
   };
 
-  // ─── Calculate Current Stock (FIXED: proper key access) ───
+  // ─── Stock Map – use backend live stock, NO invoice subtraction ───
   const stockMap = useMemo(() => {
     if (!products.length) return {};
     const stock = {};
     
     products.forEach((product) => {
       const pid = getId(product._id);
+      // stock field if available, else moq (already live stock after sales)
+      const currentStock = getNum(product, 'stock') || getNum(product, 'moq', 0);
       stock[pid] = {
         ...product,
-        currentStock: getNum(product, 'stock') || getNum(product, 'moq') || 0,
-        totalOutward: 0,
+        currentStock,
+        totalOutward: 0,   // we don't subtract invoices anymore
         walkinPrice: getNum(product, 'walkinPrice'),
         moq: getNum(product, 'moq'),
         name: getStr(product, 'name'),
@@ -152,24 +153,12 @@ const CentralStock = () => {
         batchNo: getStr(product, 'batchNo'),
       };
     });
-    
-    invoices.forEach((invoice) => {
-      (invoice.items || []).forEach((item) => {
-        const pid = getId(item.productId);
-        if (stock[pid]) {
-          stock[pid].currentStock -= getNum(item, 'qty');
-          stock[pid].totalOutward += getNum(item, 'qty');
-        }
-      });
-    });
-    
-    Object.keys(stock).forEach((id) => {
-      stock[id].currentStock = Math.max(0, stock[id].currentStock);
-    });
-    return stock;
-  }, [products, invoices]);
 
-  // ─── Overview Data (FIXED) ───
+    // **Removed** the loop that subtracted invoices.
+    return stock;
+  }, [products]);
+
+  // ─── Overview Data (now reflects correct live stock) ───
   const overviewData = useMemo(() => {
     return Object.values(stockMap).map((item) => ({
       id: getId(item._id),
@@ -183,7 +172,7 @@ const CentralStock = () => {
     }));
   }, [stockMap]);
 
-  // ─── INWARD Data (FIXED: proper date parsing) ───
+  // ─── INWARD Data (unchanged) ───
   const inwardData = useMemo(() => {
     if (!products.length) return [];
     return products.map((product) => {
@@ -206,7 +195,7 @@ const CentralStock = () => {
     }).sort((a, b) => b._createdAt - a._createdAt);
   }, [products]);
 
-  // ─── OUTWARD Data (FIXED: proper date parsing) ───
+  // ─── OUTWARD Data (unchanged) ───
   const outwardData = useMemo(() => {
     if (!invoices.length) return [];
     const outward = [];
@@ -236,7 +225,7 @@ const CentralStock = () => {
   const filteredInward = useMemo(() => filterByTimeRange(inwardData, timeFilter), [inwardData, timeFilter]);
   const filteredOutward = useMemo(() => filterByTimeRange(outwardData, timeFilter), [outwardData, timeFilter]);
 
-  // ─── Total Stock Value (FIXED: now uses proper walkinPrice) ───
+  // ─── Total Stock Value (now uses correct live stock) ───
   const totalValue = useMemo(() => {
     return overviewData.reduce((sum, item) => {
       const val = (item.qty || 0) * (item.walkinPrice || 0);

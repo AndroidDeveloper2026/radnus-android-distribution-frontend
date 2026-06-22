@@ -79,3 +79,9 @@ yarn-error.log
 .env.dev
 .env.prod
 .env.uat
+
+# Release keystore (sensitive)
+android/app/my-upload-key.keystore
+
+# Gradle properties containing passwords
+android/gradle.properties

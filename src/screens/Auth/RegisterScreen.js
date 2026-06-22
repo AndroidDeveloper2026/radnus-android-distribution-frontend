@@ -34,7 +34,12 @@ const RegisterSchema = Yup.object().shape({
 });
 
 const RegisterScreen = ({ navigation }) => {
-  const [showPassword, setShowPassword] = useState(false);
+  // Separate state for each field
+  const [passwordVisible, setPasswordVisible] = useState({
+    password: false,
+    confirmPassword: false,
+  });
+
   const dispatch = useDispatch();
   const { loading } = useSelector(state => state?.register);
   const handleBackBtn = () => navigation.goBack();
@@ -122,58 +127,72 @@ const RegisterScreen = ({ navigation }) => {
 
                 {/* PASSWORD */}
                 <Text style={styles.label}>Password</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholderTextColor={'#000'}
-                  placeholder="Enter your Password"
-                  secureTextEntry={!showPassword}
-                  value={values.password}
-                  onChangeText={handleChange('password')}
-                />
-                <TouchableOpacity
-                  onPress={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: 'absolute',
-                    right: 12,
-                    top: '46%',
-                    transform: [{ translateY: -10 }],
-                  }}
-                >
-                  {showPassword ? (
-                    <EyeOff size={20} color="#555" />
-                  ) : (
-                    <Eye size={20} color="#555" />
-                  )}
-                </TouchableOpacity>
+                <View style={{ position: 'relative' }}>
+                  <TextInput
+                    style={styles.input}
+                    placeholderTextColor={'#000'}
+                    placeholder="Enter your Password"
+                    secureTextEntry={!passwordVisible.password}
+                    value={values.password}
+                    onChangeText={handleChange('password')}
+                  />
+                  <TouchableOpacity
+                    onPress={() =>
+                      setPasswordVisible(prev => ({
+                        ...prev,
+                        password: !prev.password,
+                      }))
+                    }
+                    style={{
+                      position: 'absolute',
+                      right: 12,
+                      top: '50%',
+                      transform: [{ translateY: -10 }],
+                    }}
+                  >
+                    {passwordVisible.password ? (
+                      <EyeOff size={20} color="#555" />
+                    ) : (
+                      <Eye size={20} color="#555" />
+                    )}
+                  </TouchableOpacity>
+                </View>
                 {touched.password && errors.password && (
                   <Text style={styles.error}>{errors.password}</Text>
                 )}
 
                 {/* CONFIRM PASSWORD */}
                 <Text style={styles.label}>Confirm Password</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholderTextColor={'#000'}
-                  placeholder="Enter your Confirm Password"
-                  secureTextEntry={!showPassword}
-                  value={values.confirmPassword}
-                  onChangeText={handleChange('confirmPassword')}
-                />
-                <TouchableOpacity
-                  onPress={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: 'absolute',
-                    right: 12,
-                    top: '56.5%',
-                    transform: [{ translateY: -10 }],
-                  }}
-                >
-                  {showPassword ? (
-                    <EyeOff size={20} color="#555" />
-                  ) : (
-                    <Eye size={20} color="#555" />
-                  )}
-                </TouchableOpacity>
+                <View style={{ position: 'relative' }}>
+                  <TextInput
+                    style={styles.input}
+                    placeholderTextColor={'#000'}
+                    placeholder="Enter your Confirm Password"
+                    secureTextEntry={!passwordVisible.confirmPassword}
+                    value={values.confirmPassword}
+                    onChangeText={handleChange('confirmPassword')}
+                  />
+                  <TouchableOpacity
+                    onPress={() =>
+                      setPasswordVisible(prev => ({
+                        ...prev,
+                        confirmPassword: !prev.confirmPassword,
+                      }))
+                    }
+                    style={{
+                      position: 'absolute',
+                      right: 12,
+                      top: '50%',
+                      transform: [{ translateY: -10 }],
+                    }}
+                  >
+                    {passwordVisible.confirmPassword ? (
+                      <EyeOff size={20} color="#555" />
+                    ) : (
+                      <Eye size={20} color="#555" />
+                    )}
+                  </TouchableOpacity>
+                </View>
                 {touched.confirmPassword && errors.confirmPassword && (
                   <Text style={styles.error}>{errors.confirmPassword}</Text>
                 )}
@@ -184,44 +203,16 @@ const RegisterScreen = ({ navigation }) => {
                   <Picker
                     selectedValue={values.role}
                     onValueChange={val => setFieldValue('role', val)}
-                    dropdownIconColor="#666666" // visible arrow in light/dark
+                    dropdownIconColor="#666666"
                     style={{ color: '#000' }}
                   >
-                    <Picker.Item
-                      label="Select Role"
-                      value=""
-                      // //color="#000"
-                    />
-                    <Picker.Item
-                      label="Marketing Manager"
-                      value="MarketingManager"
-                      // //color="#000"
-                    />
-                    <Picker.Item
-                      label="Marketing Executive"
-                      value="MarketingExecutive"
-                      // //color="#000"
-                    />
-                    <Picker.Item
-                      label="Distributor"
-                      value="Distributor"
-                      // //color="#000"
-                    />
-                    <Picker.Item
-                      label="FSE"
-                      value="FSE"
-                      //color="#000"
-                    />
-                    <Picker.Item
-                      label="Retailer"
-                      value="Retailer"
-                      //color="#000"
-                    />
-                    <Picker.Item
-                      label="Radnus"
-                      value="Radnus"
-                      //color="#000"
-                    />
+                    <Picker.Item label="Select Role" value="" />
+                    <Picker.Item label="Marketing Manager" value="MarketingManager" />
+                    <Picker.Item label="Marketing Executive" value="MarketingExecutive" />
+                    <Picker.Item label="Distributor" value="Distributor" />
+                    <Picker.Item label="FSE" value="FSE" />
+                    <Picker.Item label="Retailer" value="Retailer" />
+                    <Picker.Item label="Radnus" value="Radnus" />
                   </Picker>
                 </View>
                 {touched.role && errors.role && (
@@ -239,21 +230,12 @@ const RegisterScreen = ({ navigation }) => {
                       setFieldValue('district', '');
                       setFieldValue('taluk', '');
                     }}
-                    dropdownIconColor="#666666" // visible arrow in light/dark
+                    dropdownIconColor="#666666"
                     style={{ color: '#000' }}
                   >
-                    <Picker.Item
-                      label="Select State"
-                      value=""
-                      // color="#000000"
-                    />
+                    <Picker.Item label="Select State" value="" />
                     {Object.keys(locationData).map(st => (
-                      <Picker.Item
-                        key={st}
-                        label={st}
-                        value={st}
-                        // color="#000000"
-                      />
+                      <Picker.Item key={st} label={st} value={st} />
                     ))}
                   </Picker>
                 </View>
@@ -272,22 +254,13 @@ const RegisterScreen = ({ navigation }) => {
                       setFieldValue('district', val);
                       setFieldValue('taluk', '');
                     }}
-                    dropdownIconColor="#666666" // visible arrow in light/dark
+                    dropdownIconColor="#666666"
                     style={{ color: '#000' }}
                   >
-                    <Picker.Item
-                      label="Select District"
-                      value=""
-                      //color="#000"
-                    />
+                    <Picker.Item label="Select District" value="" />
                     {values.state &&
                       Object.keys(locationData[values.state]).map(dist => (
-                        <Picker.Item
-                          key={dist}
-                          label={dist}
-                          value={dist}
-                          // color="#000000"
-                        />
+                        <Picker.Item key={dist} label={dist} value={dist} />
                       ))}
                   </Picker>
                 </View>
@@ -303,23 +276,14 @@ const RegisterScreen = ({ navigation }) => {
                     selectedValue={values.taluk}
                     selectionColor={'#000'}
                     onValueChange={val => setFieldValue('taluk', val)}
-                    dropdownIconColor="#666666" // visible arrow in light/dark
+                    dropdownIconColor="#666666"
                     style={{ color: '#000' }}
                   >
-                    <Picker.Item
-                      label="Select Taluk"
-                      value=""
-                      // color="#000000"
-                    />
+                    <Picker.Item label="Select Taluk" value="" />
                     {values.state &&
                       values.district &&
                       locationData[values.state][values.district].map(t => (
-                        <Picker.Item
-                          key={t}
-                          label={t}
-                          value={t}
-                          // color="#000000"
-                        />
+                        <Picker.Item key={t} label={t} value={t} />
                       ))}
                   </Picker>
                 </View>

@@ -29,6 +29,8 @@ import {
   ChevronRight,
   UserCog,
   Logs,
+  PieChart,
+  BarChart,
 } from 'lucide-react-native';
 
 const AdminDashboard = ({ navigation }) => {
@@ -373,6 +375,21 @@ const AdminDashboard = ({ navigation }) => {
           </View>
           <View style={styles.navTextContainer}>
             <Text style={styles.navTitle}>Activity Log</Text>
+            <Text style={styles.navSubTitle}>Edit & Update Products Logs</Text>
+          </View>
+          <ChevronRight size={18} color="#9CA3AF" strokeWidth={1.8} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigation.navigate('Reports')}
+          activeOpacity={0.7}
+        >
+          <View style={styles.navIconWrapper}>
+            <BarChart size={22} color="#1565C0" strokeWidth={1.8} />
+          </View>
+          <View style={styles.navTextContainer}>
+            <Text style={styles.navTitle}>Reports</Text>
             <Text style={styles.navSubTitle}>Edit & Update Products Logs</Text>
           </View>
           <ChevronRight size={18} color="#9CA3AF" strokeWidth={1.8} />

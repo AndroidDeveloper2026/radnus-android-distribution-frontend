@@ -12,11 +12,12 @@ import styles from "./StockVisibilityStyle";
 import Header from "../../components/Header";
 import { Package, CheckCircle, AlertTriangle, XCircle } from "lucide-react-native";
 import { fetchProducts } from "../../services/features/products/productSlice";
-import { fetchInvoices } from "../../services/features/retailer/invoiceSlice";
+// fetchInvoices is no longer needed for stock calculation
+import { useTheme } from "../../context/ThemeContext"; // keep if used elsewhere
 
 const LOW_STOCK_THRESHOLD = 10;
 
-// Same helpers as web for consistency
+// ─── Helpers (same as web) ────────────────────────────────
 const getNum = (obj, key, fallback = 0) => {
   if (obj?.[key] !== undefined && obj?.[key] !== null) {
     const val = Number(obj[key]);
@@ -50,13 +51,10 @@ const StockVisibility = () => {
   const [activeFilter, setActiveFilter] = useState(null);
 
   const { list: products = [], loading: productsLoading } = useSelector(state => state.products) || {};
-  const { data: invoices = [], loading: invoicesLoading } = useSelector(state => state.invoice) || {};
 
   const loadData = async () => {
-    await Promise.all([
-      dispatch(fetchProducts()),
-      dispatch(fetchInvoices("all")),
-    ]);
+    // Only need products – backend already returns live stock
+    await dispatch(fetchProducts());
   };
 
   useEffect(() => {
@@ -69,40 +67,27 @@ const StockVisibility = () => {
     setRefreshing(false);
   };
 
-  // 📊 Compute available stock = moq - sold
+  // 📊 Compute available stock directly from product data (no invoice subtraction)
   const stockData = useMemo(() => {
     if (!products.length) return [];
 
-    const stockMap = new Map();
-    products.forEach(product => {
+    return products.map(product => {
       const id = getId(product._id);
-      const moq = getNum(product, 'moq', 0);
-      stockMap.set(id, {
+      // Use 'stock' field if it exists, otherwise fallback to 'moq'
+      // Both represent the live stock after sales (backend updates moq)
+      const availableStock = getNum(product, 'stock') || getNum(product, 'moq', 0);
+
+      return {
         id,
         name: getStr(product, 'name'),
         sku: getStr(product, 'sku'),
-        availableStock: moq,
-      });
+        availableStock,
+        status: availableStock <= 0 ? 'OUT_OF_STOCK'
+              : availableStock <= LOW_STOCK_THRESHOLD ? 'LOW_STOCK'
+              : 'IN_STOCK'
+      };
     });
-
-    invoices.forEach(invoice => {
-      (invoice.items || []).forEach(item => {
-        const prodId = getId(item.productId);
-        if (stockMap.has(prodId)) {
-          const sold = getNum(item, 'qty', 0);
-          const current = stockMap.get(prodId).availableStock;
-          stockMap.get(prodId).availableStock = Math.max(0, current - sold);
-        }
-      });
-    });
-
-    return Array.from(stockMap.values()).map(item => ({
-      ...item,
-      status: item.availableStock <= 0 ? 'OUT_OF_STOCK'
-            : item.availableStock <= LOW_STOCK_THRESHOLD ? 'LOW_STOCK'
-            : 'IN_STOCK'
-    }));
-  }, [products, invoices]);
+  }, [products]); // depends only on products
 
   const inStockCount    = stockData.filter(i => i.status === "IN_STOCK").length;
   const lowStockCount   = stockData.filter(i => i.status === "LOW_STOCK").length;
@@ -151,7 +136,7 @@ const StockVisibility = () => {
     </View>
   );
 
-  if (productsLoading || invoicesLoading) {
+  if (productsLoading) {
     return (
       <View style={styles.container}>
         <Header title="Stock Visibility" />

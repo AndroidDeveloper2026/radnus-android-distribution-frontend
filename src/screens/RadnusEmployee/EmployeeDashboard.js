@@ -425,9 +425,9 @@ const EmployeeDashboard = ({ navigation }) => {
         <QuickAction
           icon={
             <Icons
-              name="Wallet"
+              name="BarChart"
               size={20}
-              color="#F9A825"
+              color="#1565C0"
               circleSize={40}
               withCircle
             />
