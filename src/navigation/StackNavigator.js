@@ -43,6 +43,7 @@ import AddTerritory from '../screens/TerritoryManagement/AddTerritory';
 import EditTerritory from '../screens/TerritoryManagement/EditTerritory';
 import Resetpassword from '../screens/Auth/ResetPassword';
 import DistributorOnboardList from '../screens/Distributor/DistributorOnboardList';
+import RadnusApprovalScreen from '../screens/Admin/RadnusApprovalScreen';
 import FSETracking from '../screens/FieldSalesExecutive/FSETracking';
 import FSEOnboarding from '../screens/FieldSalesExecutive/FSEOnboarding';
 import MapScreen from '../screens/FieldSalesExecutive/MapScreen';
@@ -389,6 +390,12 @@ const StackNavigator = () => {
           />
 
           <Stack.Screen
+            name="RadnusApprovalScreen"
+            component={RadnusApprovalScreen}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
             name="DistributorDashboard"
             component={DistributorDashboard}
             options={{ headerShown: false }}
@@ -477,3 +484,485 @@ const StackNavigator = () => {
 };
 
 export default StackNavigator;
+
+//+++++++++++++++++++++++++++++++++++++
+
+// import React from 'react';
+
+// import { createStackNavigator } from '@react-navigation/stack';
+
+// import SplashScreen from '../screens/Splash/SplashScreen';
+// import LoginScreen from '../screens/Auth/LoginScreen';
+// import RegisterScreen from '../screens/Auth/RegisterScreen';
+// import OtpScreen from '../screens/Auth/OtpScreen';
+// import SelectRoleScreen from '../screens/Auth/SelectRoleScreen';
+// import AdminScreen from '../screens/Auth/AdminScreen';
+// import FSEHomeScreen from '../screens/FieldSalesExecutive/FSEHomeScreen';
+// import FSEDashboard from '../screens/FieldSalesExecutive/FSEDashboard';
+// import ProductMaster from '../screens/AdminDashboard/ProductsMaster';
+// import AddProduct from '../screens/AdminDashboard/AddProduct';
+// import ProductList from '../screens/Products/ProductList';
+// import OrderCart from '../screens/OrderProduct/OrderCart';
+// import OrderSuccess from '../screens/OrderProduct/OrderSuccessScreen';
+// import TerritoryManagement from '../screens/TerritoryManagement/TerritoryManagement';
+// import RetailerList from '../screens/Retailer/RetailerList';
+// import RetailerProfile from '../screens/Retailer/RetailerProfile';
+// import RetailerSalesTab from '../screens/Retailer/RetailerSalesTab';
+// import CentralStock from '../screens/AdminDashboard/CentralStock';
+// import DistributorOnboarding from '../screens/Distributor/DistributorOnboarding';
+// import RouteList from '../screens/FieldSalesExecutive/RouteList';
+// import FSEManagement from '../screens/FieldSalesExecutive/FSEManagement';
+// import ProfileSettings from '../screens/Common/ProfileSettings';
+// import EditProfile from '../screens/Common/EditProfile';
+// import RetailerOnboarding from '../screens/Retailer/RetailerOnboarding';
+// import EndDaySummary from '../screens/FieldSalesExecutive/EndDaySummary';
+// import StockVisibility from '../screens/Retailer/StockVisibility';
+// import BottomTabs from '../navigation/BottomTabsNavigator';
+// import RetailerDashboard from '../screens/Retailer/RetailerDashboard';
+// import DistributorDashboard from '../screens/Distributor/DistributorDashboard';
+// import OrderBilling from '../screens/Distributor/OrderBilling';
+// import HomeScreen from '../screens/Common/HomeScreen';
+// import EditProduct from '../screens/AdminDashboard/EditProduct';
+// import Forgotpassword from '../screens/Auth/ForgotPassword';
+// // import AdminRegister from '../screens/Auth/AdminRegister';
+// import Reports from '../screens/Common/Reports';
+// import TermsConditions from '../screens/Common/TermsConditions';
+// import TerritoryMapping from '../screens/TerritoryManagement/TerritoryMappingScreen';
+// import AddTerritory from '../screens/TerritoryManagement/AddTerritory';
+// import EditTerritory from '../screens/TerritoryManagement/EditTerritory';
+// import Resetpassword from '../screens/Auth/ResetPassword';
+// import DistributorOnboardList from '../screens/Distributor/DistributorOnboardList';
+// import FSETracking from '../screens/FieldSalesExecutive/FSETracking';
+// import FSEOnboarding from '../screens/FieldSalesExecutive/FSEOnboarding';
+// import MapScreen from '../screens/FieldSalesExecutive/MapScreen';
+// import ExecutiveDashboard from '../screens/MarketingExecutive/ExecutiveDashboard';
+// import ExecutiveOnboarding from '../screens/MarketingExecutive/ExecutiveOnboarding';
+// import ManagerDashboard from '../screens/MarketingManager/ManagerDashboard';
+// import ManagerOnboarding from '../screens/MarketingManager/ManagerOnboarding';
+// import ManagerManagement from '../screens/MarketingManager/ManagerManagement';
+// import ExecutiveManagement from '../screens/MarketingExecutive/ExecutiveManagement';
+// import InvoiceScreen from '../screens/OrderProduct/InvoiceScreen';
+// import CustomerListScreen from '../screens/Common/CustomerListScreen';
+// import DistributorDetails from '../screens/Distributor/DistributorDetails';
+// import InvoiceListScreen from '../screens/OrderProduct/InvoiceListScreen';
+// import AdminFeedbackScreen from '../screens/AdminDashboard/AdminFeedbackScreen';
+// //-- checking --
+// import AdminDashboardScreen from '../screens/AdminDashboard/AdminDashboardScreen';
+// import DistributorList from '../screens/MarketingExecutive/DistributorList';
+// import { useSelector } from 'react-redux';
+// import { selectAuthState } from '../store/selectors/authSelector';
+// import InvoiceViewScreen from '../screens/OrderProduct/InvoiceViewScreen';
+// import EmployeeDashboard from '../screens/RadnusEmployee/EmployeeDashboard';
+// import ActivityLogScreen from '../screens/Common/ActivityLogScreen';
+// import SalesReturnScreen from '../screens/Returns/SalesReturnScreen';
+// import PurchaseReturnScreen from '../screens/Returns/PurchaseReturnScreen';
+
+// const Stack = createStackNavigator();
+
+// const StackNavigator = () => {
+//   // const { token, role } = useSelector(selectAuthState); //old
+//   // const { token, admin } = useSelector(state => state.adminAuth);
+//   // const { token, user } = useSelector(state => state.auth);
+//   // const role = user?.role;
+
+//   // const isLoggedIn = !!token; //old
+//   // const role = admin?.role;
+
+//   const { token, user, isCheckingAuth, role } = useSelector(selectAuthState);
+//   const { isCheckingAuth: isAdminChecking } = useSelector(
+//     state => state.adminAuth,
+//   );
+
+//   const isChecking = isCheckingAuth || isAdminChecking;
+
+//   const isLoggedIn = !!token && !!user;
+
+//   // Show splash screen while checking authentication
+//   if (isChecking) {
+//     return (
+//       <Stack.Navigator screenOptions={{ headerShown: false }}>
+//         <Stack.Screen name="Splash" component={SplashScreen} />
+//       </Stack.Navigator>
+//     );
+//   }
+
+//   return (
+//     <Stack.Navigator screenOptions={{ headerShown: false }}>
+//       {!isLoggedIn ? (
+//         <>
+//           <Stack.Screen
+//             name="Splash"
+//             component={SplashScreen}
+//             options={{ headerShown: false }}
+//           />
+//           <Stack.Screen
+//             name="SelectRole"
+//             component={SelectRoleScreen}
+//             options={{ headerShown: false }}
+//           />
+//           <Stack.Screen
+//             name="Admin"
+//             component={AdminScreen}
+//             options={{ headerShown: false }}
+//           />
+
+//           {/* <Stack.Screen
+//         name="AdminRegister"
+//         component={AdminRegister}
+//         options={{ headerShown: false }}
+//       /> */}
+
+//           <Stack.Screen
+//             name="Login"
+//             component={LoginScreen}
+//             options={{ headerShown: false }}
+//           />
+//           <Stack.Screen
+//             name="Register"
+//             component={RegisterScreen}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="Forgotpassword"
+//             component={Forgotpassword}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="Resetpassword"
+//             component={Resetpassword}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="TermsConditions"
+//             component={TermsConditions}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="OtpScreen"
+//             component={OtpScreen}
+//             options={{ headerShown: false }}
+//           />
+//         </>
+//       ) : (
+//         <>
+//           <Stack.Screen
+//             name="MainTabs"
+//             component={BottomTabs}
+//             initialParams={{ role }}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="HomeScreen"
+//             component={HomeScreen}
+//             options={{ headerShown: false }}
+//           />
+//           <Stack.Screen
+//             name="AdminDashboard"
+//             component={AdminDashboardScreen}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="FSEHome"
+//             component={FSEHomeScreen}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="FSETracking"
+//             component={FSETracking}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="FSEDashboard"
+//             component={FSEDashboard}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="ActivityLogScreen"
+//             component={ActivityLogScreen}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="ManagerDashboard"
+//             component={ManagerDashboard}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="ManagerOnboarding"
+//             component={ManagerOnboarding}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="ManagerManagement"
+//             component={ManagerManagement}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="ExecutiveManagement"
+//             component={ExecutiveManagement}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="ExecutiveDashboard"
+//             component={ExecutiveDashboard}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="DistributorList"
+//             component={DistributorList}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="ExecutiveOnboarding"
+//             component={ExecutiveOnboarding}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="MapScreen"
+//             component={MapScreen}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="FSEOnboarding"
+//             component={FSEOnboarding}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="ProductMaster"
+//             component={ProductMaster}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="AddProduct"
+//             component={AddProduct}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="EditProduct"
+//             component={EditProduct}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="ProductList"
+//             component={ProductList}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="EmployeeDashboard"
+//             component={EmployeeDashboard}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="OrderCart"
+//             component={OrderCart}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="OrderSuccess"
+//             component={OrderSuccess}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="InvoiceScreen"
+//             component={InvoiceScreen}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="InvoiceViewScreen"
+//             component={InvoiceViewScreen}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="InvoiceListScreen"
+//             component={InvoiceListScreen}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="AdminFeedbackScreen"
+//             component={AdminFeedbackScreen}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="CustomerListScreen"
+//             component={CustomerListScreen}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="TerritoryManagement"
+//             component={TerritoryManagement}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="TerritoryMapping"
+//             component={TerritoryMapping}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="AddTerritory"
+//             component={AddTerritory}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="EditTerritory"
+//             component={EditTerritory}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="RetailerList"
+//             component={RetailerList}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="RetailerProfile"
+//             component={RetailerProfile}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="RetailerSalesTab"
+//             component={RetailerSalesTab}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="CentralStock"
+//             component={CentralStock}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="DistributorOnboarding"
+//             component={DistributorOnboarding}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="DistributorOnboardList"
+//             component={DistributorOnboardList}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="DistributorDashboard"
+//             component={DistributorDashboard}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="DistributorDetails"
+//             component={DistributorDetails}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="RouteList"
+//             component={RouteList}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="FSEManagement"
+//             component={FSEManagement}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="ProfileSettings"
+//             component={ProfileSettings}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="EditProfile"
+//             component={EditProfile}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="RetailerOnboarding"
+//             component={RetailerOnboarding}
+//             options={{ headerShown: false }}
+//           />
+//           <Stack.Screen
+//             name="EndDaySummary"
+//             component={EndDaySummary}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="StockVisibility"
+//             component={StockVisibility}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="RetailerDashboard"
+//             component={RetailerDashboard}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="OrderBilling"
+//             component={OrderBilling}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="Reports"
+//             component={Reports}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="SalesReturnScreen"
+//             component={SalesReturnScreen}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="PurchaseReturnScreen"
+//             component={PurchaseReturnScreen}
+//             options={{ headerShown: false }}
+//           />
+//         </>
+//       )}
+//     </Stack.Navigator>
+//   );
+// };
+
+// export default StackNavigator;
