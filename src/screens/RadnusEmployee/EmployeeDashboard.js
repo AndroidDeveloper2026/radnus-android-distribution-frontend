@@ -435,6 +435,34 @@ const EmployeeDashboard = ({ navigation }) => {
           label="Reports"
           onPress={() => navigation.navigate('Reports')}
         />
+
+        <QuickAction
+          icon={
+            <Icons
+              name="FileSpreadsheet"
+              size={20}
+              color="#2E7D32"
+              circleSize={40}
+              withCircle
+            />
+          }
+          label="Excel Export"
+          onPress={() => navigation.navigate('ExcelExportScreen')}
+        />
+
+        <QuickAction
+          icon={
+            <Icons
+              name="Activity"
+              size={20}
+              color="#667eea"
+              circleSize={40}
+              withCircle
+            />
+          }
+          label="Stock Movement"
+          onPress={() => navigation.navigate('StockMovementScreen')}
+        />
       </ScrollView>
     </View>
   );

@@ -68,6 +68,9 @@ import EmployeeDashboard from '../screens/RadnusEmployee/EmployeeDashboard';
 import ActivityLogScreen from '../screens/Common/ActivityLogScreen';
 import SalesReturnScreen from '../screens/Returns/SalesReturnScreen';
 import PurchaseReturnScreen from '../screens/Returns/PurchaseReturnScreen';
+// Add these imports with the other screen imports
+import ExcelExportScreen from '../screens/RadnusEmployee/ExcelExportscreen';
+import StockMovementScreen from '../screens/RadnusEmployee/StockMovementScreen';
 
 const Stack = createStackNavigator();
 
@@ -200,6 +203,17 @@ const StackNavigator = () => {
           <Stack.Screen
             name="ActivityLogScreen"
             component={ActivityLogScreen}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="ExcelExportScreen"
+            component={ExcelExportScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="StockMovementScreen"
+            component={StockMovementScreen}
             options={{ headerShown: false }}
           />
 

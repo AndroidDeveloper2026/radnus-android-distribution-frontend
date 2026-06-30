@@ -1,0 +1,258 @@
+// src/screens/RadnusEmployee/ExcelExportStyle.js
+import { StyleSheet } from 'react-native';
+
+const C = {
+  bg: '#fff5f5',
+  card: '#ffffff',
+  border: '#fbd5d5',
+  text: '#2d0a0a',
+  subText: '#8a5050',
+  muted: '#c98f8f',
+  red: '#c0392b',
+  redDark: '#a52a1f',
+  redLight: '#ffe5e0',
+  redSoft: '#fdeaea',
+};
+
+export default StyleSheet.create({
+  container: { flex: 1, backgroundColor: C.bg },
+  content: { padding: 16, gap: 14 },
+
+  // Header card
+  headerCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: C.red,
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 14,
+  },
+  headerText: { flex: 1 },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: '#fff', marginBottom: 2 },
+  headerSub: { fontSize: 13, color: '#ffd9d4' },
+  totalBadge: { alignItems: 'center', minWidth: 70 },
+  totalBadgeValue: { fontSize: 24, fontWeight: '800', color: '#fff' },
+  totalBadgeLabel: { fontSize: 11, color: '#ffd9d4' },
+
+  // Search
+  searchWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: C.card,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: C.border,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    gap: 8,
+    marginBottom: 14,
+  },
+  searchIcon: { fontSize: 16 },
+  searchInput: { flex: 1, fontSize: 14, color: C.text },
+  clearIcon: { color: C.muted, fontSize: 16, paddingHorizontal: 4 },
+
+  // Sections
+  section: {
+    backgroundColor: C.card,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: C.border,
+    padding: 14,
+    gap: 10,
+    marginBottom: 14,
+  },
+  sectionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  sectionLabel: { fontSize: 13, fontWeight: '700', color: C.redDark },
+  clearBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    backgroundColor: C.redLight,
+    borderRadius: 6,
+  },
+  clearBtnText: { fontSize: 12, color: C.redDark, fontWeight: '600' },
+
+  // Salesperson chips
+  spChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    backgroundColor: C.redSoft,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: C.border,
+    marginRight: 8,
+  },
+  spChipActive: { backgroundColor: C.red, borderColor: C.red },
+  spChipText: { fontSize: 12, fontWeight: '500', color: C.subText },
+  spChipTextActive: { color: '#fff' },
+
+  // Period chips
+  periodChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    backgroundColor: C.redSoft,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: C.border,
+    marginRight: 8,
+  },
+  periodChipActive: { backgroundColor: C.red, borderColor: C.red },
+  periodChipText: { fontSize: 12, fontWeight: '500', color: C.subText },
+  periodChipTextActive: { color: '#fff' },
+
+  // Custom date
+  customDateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 8,
+  },
+  dateInput: {
+    flex: 1,
+    backgroundColor: C.redSoft,
+    borderWidth: 1,
+    borderColor: C.border,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    fontSize: 13,
+    color: C.text,
+  },
+  dateSep: { color: C.red, fontSize: 16, fontWeight: '700' },
+
+  // Stats grid
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 4,
+  },
+  statCard: {
+    flex: 1,
+    minWidth: '28%',
+    backgroundColor: C.card,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: C.border,
+    borderTopWidth: 3,
+    borderTopColor: C.red,
+    padding: 12,
+    alignItems: 'center',
+    gap: 4,
+  },
+  statDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: C.red },
+  statValue: { fontSize: 18, fontWeight: '700', color: C.text },
+  statLabel: { fontSize: 11, color: C.subText, textAlign: 'center' },
+
+  // Report card
+  reportCard: {
+    backgroundColor: C.card,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: C.border,
+    borderLeftWidth: 4,
+    borderLeftColor: C.red,
+    padding: 16,
+    gap: 12,
+    marginBottom: 14,
+    shadowColor: '#c0392b',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  cardHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
+  cardIcon: { fontSize: 26, marginTop: 2 },
+  cardInfo: { flex: 1 },
+  cardTitle: { fontSize: 15, fontWeight: '700', color: C.text, marginBottom: 2 },
+  cardDesc: { fontSize: 12, color: C.subText, lineHeight: 17 },
+  countBadge: { alignItems: 'center', minWidth: 50 },
+  countText: { fontSize: 22, fontWeight: '800', color: C.red },
+  countLabel: { fontSize: 10, color: C.muted },
+
+  emptyHint: { fontSize: 12, color: '#b45309', fontStyle: 'italic' },
+
+  // Actions
+  cardActions: { gap: 8 },
+  viewBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    borderWidth: 1.5,
+    borderColor: C.red,
+    borderRadius: 10,
+    backgroundColor: C.redSoft,
+  },
+  viewBtnText: { fontSize: 13, fontWeight: '700', color: C.red },
+  exportBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderWidth: 1.5,
+    borderColor: C.red,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+  },
+  exportBtnIcon: { fontSize: 16, color: C.red },
+  exportBtnName: { fontSize: 13, fontWeight: '700', color: C.red },
+  exportBtnDesc: { fontSize: 11, color: C.subText },
+  disabledBtn: { opacity: 0.4 },
+
+  // Modal
+  modalContainer: { flex: 1, backgroundColor: C.bg },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: C.red,
+  },
+  modalTitle: { fontSize: 17, fontWeight: '700', color: '#fff' },
+  modalClose: { fontSize: 14, color: '#fff', fontWeight: '700' },
+  modalCount: { fontSize: 12, color: C.subText, paddingHorizontal: 16, paddingVertical: 8 },
+  modalBody: { flex: 1, paddingHorizontal: 16 },
+
+  // Preview row
+  previewRow: {
+    backgroundColor: C.card,
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: C.border,
+    borderLeftWidth: 3,
+    borderLeftColor: C.red,
+    gap: 3,
+  },
+  previewMain: { fontSize: 13, fontWeight: '700', color: C.text },
+  previewSub: { fontSize: 12, color: C.subText },
+  previewMeta: { fontSize: 11, color: C.muted },
+
+  // Pagination
+  modalPagination: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderTopWidth: 1,
+    borderTopColor: C.border,
+    backgroundColor: C.card,
+  },
+  pageBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: C.red,
+    borderRadius: 8,
+  },
+  pageBtnDisabled: { opacity: 0.4, borderColor: C.border },
+  pageBtnText: { fontSize: 13, fontWeight: '600', color: C.red },
+  pageInfo: { fontSize: 13, color: C.subText },
+});
