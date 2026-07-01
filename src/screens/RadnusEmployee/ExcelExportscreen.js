@@ -1,5 +1,5 @@
 // src/screens/RadnusEmployee/ExcelExportScreen.js
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo, useRef } from 'react';
 import {
   View,
   Text,
@@ -13,8 +13,23 @@ import {
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  Search,
+  X,
+  Calendar,
+  Users,
+  Receipt,
+  Undo2,
+  RefreshCcw,
+  Package,
+  Eye,
+  Download,
+  ChevronLeft,
+  ChevronRight,
+  AlertTriangle,
+} from 'lucide-react-native';
 import Header from '../../components/Header';
-import { fetchInvoices } from '../../services/features/retailer/invoiceSlice';
+import { fetchInvoices } from '../../services/features/invoice/invoiceSlice';
 import { fetchSalesReturns, fetchPurchaseReturns } from '../../services/features/returns/returnsSlice';
 import { fetchProducts } from '../../services/features/products/productSlice';
 import api from '../../services/API/api';
@@ -27,7 +42,7 @@ import {
   exportProductsToExcel,
   exportCustomersToExcel,
 } from '../../utils/excelExportRN';
-import styles from './ExcelExportStyle';
+import styles, { COLORS } from './ExcelExportStyle';
 
 // ─── Constants (hoisted, never recreated) ─────────────────────────
 const PERIOD_OPTIONS = [
@@ -46,7 +61,7 @@ const REPORT_OPTIONS = [
   {
     id: 'invoices',
     title: 'Invoices',
-    icon: '🧾',
+    Icon: Receipt,
     description: 'Invoice details with customer info and payment modes',
     types: [
       { id: 'summary', name: 'Summary Report', description: 'Basic invoice information' },
@@ -56,7 +71,7 @@ const REPORT_OPTIONS = [
   {
     id: 'salesReturns',
     title: 'Sales Returns',
-    icon: '↩️',
+    Icon: Undo2,
     description: 'Sales return records with customer details',
     types: [
       { id: 'summary', name: 'Summary Report', description: 'Basic return information' },
@@ -66,27 +81,28 @@ const REPORT_OPTIONS = [
   {
     id: 'purchaseReturns',
     title: 'Purchase Returns',
-    icon: '🔄',
+    Icon: RefreshCcw,
     description: 'Purchase return records with supplier details',
     types: [{ id: 'summary', name: 'Purchase Returns', description: 'Basic purchase return information' }],
   },
   {
     id: 'products',
     title: 'Products',
-    icon: '📦',
+    Icon: Package,
     description: 'Product catalog with pricing and inventory',
     types: [{ id: 'summary', name: 'Products Report', description: 'Complete product list' }],
   },
   {
     id: 'customers',
     title: 'Customers',
-    icon: '👥',
+    Icon: Users,
     description: 'Customer database with contact details',
     types: [{ id: 'summary', name: 'Customers Report', description: 'Complete customer list' }],
   },
 ];
 
 const PREVIEW_PER_PAGE = 10;
+const SEARCH_DEBOUNCE_MS = 300;
 
 // ─── Pure helpers (hoisted) ────────────────────────────────────────
 const sortByDate = (data, reportId) => {
@@ -154,23 +170,31 @@ const StatTile = memo(({ label, value }) => (
 
 const ReportCard = memo(({ report, count, loading, exporting, onView, onExport }) => {
   const isEmpty = !loading && count === 0;
+  const ReportIcon = report.Icon;
   return (
     <View style={styles.reportCard}>
       <View style={styles.cardHeader}>
-        <Text style={styles.cardIcon}>{report.icon}</Text>
+        <View style={styles.cardIconWrap}>
+          <ReportIcon size={22} color={COLORS.red} />
+        </View>
         <View style={styles.cardInfo}>
           <Text style={styles.cardTitle}>{report.title}</Text>
           <Text style={styles.cardDesc}>{report.description}</Text>
         </View>
         <View style={styles.countBadge}>
           {loading
-            ? <ActivityIndicator size="small" color="#c0392b" />
+            ? <ActivityIndicator size="small" color={COLORS.red} />
             : <Text style={styles.countText}>{count}</Text>}
           <Text style={styles.countLabel}>records</Text>
         </View>
       </View>
 
-      {isEmpty && <Text style={styles.emptyHint}>⚠️ No data with current filters</Text>}
+      {isEmpty && (
+        <View style={styles.emptyHintRow}>
+          <AlertTriangle size={13} color="#b45309" />
+          <Text style={styles.emptyHint}> No data with current filters</Text>
+        </View>
+      )}
 
       <View style={styles.cardActions}>
         <TouchableOpacity
@@ -178,7 +202,8 @@ const ReportCard = memo(({ report, count, loading, exporting, onView, onExport }
           onPress={() => onView(report.id)}
           disabled={isEmpty || loading}
         >
-          <Text style={styles.viewBtnText}>👁 View Data</Text>
+          <Eye size={15} color={COLORS.red} />
+          <Text style={styles.viewBtnText}> View Data</Text>
         </TouchableOpacity>
 
         {report.types.map((type) => {
@@ -192,8 +217,8 @@ const ReportCard = memo(({ report, count, loading, exporting, onView, onExport }
               disabled={isEmpty || loading || !!exporting}
             >
               {isExp
-                ? <ActivityIndicator size="small" color="#c0392b" />
-                : <Text style={styles.exportBtnIcon}>⬇</Text>}
+                ? <ActivityIndicator size="small" color={COLORS.red} />
+                : <Download size={15} color={COLORS.red} />}
               <View>
                 <Text style={styles.exportBtnName}>{type.name}</Text>
                 <Text style={styles.exportBtnDesc}>{type.description}</Text>
@@ -204,7 +229,12 @@ const ReportCard = memo(({ report, count, loading, exporting, onView, onExport }
       </View>
     </View>
   );
-});
+}, (prev, next) =>
+  prev.report.id === next.report.id &&
+  prev.count === next.count &&
+  prev.loading === next.loading &&
+  prev.exporting === next.exporting,
+);
 
 const PreviewRow = memo(({ item, reportId }) => {
   if (reportId === 'invoices') {
@@ -243,6 +273,125 @@ const PreviewRow = memo(({ item, reportId }) => {
   );
 });
 
+// ─── Header content, isolated so text input doesn't re-render list ──
+const ExportHeader = memo(({
+  totalRecords,
+  searchValue,
+  onSearchChange,
+  onSearchClear,
+  uniqueSalespersons,
+  salespersonFilter,
+  onSpSelect,
+  hasFilters,
+  onResetFilters,
+  periodFilter,
+  onPeriodSelect,
+  showDateFilter,
+  fromDateText,
+  onFromDateChange,
+  toDateText,
+  onToDateChange,
+  reportCounts,
+}) => (
+  <View>
+    <View style={styles.headerCard}>
+      <View style={styles.headerText}>
+        <Text style={styles.headerTitle}>Export Center</Text>
+        <Text style={styles.headerSub}>Export your data as Excel files</Text>
+      </View>
+      <View style={styles.totalBadge}>
+        <Text style={styles.totalBadgeValue}>{totalRecords.toLocaleString()}</Text>
+        <Text style={styles.totalBadgeLabel}>Filtered Records</Text>
+      </View>
+    </View>
+
+    <View style={styles.searchWrapper}>
+      <Search size={16} color={COLORS.subText} />
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Search by customer, invoice number, salesperson..."
+        placeholderTextColor={COLORS.muted}
+        defaultValue={searchValue}
+        onChangeText={onSearchChange}
+      />
+      {searchValue ? (
+        <TouchableOpacity onPress={onSearchClear} hitSlop={8}>
+          <X size={16} color={COLORS.muted} />
+        </TouchableOpacity>
+      ) : null}
+    </View>
+
+    {uniqueSalespersons.length > 0 && (
+      <View style={styles.section}>
+        <View style={styles.sectionLabelRow}>
+          <Users size={14} color={COLORS.redDark} />
+          <Text style={styles.sectionLabel}> Filter by Salesperson</Text>
+        </View>
+        <FlatList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={['', ...uniqueSalespersons]}
+          keyExtractor={(item, idx) => item || `all_${idx}`}
+          renderItem={({ item: sp }) => (
+            <SpChip label={sp || 'All'} active={salespersonFilter === sp} onPress={() => onSpSelect(sp)} />
+          )}
+        />
+      </View>
+    )}
+
+    <View style={styles.section}>
+      <View style={styles.sectionRow}>
+        <View style={styles.sectionLabelRow}>
+          <Calendar size={14} color={COLORS.redDark} />
+          <Text style={styles.sectionLabel}> Date Filter</Text>
+        </View>
+        {hasFilters && (
+          <TouchableOpacity onPress={onResetFilters} style={styles.clearBtn}>
+            <Text style={styles.clearBtnText}>Clear All</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+      <FlatList
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        data={PERIOD_OPTIONS}
+        keyExtractor={(item) => item.value}
+        renderItem={({ item }) => (
+          <PeriodChip option={item} active={periodFilter === item.value} onPress={() => onPeriodSelect(item.value)} />
+        )}
+      />
+
+      {showDateFilter && (
+        <View style={styles.customDateRow}>
+          <TextInput
+            style={styles.dateInput}
+            placeholder="From (YYYY-MM-DD)"
+            placeholderTextColor={COLORS.muted}
+            defaultValue={fromDateText}
+            onChangeText={onFromDateChange}
+          />
+          <Text style={styles.dateSep}>→</Text>
+          <TextInput
+            style={styles.dateInput}
+            placeholder="To (YYYY-MM-DD)"
+            placeholderTextColor={COLORS.muted}
+            defaultValue={toDateText}
+            onChangeText={onToDateChange}
+          />
+        </View>
+      )}
+    </View>
+
+    <View style={styles.statsGrid}>
+      <StatTile label="Invoices" value={reportCounts.invoices} />
+      <StatTile label="Sales Returns" value={reportCounts.salesReturns} />
+      <StatTile label="Purch. Returns" value={reportCounts.purchaseReturns} />
+      <StatTile label="Products" value={reportCounts.products} />
+      <StatTile label="Customers" value={reportCounts.customers} />
+    </View>
+  </View>
+));
+
 // ─── ExcelExportScreen ─────────────────────────────────────────────
 const ExcelExportScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -270,6 +419,8 @@ const ExcelExportScreen = ({ navigation }) => {
 
   const [previewModal, setPreviewModal] = useState(null);
   const [previewPage, setPreviewPage] = useState(1);
+
+  const searchDebounceRef = useRef(null);
 
   // ─── Fetch ──────────────────────────────────────────────────────
   const fetchAllData = useCallback(async () => {
@@ -321,18 +472,36 @@ const ExcelExportScreen = ({ navigation }) => {
     setRefreshing(false);
   }, [fetchAllData]);
 
+  // ─── Debounced search ─────────────────────────────────────────────
+  const handleSearchChange = useCallback((text) => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => setSearchTerm(text), SEARCH_DEBOUNCE_MS);
+  }, []);
+
+  useEffect(() => () => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+  }, []);
+
+  const handleSearchClear = useCallback(() => setSearchTerm(''), []);
+
   // ─── Filtering ──────────────────────────────────────────────────
+  const resolvedDateRange = useMemo(() => {
+    if (periodFilter === 'custom') {
+      const from = fromDateText ? new Date(fromDateText) : null;
+      const to = toDateText ? new Date(toDateText) : null;
+      if (to) to.setHours(23, 59, 59, 999);
+      return { from, to };
+    }
+    if (periodFilter !== 'all') {
+      const range = getDateRange(periodFilter);
+      return range ? { from: range.fromDate, to: range.toDate } : { from: null, to: null };
+    }
+    return { from: null, to: null };
+  }, [periodFilter, fromDateText, toDateText]);
+
   const filterByDate = useCallback((data) => {
     if (!Array.isArray(data)) return [];
-    let from = null, to = null;
-    if (periodFilter === 'custom') {
-      from = fromDateText ? new Date(fromDateText) : null;
-      to = toDateText ? new Date(toDateText) : null;
-      if (to) to.setHours(23, 59, 59, 999);
-    } else if (periodFilter !== 'all') {
-      const range = getDateRange(periodFilter);
-      if (range) { from = range.fromDate; to = range.toDate; }
-    }
+    const { from, to } = resolvedDateRange;
     if (!from && !to) return data;
     return data.filter((item) => {
       const d = new Date(item?.invoiceDate || item?.createdAt);
@@ -341,11 +510,10 @@ const ExcelExportScreen = ({ navigation }) => {
       if (to && d > to) return false;
       return true;
     });
-  }, [periodFilter, fromDateText, toDateText]);
+  }, [resolvedDateRange]);
 
   const applyFilters = useCallback((data, reportId) => {
-    let filtered = [...data];
-    if (reportId !== 'products' && reportId !== 'customers') filtered = filterByDate(filtered);
+    let filtered = reportId !== 'products' && reportId !== 'customers' ? filterByDate(data) : data;
     if (salespersonFilter && (reportId === 'invoices' || reportId === 'salesReturns')) {
       filtered = filtered.filter((i) => i.salesperson === salespersonFilter);
     }
@@ -453,6 +621,8 @@ const ExcelExportScreen = ({ navigation }) => {
     if (value !== 'custom') { setFromDateText(''); setToDateText(''); }
   }, []);
 
+  const handleSpSelect = useCallback((sp) => setSalespersonFilter(sp), []);
+
   // ─── Preview modal data ────────────────────────────────────────
   const previewItems = useMemo(
     () => previewModal ? previewModal.data.slice((previewPage - 1) * PREVIEW_PER_PAGE, previewPage * PREVIEW_PER_PAGE) : [],
@@ -465,109 +635,9 @@ const ExcelExportScreen = ({ navigation }) => {
     [previewModal?.reportId],
   );
   const previewKeyExtractor = useCallback((item, idx) => `${item._id || item.id || idx}`, []);
-
-  // ─── Header list content ──────────────────────────────────────────
-  const ListHeader = useCallback(() => (
-    <View>
-      <View style={styles.headerCard}>
-        <View style={styles.headerText}>
-          <Text style={styles.headerTitle}>Export Center</Text>
-          <Text style={styles.headerSub}>Export your data as Excel files</Text>
-        </View>
-        <View style={styles.totalBadge}>
-          <Text style={styles.totalBadgeValue}>{totalRecords.toLocaleString()}</Text>
-          <Text style={styles.totalBadgeLabel}>Filtered Records</Text>
-        </View>
-      </View>
-
-      <View style={styles.searchWrapper}>
-        <Text style={styles.searchIcon}>🔍</Text>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search by customer, invoice number, salesperson..."
-          placeholderTextColor="#c98f8f"
-          value={searchTerm}
-          onChangeText={setSearchTerm}
-        />
-        {searchTerm ? (
-          <TouchableOpacity onPress={() => setSearchTerm('')}>
-            <Text style={styles.clearIcon}>✕</Text>
-          </TouchableOpacity>
-        ) : null}
-      </View>
-
-      {uniqueSalespersons.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>🧑‍💼 Filter by Salesperson</Text>
-          <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            data={['', ...uniqueSalespersons]}
-            keyExtractor={(item, idx) => item || `all_${idx}`}
-            renderItem={({ item: sp }) => (
-              <SpChip
-                label={sp || 'All'}
-                active={salespersonFilter === sp}
-                onPress={() => setSalespersonFilter(sp)}
-              />
-            )}
-          />
-        </View>
-      )}
-
-      <View style={styles.section}>
-        <View style={styles.sectionRow}>
-          <Text style={styles.sectionLabel}>📅 Date Filter</Text>
-          {hasFilters && (
-            <TouchableOpacity onPress={resetFilters} style={styles.clearBtn}>
-              <Text style={styles.clearBtnText}>Clear All</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-        <FlatList
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          data={PERIOD_OPTIONS}
-          keyExtractor={(item) => item.value}
-          renderItem={({ item }) => (
-            <PeriodChip option={item} active={periodFilter === item.value} onPress={() => handlePeriodSelect(item.value)} />
-          )}
-        />
-
-        {showDateFilter && (
-          <View style={styles.customDateRow}>
-            <TextInput
-              style={styles.dateInput}
-              placeholder="From (YYYY-MM-DD)"
-              placeholderTextColor="#c98f8f"
-              value={fromDateText}
-              onChangeText={setFromDateText}
-            />
-            <Text style={styles.dateSep}>→</Text>
-            <TextInput
-              style={styles.dateInput}
-              placeholder="To (YYYY-MM-DD)"
-              placeholderTextColor="#c98f8f"
-              value={toDateText}
-              onChangeText={setToDateText}
-            />
-          </View>
-        )}
-      </View>
-
-      <View style={styles.statsGrid}>
-        <StatTile label="Invoices" value={reportCounts.invoices} />
-        <StatTile label="Sales Returns" value={reportCounts.salesReturns} />
-        <StatTile label="Purch. Returns" value={reportCounts.purchaseReturns} />
-        <StatTile label="Products" value={reportCounts.products} />
-        <StatTile label="Customers" value={reportCounts.customers} />
-      </View>
-    </View>
-  ), [
-    totalRecords, searchTerm, uniqueSalespersons, salespersonFilter, hasFilters,
-    periodFilter, showDateFilter, fromDateText, toDateText, reportCounts,
-    handlePeriodSelect, resetFilters,
-  ]);
+  const handlePreviewPrev = useCallback(() => setPreviewPage((p) => Math.max(1, p - 1)), []);
+  const handlePreviewNext = useCallback(() => setPreviewPage((p) => Math.min(previewTotal, p + 1)), [previewTotal]);
+  const closePreview = useCallback(() => setPreviewModal(null), []);
 
   const renderReportCard = useCallback(({ item: report }) => (
     <ReportCard
@@ -582,6 +652,32 @@ const ExcelExportScreen = ({ navigation }) => {
 
   const reportKeyExtractor = useCallback((item) => item.id, []);
 
+  const headerElement = useMemo(() => (
+    <ExportHeader
+      totalRecords={totalRecords}
+      searchValue={searchTerm}
+      onSearchChange={handleSearchChange}
+      onSearchClear={handleSearchClear}
+      uniqueSalespersons={uniqueSalespersons}
+      salespersonFilter={salespersonFilter}
+      onSpSelect={handleSpSelect}
+      hasFilters={hasFilters}
+      onResetFilters={resetFilters}
+      periodFilter={periodFilter}
+      onPeriodSelect={handlePeriodSelect}
+      showDateFilter={showDateFilter}
+      fromDateText={fromDateText}
+      onFromDateChange={setFromDateText}
+      toDateText={toDateText}
+      onToDateChange={setToDateText}
+      reportCounts={reportCounts}
+    />
+  ), [
+    totalRecords, searchTerm, handleSearchChange, handleSearchClear,
+    uniqueSalespersons, salespersonFilter, handleSpSelect, hasFilters, resetFilters,
+    periodFilter, handlePeriodSelect, showDateFilter, fromDateText, toDateText, reportCounts,
+  ]);
+
   // ─── Render ──────────────────────────────────────────────────────
   return (
     <View style={styles.container}>
@@ -591,25 +687,27 @@ const ExcelExportScreen = ({ navigation }) => {
         data={REPORT_OPTIONS}
         keyExtractor={reportKeyExtractor}
         renderItem={renderReportCard}
-        ListHeaderComponent={ListHeader}
+        ListHeaderComponent={headerElement}
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 20 }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#c0392b']} tintColor="#c0392b" />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLORS.red]} tintColor={COLORS.red} />
         }
-        initialNumToRender={3}
-        maxToRenderPerBatch={3}
+        initialNumToRender={5}
+        maxToRenderPerBatch={5}
         windowSize={5}
         removeClippedSubviews
+        keyboardShouldPersistTaps="handled"
       />
 
       {/* ── Data Preview Modal ── */}
-      <Modal visible={!!previewModal} animationType="slide" onRequestClose={() => setPreviewModal(null)}>
+      <Modal visible={!!previewModal} animationType="slide" onRequestClose={closePreview}>
         <View style={[styles.modalContainer, { paddingTop: insets.top }]}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>{previewModal?.title} Data</Text>
-            <TouchableOpacity onPress={() => setPreviewModal(null)}>
-              <Text style={styles.modalClose}>✕ Close</Text>
+            <TouchableOpacity onPress={closePreview} style={styles.modalCloseBtn}>
+              <X size={16} color="#fff" />
+              <Text style={styles.modalClose}> Close</Text>
             </TouchableOpacity>
           </View>
           <Text style={styles.modalCount}>{previewModal?.data?.length ?? 0} records (oldest first)</Text>
@@ -627,18 +725,20 @@ const ExcelExportScreen = ({ navigation }) => {
             <View style={styles.modalPagination}>
               <TouchableOpacity
                 style={[styles.pageBtn, previewPage === 1 && styles.pageBtnDisabled]}
-                onPress={() => setPreviewPage((p) => Math.max(1, p - 1))}
+                onPress={handlePreviewPrev}
                 disabled={previewPage === 1}
               >
-                <Text style={styles.pageBtnText}>‹ Prev</Text>
+                <ChevronLeft size={14} color={previewPage === 1 ? COLORS.muted : COLORS.red} />
+                <Text style={styles.pageBtnText}> Prev</Text>
               </TouchableOpacity>
               <Text style={styles.pageInfo}>Page {previewPage} of {previewTotal}</Text>
               <TouchableOpacity
                 style={[styles.pageBtn, previewPage === previewTotal && styles.pageBtnDisabled]}
-                onPress={() => setPreviewPage((p) => Math.min(previewTotal, p + 1))}
+                onPress={handlePreviewNext}
                 disabled={previewPage === previewTotal}
               >
-                <Text style={styles.pageBtnText}>Next ›</Text>
+                <Text style={styles.pageBtnText}>Next </Text>
+                <ChevronRight size={14} color={previewPage === previewTotal ? COLORS.muted : COLORS.red} />
               </TouchableOpacity>
             </View>
           )}

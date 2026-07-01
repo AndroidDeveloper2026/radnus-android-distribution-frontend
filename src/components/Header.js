@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: '#fff',
-    fontSize: 24,
+    fontSize: 20, // before 24
     fontWeight: '600',
     textAlign:'center',
   },

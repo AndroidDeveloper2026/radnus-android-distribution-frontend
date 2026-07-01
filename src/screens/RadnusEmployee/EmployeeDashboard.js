@@ -450,7 +450,7 @@ const EmployeeDashboard = ({ navigation }) => {
           onPress={() => navigation.navigate('ExcelExportScreen')}
         />
 
-        <QuickAction
+        {/* <QuickAction
           icon={
             <Icons
               name="Activity"
@@ -462,6 +462,33 @@ const EmployeeDashboard = ({ navigation }) => {
           }
           label="Stock Movement"
           onPress={() => navigation.navigate('StockMovementScreen')}
+        /> */}
+
+        <QuickAction
+          icon={
+            <Icons
+              name="ArrowUp"
+              size={20}
+              color="#2E7D32"
+              circleSize={40}
+              withCircle
+            />
+          }
+          label="Inward"
+          onPress={() => navigation.navigate('InwardScreen')}
+        />
+        <QuickAction
+          icon={
+            <Icons
+              name="ArrowDown"
+              size={20}
+              color="#D32F2F"
+              circleSize={40}
+              withCircle
+            />
+          }
+          label="Outward"
+          onPress={() => navigation.navigate('OutwardScreen')}
         />
       </ScrollView>
     </View>

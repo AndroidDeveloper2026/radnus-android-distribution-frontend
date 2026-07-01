@@ -70,7 +70,13 @@ import SalesReturnScreen from '../screens/Returns/SalesReturnScreen';
 import PurchaseReturnScreen from '../screens/Returns/PurchaseReturnScreen';
 // Add these imports with the other screen imports
 import ExcelExportScreen from '../screens/RadnusEmployee/ExcelExportscreen';
-import StockMovementScreen from '../screens/RadnusEmployee/StockMovementScreen';
+// import StockMovementScreen from '../screens/RadnusEmployee/StockMovementScreen';
+import HierarchyApprovalScreen from '../screens/Admin/HierarchyApprovalScreen';
+import ManagerApprovalScreen from '../screens/MarketingManager/ManagerApprovalScreen';
+import DistributorApprovalScreen from '../screens/Distributor/DistributorApprovalScreen';
+import FSEApprovalScreen from '../screens/FieldSalesExecutive/FSEApprovalScreen';
+import InwardScreen from '../screens/RadnusEmployee/InwardScreen';
+import OutwardScreen from '../screens/RadnusEmployee/OutwardScreen';
 
 const Stack = createStackNavigator();
 
@@ -211,9 +217,20 @@ const StackNavigator = () => {
             component={ExcelExportScreen}
             options={{ headerShown: false }}
           />
-          <Stack.Screen
+          {/* <Stack.Screen
             name="StockMovementScreen"
             component={StockMovementScreen}
+            options={{ headerShown: false }}
+          /> */}
+
+          <Stack.Screen
+            name="InwardScreen"
+            component={InwardScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="OutwardScreen"
+            component={OutwardScreen}
             options={{ headerShown: false }}
           />
 
@@ -410,6 +427,30 @@ const StackNavigator = () => {
           />
 
           <Stack.Screen
+            name="HierarchyApprovalScreen"
+            component={HierarchyApprovalScreen}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="ManagerApprovalScreen"
+            component={ManagerApprovalScreen}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="DistributorApprovalScreen"
+            component={DistributorApprovalScreen}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="FSEApprovalScreen"
+            component={FSEApprovalScreen}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
             name="DistributorDashboard"
             component={DistributorDashboard}
             options={{ headerShown: false }}
@@ -499,7 +540,7 @@ const StackNavigator = () => {
 
 export default StackNavigator;
 
-//+++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++++++++++++++
 
 // import React from 'react';
 
@@ -546,6 +587,7 @@ export default StackNavigator;
 // import EditTerritory from '../screens/TerritoryManagement/EditTerritory';
 // import Resetpassword from '../screens/Auth/ResetPassword';
 // import DistributorOnboardList from '../screens/Distributor/DistributorOnboardList';
+// import RadnusApprovalScreen from '../screens/Admin/RadnusApprovalScreen';
 // import FSETracking from '../screens/FieldSalesExecutive/FSETracking';
 // import FSEOnboarding from '../screens/FieldSalesExecutive/FSEOnboarding';
 // import MapScreen from '../screens/FieldSalesExecutive/MapScreen';
@@ -570,6 +612,9 @@ export default StackNavigator;
 // import ActivityLogScreen from '../screens/Common/ActivityLogScreen';
 // import SalesReturnScreen from '../screens/Returns/SalesReturnScreen';
 // import PurchaseReturnScreen from '../screens/Returns/PurchaseReturnScreen';
+// // Add these imports with the other screen imports
+// import ExcelExportScreen from '../screens/RadnusEmployee/ExcelExportscreen';
+// import StockMovementScreen from '../screens/RadnusEmployee/StockMovementScreen';
 
 // const Stack = createStackNavigator();
 
@@ -702,6 +747,17 @@ export default StackNavigator;
 //           <Stack.Screen
 //             name="ActivityLogScreen"
 //             component={ActivityLogScreen}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="ExcelExportScreen"
+//             component={ExcelExportScreen}
+//             options={{ headerShown: false }}
+//           />
+//           <Stack.Screen
+//             name="StockMovementScreen"
+//             component={StockMovementScreen}
 //             options={{ headerShown: false }}
 //           />
 
@@ -888,6 +944,12 @@ export default StackNavigator;
 //           <Stack.Screen
 //             name="DistributorOnboardList"
 //             component={DistributorOnboardList}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="RadnusApprovalScreen"
+//             component={RadnusApprovalScreen}
 //             options={{ headerShown: false }}
 //           />
 

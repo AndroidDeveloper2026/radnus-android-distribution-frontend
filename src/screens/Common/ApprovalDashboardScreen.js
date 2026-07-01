@@ -12,14 +12,18 @@ import {
 import { UserCog } from 'lucide-react-native';
 import API from '../../services/API/api';
 import Header from '../../components/Header';
-import styles from './RadnusApprovalStyle';
+import styles from '../Admin/RadnusApprovalStyle';
 
-// This screen is dedicated to the Radnus Employee Login approval workflow.
-// It does not touch Distributor / FSE / Retailer onboarding, which have
-// their own separate screens and endpoints.
+// Generic hierarchical approval dashboard. Each approver role (Admin,
+// Marketing Manager, Distributor, FSE) sees only the registration
+// requests that belong to their own branch of the hierarchy — this is
+// enforced server-side by /api/approvals/* (see approvalController.js).
+//
+// `title` is just a display label; the data/authorization is always
+// scoped to the logged-in user via the JWT.
 const TABS = ['pending', 'approved', 'rejected'];
 
-const RadnusApprovalScreen = () => {
+const ApprovalDashboardScreen = ({ title = 'Approval Requests' }) => {
   const [tab, setTab] = useState('pending');
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -34,21 +38,16 @@ const RadnusApprovalScreen = () => {
     setError(null);
     try {
       if (tab === 'pending') {
-        const res = await API.get('/api/admin/pending-approvals');
+        const res = await API.get('/api/approvals/pending');
         setUsers(res.data || []);
       } else {
-        const res = await API.get('/api/admin/approved-users?role=Radnus');
-        const list = res.data || [];
-        setUsers(
-          list.filter(u =>
-            tab === 'approved'
-              ? u.approvalStatus === 'approved'
-              : u.approvalStatus === 'rejected',
-          ),
-        );
+        const res = await API.get('/api/approvals/processed', {
+          params: { status: tab },
+        });
+        setUsers(res.data || []);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load Radnus employees');
+      setError(err.response?.data?.message || 'Failed to load requests');
     }
   }, [tab]);
 
@@ -65,7 +64,7 @@ const RadnusApprovalScreen = () => {
 
   const approve = async (id) => {
     try {
-      await API.post(`/api/admin/approve-user/${id}`);
+      await API.post(`/api/approvals/approve/${id}`);
       load();
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to approve');
@@ -81,7 +80,7 @@ const RadnusApprovalScreen = () => {
   const confirmReject = async () => {
     if (!rejectReason.trim()) return;
     try {
-      await API.post(`/api/admin/reject-user/${selectedUserId}`, {
+      await API.post(`/api/approvals/reject/${selectedUserId}`, {
         reason: rejectReason.trim(),
       });
       setRejectModalVisible(false);
@@ -99,10 +98,14 @@ const RadnusApprovalScreen = () => {
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.name}>{item.name}</Text>
+          <Text style={styles.subText}>{item.role}</Text>
           <Text style={styles.subText}>{item.email}</Text>
           <Text style={styles.mobile}>{item.mobile}</Text>
           <Text style={styles.sub}>
             {item.district}, {item.state}
+          </Text>
+          <Text style={styles.sub}>
+            Registered: {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '-'}
           </Text>
         </View>
         <View
@@ -136,7 +139,7 @@ const RadnusApprovalScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Header title="Radnus Emp Approvals" />
+      <Header title={title} />
 
       <View style={styles.tabs}>
         {TABS.map(t => (
@@ -162,7 +165,7 @@ const RadnusApprovalScreen = () => {
         contentContainerStyle={{ padding: 16 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         ListEmptyComponent={
-          !loading && <Text style={styles.center}>No {tab} Radnus employees</Text>
+          !loading && <Text style={styles.center}>No {tab} requests</Text>
         }
       />
 
@@ -195,4 +198,4 @@ const RadnusApprovalScreen = () => {
   );
 };
 
-export default RadnusApprovalScreen;
+export default ApprovalDashboardScreen;

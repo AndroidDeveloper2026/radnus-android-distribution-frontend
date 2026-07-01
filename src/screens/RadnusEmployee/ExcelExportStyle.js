@@ -14,6 +14,8 @@ const C = {
   redSoft: '#fdeaea',
 };
 
+export const COLORS = C;
+
 export default StyleSheet.create({
   container: { flex: 1, backgroundColor: C.bg },
   content: { padding: 16, gap: 14 },
@@ -48,9 +50,7 @@ export default StyleSheet.create({
     gap: 8,
     marginBottom: 14,
   },
-  searchIcon: { fontSize: 16 },
   searchInput: { flex: 1, fontSize: 14, color: C.text },
-  clearIcon: { color: C.muted, fontSize: 16, paddingHorizontal: 4 },
 
   // Sections
   section: {
@@ -63,6 +63,7 @@ export default StyleSheet.create({
     marginBottom: 14,
   },
   sectionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  sectionLabelRow: { flexDirection: 'row', alignItems: 'center' },
   sectionLabel: { fontSize: 13, fontWeight: '700', color: C.redDark },
   clearBtn: {
     paddingHorizontal: 10,
@@ -162,7 +163,14 @@ export default StyleSheet.create({
     elevation: 2,
   },
   cardHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-  cardIcon: { fontSize: 26, marginTop: 2 },
+  cardIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: C.redSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   cardInfo: { flex: 1 },
   cardTitle: { fontSize: 15, fontWeight: '700', color: C.text, marginBottom: 2 },
   cardDesc: { fontSize: 12, color: C.subText, lineHeight: 17 },
@@ -170,6 +178,7 @@ export default StyleSheet.create({
   countText: { fontSize: 22, fontWeight: '800', color: C.red },
   countLabel: { fontSize: 10, color: C.muted },
 
+  emptyHintRow: { flexDirection: 'row', alignItems: 'center' },
   emptyHint: { fontSize: 12, color: '#b45309', fontStyle: 'italic' },
 
   // Actions
@@ -178,7 +187,6 @@ export default StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
     paddingVertical: 10,
     borderWidth: 1.5,
     borderColor: C.red,
@@ -197,7 +205,6 @@ export default StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#fff',
   },
-  exportBtnIcon: { fontSize: 16, color: C.red },
   exportBtnName: { fontSize: 13, fontWeight: '700', color: C.red },
   exportBtnDesc: { fontSize: 11, color: C.subText },
   disabledBtn: { opacity: 0.4 },
@@ -213,6 +220,7 @@ export default StyleSheet.create({
     backgroundColor: C.red,
   },
   modalTitle: { fontSize: 17, fontWeight: '700', color: '#fff' },
+  modalCloseBtn: { flexDirection: 'row', alignItems: 'center' },
   modalClose: { fontSize: 14, color: '#fff', fontWeight: '700' },
   modalCount: { fontSize: 12, color: C.subText, paddingHorizontal: 16, paddingVertical: 8 },
   modalBody: { flex: 1, paddingHorizontal: 16 },
@@ -245,6 +253,8 @@ export default StyleSheet.create({
     backgroundColor: C.card,
   },
   pageBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 8,
     backgroundColor: '#fff',
