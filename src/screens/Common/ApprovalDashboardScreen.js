@@ -99,7 +99,7 @@ const ApprovalDashboardScreen = ({ title = 'Approval Requests' }) => {
         <View style={{ flex: 1 }}>
           <Text style={styles.name}>{item.name}</Text>
           <Text style={styles.subText}>{item.role}</Text>
-          <Text style={styles.subText}>{item.email}</Text>
+          <Text style={styles.subText}>{ item.email}</Text>
           <Text style={styles.mobile}>{item.mobile}</Text>
           <Text style={styles.sub}>
             {item.district}, {item.state}

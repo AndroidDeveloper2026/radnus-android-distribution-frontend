@@ -9,6 +9,8 @@ import styles from "../AdminDashboard/AdminDashboardStyle";
 import Header from "../../components/Header";
 import Icons from "../../components/Icon";
 import Color from "../../utils/constants/colors"
+import ApprovalStatusCards from "../../components/ApprovalStatusCards";
+import useApprovalCounts from "../../utils/hooks/useApprovalCounts";
 
 // import { TrendingUp, Users, UserCheck, Package, AlertCircle, BarChart3 } from 'lucide-react-native';
 
@@ -18,6 +20,16 @@ const ManagerDashboard = ({ navigation }) => {
   const handleDistributorOnboarding = () =>{
   navigation.navigate('DistributorOnboarding')
   }
+
+  // Pending / Approved / Rejected onboarding-request counts (scoped to
+  // this Manager's hierarchy on the server).
+  const {
+    pending: pendingCount,
+    approved: approvedCount,
+    rejected: rejectedCount,
+    loading: approvalCountsLoading,
+    error: approvalCountsError,
+  } = useApprovalCounts();
   return (
     <View style={styles.container}>
       <Header title="Manager Dashboard" showBackArrow={false} />
@@ -89,6 +101,15 @@ const ManagerDashboard = ({ navigation }) => {
 
           {/* 🚨 ACTION REQUIRED */}
           <Text style={styles.sectionTitle}>Action Required</Text>
+
+          <ApprovalStatusCards
+            pending={pendingCount}
+            approved={approvedCount}
+            rejected={rejectedCount}
+            loading={approvalCountsLoading}
+            error={approvalCountsError}
+            onPress={() => navigation.navigate("ManagerApprovalScreen")}
+          />
 
           <TouchableOpacity
             style={styles.navItem}
@@ -172,7 +193,7 @@ const ManagerDashboard = ({ navigation }) => {
 export default ManagerDashboard;
 
 
-//++++++++++++++++++++++++++++++
+//+++++++++++++++++++++++++++++++++++++++++++
 
 // import React from "react";
 // import {
@@ -268,11 +289,21 @@ export default ManagerDashboard;
 
 //           <TouchableOpacity
 //             style={styles.navItem}
-//             onPress={() => navigation.navigate("DistributorOnboardList")}
+//             onPress={() => navigation.navigate("ManagerApprovalScreen")}
 //           >
 //             <Text style={styles.navTitle}>Pending Approvals</Text>
 //             <Text style={styles.navSubTitle}>
-//               Distributor · FSE · Retailer requests
+//               Distributor · Marketing Executive requests
+//             </Text>
+//           </TouchableOpacity>
+
+//           <TouchableOpacity
+//             style={styles.navItem}
+//             onPress={() => navigation.navigate("DistributorOnboardList")}
+//           >
+//             <Text style={styles.navTitle}>Distributor Onboarding List</Text>
+//             <Text style={styles.navSubTitle}>
+//               Distributor · FSE · Retailer onboarding
 //             </Text>
 //           </TouchableOpacity>
 

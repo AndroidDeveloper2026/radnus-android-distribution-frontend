@@ -8,6 +8,8 @@ import {
 import styles from "./DistributorDashboardStyle";
 import Header from "../../components/Header";
 import Icons from "../../components/Icon";
+import ApprovalStatusCards from "../../components/ApprovalStatusCards";
+import useApprovalCounts from "../../utils/hooks/useApprovalCounts";
 
 const DistributorDashboard = ({ navigation }) => {
 
@@ -17,6 +19,16 @@ const DistributorDashboard = ({ navigation }) => {
     pendingCollections: 0,
     activeFSE: 0,
   };
+
+  // Pending / Approved / Rejected FSE onboarding-request counts (scoped to
+  // this Distributor's hierarchy on the server).
+  const {
+    pending: pendingCount,
+    approved: approvedCount,
+    rejected: rejectedCount,
+    loading: approvalCountsLoading,
+    error: approvalCountsError,
+  } = useApprovalCounts();
 
   return (
     <View style={styles.container}>
@@ -100,6 +112,19 @@ const DistributorDashboard = ({ navigation }) => {
 
         </View>
 
+
+        {/* APPROVAL REQUESTS */}
+
+        <Text style={styles.sectionTitle}>FSE Approval Requests</Text>
+
+        <ApprovalStatusCards
+          pending={pendingCount}
+          approved={approvedCount}
+          rejected={rejectedCount}
+          loading={approvalCountsLoading}
+          error={approvalCountsError}
+          onPress={() => navigation.navigate("DistributorApprovalScreen")}
+        />
 
         {/* QUICK ACTIONS */}
 
@@ -228,8 +253,7 @@ const QuickAction = ({ icon, label, onPress }) => (
 
 export default DistributorDashboard;
 
-
-//+++++++++++++++++++++++++++++++++++
+//+++++++++++++++++++++++++++++++++++++++
 
 // import React from "react";
 // import {
@@ -384,6 +408,20 @@ export default DistributorDashboard;
 //           }
 //           label="Manage FSE"
 //           onPress={() => navigation.navigate("FSEManagement")}
+//         />
+
+//         <QuickAction
+//           icon={
+//             <Icons
+//               name={"UserCheck"}
+//               size={20}
+//               color="#2E7D32"
+//               circleSize={40}
+//               withCircle={true}
+//             />
+//           }
+//           label="FSE Approvals"
+//           onPress={() => navigation.navigate("DistributorApprovalScreen")}
 //         />
 
 

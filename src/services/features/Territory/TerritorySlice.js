@@ -3,38 +3,36 @@ import API from '../../API/api';
 
 const TERRITORY = '/api/territory';
 
-export const fetchTerritory = createAsyncThunk('territory/fetch', async () => {
-  const res = await API.get('/api/territory');
+// ─── FETCH TERRITORY ──────────────────────────────────────────────────────
+export const fetchTerritory = createAsyncThunk(
+  'territory/fetch',
+  async () => {
+    const res = await API.get('/api/territory');
+    return res.data;
+  }
+);
 
-  return res.data;
-});
-
-// ADD TERRITORY
+// ─── ADD TERRITORY ──────────────────────────────────────────────────────
 export const addTerritory = createAsyncThunk(
   'territory/add',
   async (data, { dispatch }) => {
     const res = await API.post(TERRITORY, data);
-
-    // refresh list after add
     dispatch(fetchTerritory());
-
     return res.data;
-  },
+  }
 );
 
+// ─── UPDATE TERRITORY ──────────────────────────────────────────────────────
 export const updateTerritory = createAsyncThunk(
   'territory/update',
   async ({ id, data }, { dispatch }) => {
     const res = await API.put(`/api/territory/${id}`, data);
-
-    // refresh list
     dispatch(fetchTerritory());
-
     return res.data;
-  },
+  }
 );
 
-// DELETE TALUK
+// ─── DELETE TALUK ──────────────────────────────────────────────────────
 export const deleteTaluk = createAsyncThunk(
   'territory/deleteTaluk',
   async (id, { dispatch }) => {
@@ -43,7 +41,7 @@ export const deleteTaluk = createAsyncThunk(
   }
 );
 
-// DELETE DISTRICT
+// ─── DELETE DISTRICT ──────────────────────────────────────────────────────
 export const deleteDistrict = createAsyncThunk(
   'territory/deleteDistrict',
   async ({ state, district }, { dispatch }) => {
@@ -54,7 +52,7 @@ export const deleteDistrict = createAsyncThunk(
   }
 );
 
-// DELETE STATE
+// ─── DELETE STATE ──────────────────────────────────────────────────────
 export const deleteState = createAsyncThunk(
   'territory/deleteState',
   async (stateName, { dispatch }) => {
@@ -65,37 +63,163 @@ export const deleteState = createAsyncThunk(
   }
 );
 
+// ─── SLICE ──────────────────────────────────────────────────────
 const territorySlice = createSlice({
   name: 'territory',
   initialState: {
     data: {},
     loading: false,
+    error: null,
   },
-  reducers: {},
-  extraReducers: builder => {
+  reducers: {
+    clearError: (state) => {
+      state.error = null;
+    },
+  },
+  extraReducers: (builder) => {
     builder
-      .addCase(fetchTerritory.pending, state => {
+      // Fetch
+      .addCase(fetchTerritory.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(fetchTerritory.fulfilled, (state, action) => {
         state.loading = false;
-        state.data = action.payload;
+        state.data = action.payload || {};
+      })
+      .addCase(fetchTerritory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
       })
 
-      .addCase(addTerritory.pending, state => {
+      // Add
+      .addCase(addTerritory.pending, (state) => {
         state.loading = true;
       })
-      .addCase(addTerritory.fulfilled, state => {
+      .addCase(addTerritory.fulfilled, (state) => {
         state.loading = false;
+      })
+      .addCase(addTerritory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
       })
 
-      .addCase(updateTerritory.pending, state => {
+      // Update
+      .addCase(updateTerritory.pending, (state) => {
         state.loading = true;
       })
-      .addCase(updateTerritory.fulfilled, state => {
+      .addCase(updateTerritory.fulfilled, (state) => {
         state.loading = false;
+      })
+      .addCase(updateTerritory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
       });
   },
 });
 
+export const { clearError } = territorySlice.actions;
 export default territorySlice.reducer;
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+// import API from '../../API/api';
+
+// const TERRITORY = '/api/territory';
+
+// export const fetchTerritory = createAsyncThunk('territory/fetch', async () => {
+//   const res = await API.get('/api/territory');
+
+//   return res.data;
+// });
+
+// // ADD TERRITORY
+// export const addTerritory = createAsyncThunk(
+//   'territory/add',
+//   async (data, { dispatch }) => {
+//     const res = await API.post(TERRITORY, data);
+
+//     // refresh list after add
+//     dispatch(fetchTerritory());
+
+//     return res.data;
+//   },
+// );
+
+// export const updateTerritory = createAsyncThunk(
+//   'territory/update',
+//   async ({ id, data }, { dispatch }) => {
+//     const res = await API.put(`/api/territory/${id}`, data);
+
+//     // refresh list
+//     dispatch(fetchTerritory());
+
+//     return res.data;
+//   },
+// );
+
+// // DELETE TALUK
+// export const deleteTaluk = createAsyncThunk(
+//   'territory/deleteTaluk',
+//   async (id, { dispatch }) => {
+//     await API.delete(`/api/territory/taluk/${id}`);
+//     dispatch(fetchTerritory());
+//   }
+// );
+
+// // DELETE DISTRICT
+// export const deleteDistrict = createAsyncThunk(
+//   'territory/deleteDistrict',
+//   async ({ state, district }, { dispatch }) => {
+//     await API.delete(`/api/territory/district`, {
+//       data: { state, district },
+//     });
+//     dispatch(fetchTerritory());
+//   }
+// );
+
+// // DELETE STATE
+// export const deleteState = createAsyncThunk(
+//   'territory/deleteState',
+//   async (stateName, { dispatch }) => {
+//     await API.delete(`/api/territory/state`, {
+//       data: { state: stateName },
+//     });
+//     dispatch(fetchTerritory());
+//   }
+// );
+
+// const territorySlice = createSlice({
+//   name: 'territory',
+//   initialState: {
+//     data: {},
+//     loading: false,
+//   },
+//   reducers: {},
+//   extraReducers: builder => {
+//     builder
+//       .addCase(fetchTerritory.pending, state => {
+//         state.loading = true;
+//       })
+//       .addCase(fetchTerritory.fulfilled, (state, action) => {
+//         state.loading = false;
+//         state.data = action.payload;
+//       })
+
+//       .addCase(addTerritory.pending, state => {
+//         state.loading = true;
+//       })
+//       .addCase(addTerritory.fulfilled, state => {
+//         state.loading = false;
+//       })
+
+//       .addCase(updateTerritory.pending, state => {
+//         state.loading = true;
+//       })
+//       .addCase(updateTerritory.fulfilled, state => {
+//         state.loading = false;
+//       });
+//   },
+// });
+
+// export default territorySlice.reducer;

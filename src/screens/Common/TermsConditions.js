@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import styles from './TermsConditionsStyle';
 import Header from '../../components/Header';
@@ -9,22 +9,47 @@ import { registerUser } from '../../services/features/auth/registerSlice';
 
 const TermsConditions = ({ navigation, route }) => {
   const [accepted, setAccepted] = useState(false);
+  // ⭐ FIX: without this, a fast double-tap on "OK & Continue" fired
+  // registerUser() twice before the first request's response came back.
+  // The first request would create the account and send the OTP fine;
+  // the second raced past the duplicate-mobile/email check and hit the
+  // unique index, throwing a real (previously uncaught) error — so the
+  // user saw a working OTP screen with a "Server error" alert stacked on
+  // top of it. Disabling the button while a request is in flight closes
+  // that race at the source.
+  const [submitting, setSubmitting] = useState(false);
   const dispatch = useDispatch();
   const insets = useSafeAreaInsets();
 
   const registerData = route?.params?.registerData;
 
   const onAccept = async () => {
-    if (!accepted) return;
+    if (!accepted || submitting) return;
 
-    const result = await dispatch(registerUser(registerData));
+    setSubmitting(true);
+    try {
+      const result = await dispatch(registerUser(registerData));
 
-    if (registerUser.fulfilled.match(result)) {
-      navigation.replace('OtpScreen', {
-        mobile: registerData.mobile,
-        type: 'register',
-        role: registerData.role,
-      });
+      if (registerUser.fulfilled.match(result)) {
+        navigation.replace('OtpScreen', {
+          mobile: registerData.mobile,
+          type: 'register',
+          role: registerData.role,
+        });
+      } else {
+        // ⭐ FIX: previously a failed registration (bad FCM token, network
+        // blip, server error, etc.) did nothing here — the user just sat on
+        // this screen with no idea the tap didn't work. Now we surface the
+        // real error so they know to retry instead of assuming it's broken.
+        const message =
+          result.payload?.message ||
+          (typeof result.payload === 'string' ? result.payload : null) ||
+          'Registration failed. Please check your details and try again.';
+
+        Alert.alert('Registration Failed', message);
+      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -73,11 +98,16 @@ const TermsConditions = ({ navigation, route }) => {
 
         {/* ACTION BUTTON */}
         <TouchableOpacity
-          style={[styles.okButton, !accepted && styles.disabledBtn]}
-          disabled={!accepted}
+          style={[
+            styles.okButton,
+            (!accepted || submitting) && styles.disabledBtn,
+          ]}
+          disabled={!accepted || submitting}
           onPress={onAccept}
         >
-          <Text style={styles.okText}>OK & Continue</Text>
+          <Text style={styles.okText}>
+            {submitting ? 'PLEASE WAIT...' : 'OK & Continue'}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -86,8 +116,7 @@ const TermsConditions = ({ navigation, route }) => {
 
 export default TermsConditions;
 
-//++++++++++++++++++++++++++++++++++++++++++++++++
-
+//---------- 12.09.2026 -----------------
 // import React, { useState } from 'react';
 // import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 // import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -113,6 +142,7 @@ export default TermsConditions;
 //       navigation.replace('OtpScreen', {
 //         mobile: registerData.mobile,
 //         type: 'register',
+//         role: registerData.role,
 //       });
 //     }
 //   };

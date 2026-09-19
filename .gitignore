@@ -85,3 +85,5 @@ android/app/my-upload-key.keystore
 
 # Gradle properties containing passwords
 android/gradle.properties
+
+*.jks

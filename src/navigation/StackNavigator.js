@@ -14,6 +14,7 @@ import ProductMaster from '../screens/AdminDashboard/ProductsMaster';
 import AddProduct from '../screens/AdminDashboard/AddProduct';
 import ProductList from '../screens/Products/ProductList';
 import OrderCart from '../screens/OrderProduct/OrderCart';
+import CartReviewScreen from '../screens/OrderProduct/CartReviewScreen';
 import OrderSuccess from '../screens/OrderProduct/OrderSuccessScreen';
 import TerritoryManagement from '../screens/TerritoryManagement/TerritoryManagement';
 import RetailerList from '../screens/Retailer/RetailerList';
@@ -77,6 +78,11 @@ import DistributorApprovalScreen from '../screens/Distributor/DistributorApprova
 import FSEApprovalScreen from '../screens/FieldSalesExecutive/FSEApprovalScreen';
 import InwardScreen from '../screens/RadnusEmployee/InwardScreen';
 import OutwardScreen from '../screens/RadnusEmployee/OutwardScreen';
+import PurchaseEntryScreen from '../screens/Purchase/PurchaseEntryScreen';
+import PurchaseHistoryScreen from '../screens/Purchase/PurchaseHistoryScreen';
+import PurchasePriceHistoryScreen from '../screens/Purchase/PurchasePriceHistoryScreen';
+import DataExplorerScreen from '../screens/Purchase/DataExplorerScreen';
+
 
 const Stack = createStackNavigator();
 
@@ -325,6 +331,12 @@ const StackNavigator = () => {
           />
 
           <Stack.Screen
+            name="CartReview"
+            component={CartReviewScreen}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
             name="OrderSuccess"
             component={OrderSuccess}
             options={{ headerShown: false }}
@@ -532,6 +544,28 @@ const StackNavigator = () => {
             component={PurchaseReturnScreen}
             options={{ headerShown: false }}
           />
+
+          {/* ── Purchase Module ── */}
+          <Stack.Screen
+            name="PurchaseEntryScreen"
+            component={PurchaseEntryScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="PurchaseHistoryScreen"
+            component={PurchaseHistoryScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="PurchasePriceHistoryScreen"
+            component={PurchasePriceHistoryScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="DataExplorerScreen"
+            component={DataExplorerScreen}
+            options={{ headerShown: false }}
+          />
         </>
       )}
     </Stack.Navigator>
@@ -540,8 +574,8 @@ const StackNavigator = () => {
 
 export default StackNavigator;
 
-//++++++++++++++++++++++++++++++
 
+//---------------28.8.26-----------------
 // import React from 'react';
 
 // import { createStackNavigator } from '@react-navigation/stack';
@@ -614,7 +648,13 @@ export default StackNavigator;
 // import PurchaseReturnScreen from '../screens/Returns/PurchaseReturnScreen';
 // // Add these imports with the other screen imports
 // import ExcelExportScreen from '../screens/RadnusEmployee/ExcelExportscreen';
-// import StockMovementScreen from '../screens/RadnusEmployee/StockMovementScreen';
+// // import StockMovementScreen from '../screens/RadnusEmployee/StockMovementScreen';
+// import HierarchyApprovalScreen from '../screens/Admin/HierarchyApprovalScreen';
+// import ManagerApprovalScreen from '../screens/MarketingManager/ManagerApprovalScreen';
+// import DistributorApprovalScreen from '../screens/Distributor/DistributorApprovalScreen';
+// import FSEApprovalScreen from '../screens/FieldSalesExecutive/FSEApprovalScreen';
+// import InwardScreen from '../screens/RadnusEmployee/InwardScreen';
+// import OutwardScreen from '../screens/RadnusEmployee/OutwardScreen';
 
 // const Stack = createStackNavigator();
 
@@ -755,9 +795,20 @@ export default StackNavigator;
 //             component={ExcelExportScreen}
 //             options={{ headerShown: false }}
 //           />
-//           <Stack.Screen
+//           {/* <Stack.Screen
 //             name="StockMovementScreen"
 //             component={StockMovementScreen}
+//             options={{ headerShown: false }}
+//           /> */}
+
+//           <Stack.Screen
+//             name="InwardScreen"
+//             component={InwardScreen}
+//             options={{ headerShown: false }}
+//           />
+//           <Stack.Screen
+//             name="OutwardScreen"
+//             component={OutwardScreen}
 //             options={{ headerShown: false }}
 //           />
 
@@ -950,6 +1001,30 @@ export default StackNavigator;
 //           <Stack.Screen
 //             name="RadnusApprovalScreen"
 //             component={RadnusApprovalScreen}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="HierarchyApprovalScreen"
+//             component={HierarchyApprovalScreen}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="ManagerApprovalScreen"
+//             component={ManagerApprovalScreen}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="DistributorApprovalScreen"
+//             component={DistributorApprovalScreen}
+//             options={{ headerShown: false }}
+//           />
+
+//           <Stack.Screen
+//             name="FSEApprovalScreen"
+//             component={FSEApprovalScreen}
 //             options={{ headerShown: false }}
 //           />
 

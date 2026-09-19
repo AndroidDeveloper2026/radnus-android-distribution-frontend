@@ -84,6 +84,7 @@ const ForgotPassword = ({ navigation }) => {
                 errors.email && touched.email ? { borderColor: 'red' } : null,
               ]}
               placeholder="Enter email"
+              placeholderTextColor="#888"
               value={values.email}
               onChangeText={handleChange('email')}
               onBlur={handleBlur('email')}

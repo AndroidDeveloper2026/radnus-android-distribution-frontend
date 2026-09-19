@@ -13,6 +13,8 @@ import { fetchDistributors } from '../../services/features/distributor/distribut
 import Header from '../../components/Header';
 import Color from '../../utils/constants/colors';
 import api from '../../services/API/api';
+import ApprovalStatusCards from '../../components/ApprovalStatusCards';
+import useApprovalCounts from '../../utils/hooks/useApprovalCounts';
 import {
   TrendingUp,
   CalendarDays,
@@ -53,6 +55,17 @@ const AdminDashboard = ({ navigation }) => {
   const [thisMonthSalesLoading, setThisMonthSalesLoading] = useState(true);
 
   const [refreshing, setRefreshing] = useState(false);
+
+  // Pending / Approved / Rejected onboarding-request counts (scoped to
+  // Admin's hierarchy on the server).
+  const {
+    pending: pendingCount,
+    approved: approvedCount,
+    rejected: rejectedCount,
+    loading: approvalCountsLoading,
+    error: approvalCountsError,
+    refetch: refetchApprovalCounts,
+  } = useApprovalCounts();
 
   // Fetch today's sales
   const fetchTodaySales = useCallback(async () => {
@@ -105,9 +118,10 @@ const AdminDashboard = ({ navigation }) => {
       dispatch(fetchDistributors()),
       fetchTodaySales(),
       fetchThisMonthSales(),
+      refetchApprovalCounts(),
     ]);
     setRefreshing(false);
-  }, [dispatch, fetchTodaySales, fetchThisMonthSales]);
+  }, [dispatch, fetchTodaySales, fetchThisMonthSales, refetchApprovalCounts]);
 
   const handleDistributorOnboarding = () => {
     navigation.navigate('DistributorList');
@@ -224,6 +238,15 @@ const AdminDashboard = ({ navigation }) => {
 
         {/* 🚨 ACTION REQUIRED */}
         <Text style={styles.sectionTitle}>Action Required</Text>
+
+        <ApprovalStatusCards
+          pending={pendingCount}
+          approved={approvedCount}
+          rejected={rejectedCount}
+          loading={approvalCountsLoading}
+          error={approvalCountsError}
+          onPress={() => navigation.navigate('HierarchyApprovalScreen')}
+        />
 
         <TouchableOpacity
           style={styles.navItem}
@@ -583,7 +606,7 @@ const styles = StyleSheet.create({
 
 export default AdminDashboard;
 
-//++++++++++++++++++++++++++++++++++++++++++++++++
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 // import React, { useEffect, useState, useCallback } from 'react';
 // import {
@@ -618,6 +641,8 @@ export default AdminDashboard;
 //   Logs,
 //   PieChart,
 //   BarChart,
+//   ArrowDown,
+//   ArrowUp,
 // } from 'lucide-react-native';
 
 // const AdminDashboard = ({ navigation }) => {
@@ -827,7 +852,7 @@ export default AdminDashboard;
 //           <ChevronRight size={18} color="#9CA3AF" strokeWidth={1.8} />
 //         </TouchableOpacity>
 
-//         <TouchableOpacity
+//         {/* <TouchableOpacity
 //           style={styles.navItem}
 //           onPress={() => navigation.navigate('RadnusApprovalScreen')}
 //           activeOpacity={0.7}
@@ -839,6 +864,23 @@ export default AdminDashboard;
 //             <Text style={styles.navTitle}>Radnus Employee Approvals</Text>
 //             <Text style={styles.navSubTitle}>
 //               Approve or reject Radnus Employee Login registrations
+//             </Text>
+//           </View>
+//           <ChevronRight size={18} color="#9CA3AF" strokeWidth={1.8} />
+//         </TouchableOpacity> */}
+
+//         <TouchableOpacity
+//           style={styles.navItem}
+//           onPress={() => navigation.navigate('HierarchyApprovalScreen')}
+//           activeOpacity={0.7}
+//         >
+//           <View style={styles.navIconWrapper}>
+//             <UserCog size={22} color="#2E7D32" strokeWidth={1.8} />
+//           </View>
+//           <View style={styles.navTextContainer}>
+//             <Text style={styles.navTitle}>Marketing Manager Approvals</Text>
+//             <Text style={styles.navSubTitle}>
+//               Approve or reject Marketing Manager registrations
 //             </Text>
 //           </View>
 //           <ChevronRight size={18} color="#9CA3AF" strokeWidth={1.8} />
@@ -998,7 +1040,42 @@ export default AdminDashboard;
 //           </View>
 //           <ChevronRight size={18} color="#9CA3AF" strokeWidth={1.8} />
 //         </TouchableOpacity>
+        
+//               <Text style={styles.sectionTitle}>Stock Movement</Text>
+
+//         <TouchableOpacity
+//           style={styles.navItem}
+//           onPress={() => navigation.navigate('InwardScreen')}
+//           activeOpacity={0.7}
+//         >
+//           <View style={[styles.navIconWrapper, { backgroundColor: '#e8f5e9' }]}>
+//             <ArrowUp size={22} color="#2E7D32" strokeWidth={1.8} />
+//           </View>
+//           <View style={styles.navTextContainer}>
+//             <Text style={styles.navTitle}>Inward</Text>
+//             <Text style={styles.navSubTitle}>Stock added / received</Text>
+//           </View>
+//           <ChevronRight size={18} color="#9CA3AF" strokeWidth={1.8} />
+//         </TouchableOpacity>
+
+//         <TouchableOpacity
+//           style={styles.navItem}
+//           onPress={() => navigation.navigate('OutwardScreen')}
+//           activeOpacity={0.7}
+//         >
+//           <View style={[styles.navIconWrapper, { backgroundColor: '#ffebee' }]}>
+//             <ArrowDown size={22} color="#D32F2F" strokeWidth={1.8} />
+//           </View>
+//           <View style={styles.navTextContainer}>
+//             <Text style={styles.navTitle}>Outward</Text>
+//             <Text style={styles.navSubTitle}>Stock issued / sold</Text>
+//           </View>
+//           <ChevronRight size={18} color="#9CA3AF" strokeWidth={1.8} />
+//         </TouchableOpacity>
+
 //       </ScrollView>
+
+
 //     </View>
 //   );
 // };

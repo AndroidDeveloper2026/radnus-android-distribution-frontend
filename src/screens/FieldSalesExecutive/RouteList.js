@@ -1,3 +1,5 @@
+// RouteList.js - ROLE-BASED SESSION DISPLAY
+
 import React, { useEffect, useCallback, useState, useMemo } from 'react';
 import {
   View,
@@ -22,8 +24,11 @@ import {
   CalendarDays,
   Timer,
   Route,
+  Users,
+  User,
 } from 'lucide-react-native';
 import Header from '../../components/Header';
+import { formatDistance } from '../../utils/formatDistance';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -46,10 +51,10 @@ const formatTime = iso => {
 
 const formatDuration = (start, end) => {
   if (!start || !end) return '—';
-  const ms   = new Date(end) - new Date(start);
+  const ms = new Date(end) - new Date(start);
   const mins = Math.floor(ms / 60000);
-  const hrs  = Math.floor(mins / 60);
-  const rem  = mins % 60;
+  const hrs = Math.floor(mins / 60);
+  const rem = mins % 60;
   if (hrs > 0) return `${hrs}h ${rem}m`;
   return `${mins}m`;
 };
@@ -57,22 +62,22 @@ const formatDuration = (start, end) => {
 // ─── Tab config ───────────────────────────────────────────────────────────────
 
 const TABS = [
-  { key: 'all',   label: 'All' },
+  { key: 'all', label: 'All' },
   { key: 'today', label: 'Today' },
-  { key: 'week',  label: 'Week' },
+  { key: 'week', label: 'Week' },
   { key: 'month', label: 'Month' },
 ];
 
 const isWithinTab = (isoString, tab) => {
   if (tab === 'all' || !isoString) return true;
   const date = new Date(isoString);
-  const now  = new Date();
+  const now = new Date();
 
   if (tab === 'today') {
     return (
       date.getFullYear() === now.getFullYear() &&
-      date.getMonth()    === now.getMonth()    &&
-      date.getDate()     === now.getDate()
+      date.getMonth() === now.getMonth() &&
+      date.getDate() === now.getDate()
     );
   }
   if (tab === 'week') {
@@ -84,7 +89,7 @@ const isWithinTab = (isoString, tab) => {
   if (tab === 'month') {
     return (
       date.getFullYear() === now.getFullYear() &&
-      date.getMonth()    === now.getMonth()
+      date.getMonth() === now.getMonth()
     );
   }
   return true;
@@ -92,14 +97,15 @@ const isWithinTab = (isoString, tab) => {
 
 // ─── Session Card ─────────────────────────────────────────────────────────────
 
-const SessionCard = ({ item, onPress }) => {
-  const isActive   = item.status === 'ACTIVE';
-  const routeCount = item.route?.length || 0;
-  const duration   = formatDuration(item.startTime, item.endTime);
-  const distance   = item.totalDistanceKm
-    ? `${item.totalDistanceKm.toFixed(2)} km`
-    : '0.00 km';
-
+const SessionCard = ({ item, onPress, showUserInfo = false }) => {
+  const isActive = item.status === 'ACTIVE';
+  
+  // ✅ FIXED: Use pointCount with fallback to route.length
+  const routeCount = item.pointCount ?? item.route?.length ?? 0;
+  
+  const duration = formatDuration(item.startTime, item.endTime);
+  const distance = formatDistance(item.totalDistanceKm);
+  
   return (
     <TouchableOpacity
       style={sl.card}
@@ -112,6 +118,19 @@ const SessionCard = ({ item, onPress }) => {
           <CalendarDays size={13} color={ACCENT} strokeWidth={2} />
           <Text style={sl.dateText}>{formatDate(item.startTime)}</Text>
         </View>
+        
+        {/* ✅ Show user info for admin view */}
+        {showUserInfo && item.userId && (
+          <View style={sl.userBadge}>
+            <User size={10} color="#fff" strokeWidth={2} />
+            <Text style={sl.userBadgeText}>
+              {typeof item.userId === 'object' 
+                ? item.userId.name || 'Unknown' 
+                : `User ${String(item.userId).slice(-6)}`}
+            </Text>
+          </View>
+        )}
+        
         <View style={[sl.statusBadge, isActive ? sl.badgeActive : sl.badgeEnded]}>
           {isActive
             ? <Navigation size={10} color="#fff" strokeWidth={2.5} />
@@ -121,12 +140,11 @@ const SessionCard = ({ item, onPress }) => {
         </View>
       </View>
 
-      {/* ── Time row: start + end side by side, no arrow ── */}
+      {/* ── Time row: start + end side by side ── */}
       <View style={sl.timeRow}>
         <View style={sl.timeBlock}>
           <Text style={sl.timeLabel}>START</Text>
           <Text style={sl.timeValue}>{formatTime(item.startTime)}</Text>
-          {/* <Text style={sl.timeDateSub}>{formatDate(item.startTime)}</Text> */}
         </View>
 
         <View style={sl.timeDividerVertical} />
@@ -136,9 +154,6 @@ const SessionCard = ({ item, onPress }) => {
           <Text style={[sl.timeValue, !item.endTime && sl.timeValueOngoing]}>
             {item.endTime ? formatTime(item.endTime) : 'Ongoing'}
           </Text>
-          {/* {item.endTime && (
-            <Text style={sl.timeDateSub}>{formatDate(item.endTime)}</Text>
-          )} */}
         </View>
       </View>
 
@@ -181,9 +196,14 @@ const SessionCard = ({ item, onPress }) => {
 const RouteList = ({ navigation }) => {
   const dispatch = useDispatch();
   const { list: sessions = [], listState, error } = useSelector(s => s.session);
+  
+  // ✅ Get user role and ID from auth
+  const user = useSelector(state => state.auth.user);
+  const userRole = user?.role || 'FSE'; // 'ADMIN' or 'FSE'
+  const userId = user?._id || user?.id;
 
   const [refreshing, setRefreshing] = useState(false);
-  const [activeTab,  setActiveTab]  = useState('all');
+  const [activeTab, setActiveTab] = useState('all');
 
   useEffect(() => {
     dispatch(fetchAllSessions());
@@ -195,27 +215,54 @@ const RouteList = ({ navigation }) => {
     setRefreshing(false);
   }, [dispatch]);
 
-  const filteredSessions = useMemo(() => {
-    if (activeTab === 'all') return sessions;
-    return sessions.filter(s => isWithinTab(s.startTime, activeTab));
-  }, [sessions, activeTab]);
+  // ✅ Filter sessions based on role
+  const filteredByRole = useMemo(() => {
+    if (!sessions || sessions.length === 0) return [];
+    
+    // Admin sees all sessions
+    if (userRole === 'ADMIN' || userRole === 'admin') {
+      return sessions;
+    }
+    
+    // FSE sees only their own sessions
+    return sessions.filter(session => {
+      const sessionUserId = session.userId?._id || session.userId;
+      return sessionUserId === userId;
+    });
+  }, [sessions, userRole, userId]);
 
+  // ✅ Apply tab filter
+  const filteredSessions = useMemo(() => {
+    if (activeTab === 'all') return filteredByRole;
+    return filteredByRole.filter(s => isWithinTab(s.startTime, activeTab));
+  }, [filteredByRole, activeTab]);
+
+  // ✅ Tab counts based on filtered sessions
   const tabCounts = useMemo(() => {
     const counts = {};
     TABS.forEach(({ key }) => {
       counts[key] =
         key === 'all'
-          ? sessions.length
-          : sessions.filter(s => isWithinTab(s.startTime, key)).length;
+          ? filteredByRole.length
+          : filteredByRole.filter(s => isWithinTab(s.startTime, key)).length;
     });
     return counts;
-  }, [sessions]);
+  }, [filteredByRole]);
+
+  // ✅ Check if we should show user info on cards (admin view)
+  const showUserInfo = userRole === 'ADMIN' || userRole === 'admin';
 
   // ── Empty state ───────────────────────────────────────────────────────────
   const renderEmpty = () => {
     if (listState === 'loading') return null;
     const isFiltered = activeTab !== 'all';
-    const tabLabel   = TABS.find(t => t.key === activeTab)?.label ?? '';
+    const tabLabel = TABS.find(t => t.key === activeTab)?.label ?? '';
+    
+    const isAdmin = userRole === 'ADMIN' || userRole === 'admin';
+    const emptyMessage = isAdmin
+      ? 'No sessions found'
+      : 'You have no sessions yet. Start your day to begin tracking.';
+    
     return (
       <View style={sl.emptyBox}>
         <View style={sl.emptyIconWrap}>
@@ -224,12 +271,14 @@ const RouteList = ({ navigation }) => {
         <Text style={sl.emptyTitle}>
           {isFiltered
             ? `No sessions this ${tabLabel.toLowerCase()}`
-            : 'No sessions yet'}
+            : emptyMessage}
         </Text>
         <Text style={sl.emptySubtitle}>
           {isFiltered
             ? 'Try a different time range'
-            : 'Sessions will appear here once FSEs start tracking'}
+            : isAdmin 
+              ? 'Sessions will appear here once FSEs start tracking'
+              : 'Go to Start Day to begin your work session'}
         </Text>
         {isFiltered && (
           <TouchableOpacity
@@ -264,16 +313,33 @@ const RouteList = ({ navigation }) => {
     );
   }
 
+  // ── Role indicator header ───────────────────────────────────────────────
+  const roleLabel = userRole === 'ADMIN' || userRole === 'admin' ? 'Admin View' : 'My Sessions';
+
   return (
     <SafeAreaView style={sl.container} edges={['bottom']}>
       <Header title="Route List" />
+
+      {/* ── Role indicator ── */}
+      <View style={sl.roleIndicator}>
+        <View style={sl.roleIndicatorInner}>
+          {showUserInfo ? (
+            <Users size={14} color="#2563EB" strokeWidth={2} />
+          ) : (
+            <User size={14} color="#16A34A" strokeWidth={2} />
+          )}
+          <Text style={sl.roleIndicatorText}>
+            {roleLabel} {showUserInfo && `(${filteredByRole.length} total)`}
+          </Text>
+        </View>
+      </View>
 
       {/* ── Tab bar ─────────────────────────────────────────────────────── */}
       <View style={sl.tabBarWrap}>
         <View style={sl.tabBar}>
           {TABS.map(tab => {
             const isSelected = activeTab === tab.key;
-            const count      = tabCounts[tab.key] ?? 0;
+            const count = tabCounts[tab.key] ?? 0;
             return (
               <TouchableOpacity
                 key={tab.key}
@@ -310,6 +376,7 @@ const RouteList = ({ navigation }) => {
           renderItem={({ item }) => (
             <SessionCard
               item={item}
+              showUserInfo={showUserInfo}
               onPress={() => navigation.navigate('MapScreen', { session: item })}
             />
           )}
@@ -331,7 +398,7 @@ const RouteList = ({ navigation }) => {
         />
       )}
 
-      {/* ── Floating count pill ──────────────────────────────────────────── */}
+      {/* ── Floating count pill ── */}
       {listState === 'success' && filteredSessions.length > 0 && (
         <View style={sl.countPill}>
           <Text style={sl.countText}>
@@ -345,15 +412,51 @@ const RouteList = ({ navigation }) => {
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
-const ACCENT  = '#dc2626'; // red
+const ACCENT = '#dc2626'; // red
 const SURFACE = '#ffffff';
-const BG      = '#f4f4f5';
+const BG = '#f4f4f5';
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const sl = StyleSheet.create({
-  container:   { flex: 1, backgroundColor: BG },
+  container: { flex: 1, backgroundColor: BG },
   listContent: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 90 },
+
+  // ── Role indicator ──────────────────────────────────────────────────────
+  roleIndicator: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    backgroundColor: '#F8FAFC',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+  },
+  roleIndicatorInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  roleIndicatorText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#475569',
+  },
+
+  // ── User badge on card ──────────────────────────────────────────────────
+  userBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#2563EB',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    gap: 3,
+    marginRight: 8,
+  },
+  userBadgeText: {
+    color: '#fff',
+    fontSize: 9,
+    fontWeight: '700',
+  },
 
   // ── Tab bar ──────────────────────────────────────────────────────────────
   tabBarWrap: {
@@ -435,6 +538,7 @@ const sl = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
+    flexWrap: 'wrap',
   },
   dateBlock: {
     flexDirection: 'row',
@@ -454,8 +558,8 @@ const sl = StyleSheet.create({
     borderRadius: 20,
   },
   badgeActive: { backgroundColor: '#16a34a' },
-  badgeEnded:  { backgroundColor: '#a1a1aa' },
-  badgeText:   { color: '#fff', fontSize: 11, fontWeight: '700' },
+  badgeEnded: { backgroundColor: '#a1a1aa' },
+  badgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
 
   // Time row
   timeRow: {
@@ -482,12 +586,6 @@ const sl = StyleSheet.create({
   timeValueOngoing: {
     color: '#16a34a',
     fontSize: 16,
-  },
-  timeDateSub: {
-    fontSize: 11,
-    color: '#a1a1aa',
-    fontWeight: '500',
-    marginTop: 2,
   },
   timeDividerVertical: {
     width: 1,
@@ -591,8 +689,8 @@ const sl = StyleSheet.create({
     gap: 10,
     padding: 24,
   },
-  loadingText:   { fontSize: 14, color: '#71717a', marginTop: 8 },
-  errorTitle:    { fontSize: 17, fontWeight: '700', color: ACCENT, marginTop: 12 },
+  loadingText: { fontSize: 14, color: '#71717a', marginTop: 8 },
+  errorTitle: { fontSize: 17, fontWeight: '700', color: ACCENT, marginTop: 12 },
   errorSubtitle: { fontSize: 13, color: '#71717a', textAlign: 'center', marginTop: 4 },
   retryBtn: {
     flexDirection: 'row',

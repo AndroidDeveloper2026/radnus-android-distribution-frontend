@@ -1,30 +1,20 @@
-import React, { useRef, useEffect, useState } from 'react';
+// OrderSuccessScreen.js — Fixed with proper imports
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
-  StyleSheet,
-  Animated,
   TextInput,
-  Modal,
+  TouchableOpacity,
   ScrollView,
-  KeyboardAvoidingView,
-  Platform,
+  Modal,
   ActivityIndicator,
   Alert,
-  Switch,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  lookupCustomer,
-  addCustomer,
-  updateCustomer,               // ✅ for editing existing customer
-  resetCustomer,
-  clearAddState,
-  clearUpdateState,            // ✅ reset update status
-} from '../../services/features/customer/customerSlice.js';
-import { reduceStock } from '../../services/features/products/productSlice';
-import LottieView from 'lottie-react-native';
+import { useNavigation } from '@react-navigation/native'; // ✅ IMPORT THIS
 import {
   FileText,
   ChevronDown,
@@ -40,122 +30,360 @@ import {
   AlertTriangle,
   WifiOff,
   CreditCard,
-  IndianRupee,
+  Check,
 } from 'lucide-react-native';
+
 import Header from '../../components/Header';
 import API from '../../services/API/api';
+import {
+  lookupCustomer,
+  addCustomer,
+  updateCustomer,
+  resetCustomer,
+} from '../../services/features/customer/customerSlice';
+import { fetchProducts } from '../../services/features/products/productSlice';
 import styles from './OrderSucessStyle';
-import { createActivityLog } from '../../services/features/activity/activitySlice.js';
+
+// ─── Constants ────────────────────────────────────────────────
+const ACCENT = '#D32F2F';
+const WHITE = '#FFFFFF';
+const GREY = '#555';
+const GREEN = '#2E7D32';
 
 const SALESPERSONS = [
-  { id: 1, name: 'SHANTHI' },
-  { id: 2, name: 'HARIVARTHINI' },
-  { id: 3, name: 'UMA MAM' },
-  { id: 4, name: 'SHARMILA' },
-  { id: 5, name: 'MOHANA AMBIGAI' },
-  { id: 6, name: 'KALAIVANI' },
-  { id: 7, name: 'SUNDER SIR' },
-  { id: 8, name: 'Direct WalkIn'},
+  'SHANTHI',
+  'HARIVARTHINI',
+  'UMA MAM',
+  'SHARMILA',
+  'MOHANA AMBIGAI',
+  'KALAIVANI',
+  'SUNDER SIR',
+  'PAVITHRA',
+  'SARANYA',
+  'VIJAYA LAKSHMI',
+  'VENNILA',
+  'ASHWINI',
+  'PRIYADHARSHNI',
+  'GOMATHI',
+  'KAVIBHARATHI',
+  'DHANALAKSHMI',
 ];
 
-const PAYMENT_MODES = [
-  { id: 1, label: 'Cash' },
-  { id: 2, label: 'GPay' },
-  { id: 3, label: 'Credit Card' },
-  { id: 4, label: 'Debit Card' },
-];
+const PAYMENT_MODES = ['Cash', 'GPay', 'Credit Card', 'Debit Card', 'Office Use', 'Loan Amount'];
+const ORDER_TYPES = ['OEM', 'TOOLS'];
 
-const formatDate = iso =>
-  new Date(iso).toLocaleDateString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
+const fmtDate = iso =>
+  new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+const fmt = v => Number(v || 0).toLocaleString('en-IN');
 
-// Generate invoice number based on financial year
-const getInvoiceNumber = invoiceNum => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
-  let financialYear;
-  if (month >= 4) {
-    financialYear = `${year}-${year + 1}`;
-  } else {
-    financialYear = `${year - 1}-${year}`;
-  }
-  const sequence = invoiceNum?.split('/')?.pop() || '001';
-  return `RC${financialYear}/${sequence}`;
-};
+// ─── Picker Sheet Component ──────────────────────────────────
+const PickerSheet = React.memo(({ visible, onClose, title, items, selected, onSelect }) => (
+  <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+    <View style={styles.overlay}>
+      <View style={styles.sheet}>
+        <View style={styles.sheetHeader}>
+          <Text style={styles.sheetTitle}>{title}</Text>
+          <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <X size={20} color={GREY} />
+          </TouchableOpacity>
+        </View>
+        <ScrollView>
+          {items.map(item => (
+            <TouchableOpacity
+              key={item}
+              style={[styles.sheetRow, selected === item && styles.sheetRowActive]}
+              onPress={() => {
+                onSelect(item);
+                onClose();
+              }}
+            >
+              <Text style={[styles.sheetRowText, selected === item && styles.sheetRowTextActive]}>
+                {item}
+              </Text>
+              {selected === item && <CheckCircle size={15} color={ACCENT} />}
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+    </View>
+  </Modal>
+));
 
-const OrderSuccessScreen = ({ route, navigation }) => {
-  // ✅ Now we receive cartItems instead of invoiceNumber
-  const { cartItems, grandTotal, paymentMode, date } = route.params || {};
-  const [referenceNo, setReferenceNo] = useState('');
+// ─── Customer Modal Component ──────────────────────────────
+const CustomerModal = React.memo(({ 
+  visible, 
+  onClose, 
+  onSave, 
+  saving, 
+  title, 
+  phone, 
+  initial 
+}) => {
+  const [name, setName] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [shop, setShop] = useState('');
+  const [type, setType] = useState('customer');
 
+  useEffect(() => {
+    if (visible && initial) {
+      setName(initial.name || '');
+      setAddress(initial.address || '');
+      setCity(initial.city || '');
+      setState(initial.state || '');
+      setShop(initial.shopName || '');
+      setType(initial.type || 'customer');
+    } else if (visible) {
+      setName('');
+      setAddress('');
+      setCity('');
+      setState('');
+      setShop('');
+      setType('customer');
+    }
+  }, [visible, initial]);
+
+  const handleSave = () => {
+    if (!name.trim()) {
+      Alert.alert('Validation', 'Customer name is required.');
+      return;
+    }
+    if (type === 'shop' && !shop.trim()) {
+      Alert.alert('Validation', 'Shop name is required.');
+      return;
+    }
+    onSave({ 
+      name: name.trim(), 
+      address: address.trim(), 
+      city: city.trim(), 
+      state: state.trim(), 
+      shopName: shop.trim(), 
+      type 
+    });
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+      <View style={styles.overlay}>
+        <View style={[styles.sheet, { maxHeight: '88%' }]}>
+          <View style={styles.sheetHeader}>
+            <View style={styles.sheetHeaderLeft}>
+              <UserPlus size={18} color={ACCENT} />
+              <Text style={styles.sheetTitle}>{title}</Text>
+            </View>
+            <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <X size={20} color={GREY} />
+            </TouchableOpacity>
+          </View>
+          <ScrollView style={styles.modalScroll} keyboardShouldPersistTaps="handled">
+            <View style={styles.phonePill}>
+              <Phone size={12} color={GREY} />
+              <Text style={styles.phonePillText}>{phone}</Text>
+            </View>
+            
+            <View style={styles.typeRow}>
+              {['customer', 'shop'].map(t => (
+                <TouchableOpacity
+                  key={t}
+                  style={[styles.typeBtn, type === t && styles.typeBtnActive]}
+                  onPress={() => setType(t)}
+                >
+                  <Text style={[styles.typeBtnText, type === t && styles.typeBtnTextActive]}>
+                    {t === 'customer' ? 'Customer' : 'Shop'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            
+            {[
+              { label: 'Name *', key: 'name', value: name, set: setName },
+              ...(type === 'shop' ? [{ label: 'Shop Name *', key: 'shop', value: shop, set: setShop }] : []),
+            ].map(f => (
+              <View key={f.key}>
+                <Text style={styles.label}>{f.label}</Text>
+                <TextInput 
+                  style={styles.input} 
+                  value={f.value} 
+                  onChangeText={f.set} 
+                  placeholder={f.label} 
+                  placeholderTextColor="#aaa" 
+                />
+              </View>
+            ))}
+            
+            <Text style={styles.label}>Delivery Address</Text>
+            <TextInput
+              style={[styles.input, styles.textarea]}
+              value={address}
+              onChangeText={setAddress}
+              placeholder="Street, landmark, area…"
+              placeholderTextColor="#aaa"
+              multiline
+            />
+            
+            <View style={styles.rowFields}>
+              <View style={styles.fieldHalf}>
+                <Text style={styles.label}>City</Text>
+                <TextInput 
+                  style={styles.input} 
+                  value={city} 
+                  onChangeText={setCity} 
+                  placeholder="City" 
+                  placeholderTextColor="#aaa" 
+                />
+              </View>
+              <View style={styles.fieldHalf}>
+                <Text style={styles.label}>State</Text>
+                <TextInput 
+                  style={styles.input} 
+                  value={state} 
+                  onChangeText={setState} 
+                  placeholder="State" 
+                  placeholderTextColor="#aaa" 
+                />
+              </View>
+            </View>
+          </ScrollView>
+          
+          <View style={styles.modalFooter}>
+            <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
+              <Text style={styles.cancelBtnText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.submitBtn} onPress={handleSave} disabled={saving}>
+              {saving ? 
+                <ActivityIndicator size="small" color={WHITE} /> : 
+                <CheckCircle size={14} color={WHITE} />
+              }
+              <Text style={styles.submitBtnText}>{saving ? 'Saving…' : 'Save'}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+});
+
+// ─── Confirm Modal Component ────────────────────────────────
+const ConfirmModal = React.memo(({ visible, onClose, onConfirm, confirming, data }) => {
+  if (!data) return null;
+  
+  return (
+    <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
+      <View style={styles.overlay}>
+        <View style={[styles.sheet, { maxHeight: '88%' }]}>
+          <View style={styles.sheetHeader}>
+            <View style={styles.sheetHeaderLeft}>
+              <Check size={18} color={GREEN} />
+              <Text style={styles.sheetTitle}>Ready to Generate Invoice?</Text>
+            </View>
+            <TouchableOpacity onPress={onClose}>
+              <X size={20} color={GREY} />
+            </TouchableOpacity>
+          </View>
+          <ScrollView style={styles.modalScroll}>
+            <Text style={styles.confirmSubtitle}>
+              Please confirm the order details before proceeding.
+            </Text>
+            {[
+              { label: 'Reference No', value: data.referenceNo },
+              { label: 'Order Type', value: data.orderType },
+              { label: 'Buyer', value: data.buyerName },
+              { label: 'Phone', value: data.phone },
+              { label: 'Address', value: data.address || '—' },
+              { label: 'City / State', value: [data.city, data.state].filter(Boolean).join(', ') || '—' },
+              { label: 'Salesperson', value: data.salesperson || '—' },
+              { label: 'Payment Mode', value: data.paymentMode || '—' },
+              { label: 'Courier', value: `₹${data.courier}` },
+              ...(data.discount > 0 ? [{ label: 'Discount', value: `₹${data.discount}` }] : []),
+              ...(data.gst > 0 ? [{ label: 'GST', value: `₹${data.gst}` }] : []),
+              { label: 'Grand Total', value: `₹${fmt(data.grandTotal)}` },
+            ].map(row => (
+              <View key={row.label} style={styles.confirmRow}>
+                <Text style={styles.confirmLabel}>{row.label}</Text>
+                <Text style={[
+                  styles.confirmValue, 
+                  row.label === 'Grand Total' && styles.confirmGrandTotal
+                ]}>
+                  {row.value}
+                </Text>
+              </View>
+            ))}
+          </ScrollView>
+          <View style={styles.modalFooter}>
+            <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
+              <Text style={styles.cancelBtnText}>Go Back</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.submitBtn} onPress={onConfirm} disabled={confirming}>
+              {confirming ? 
+                <ActivityIndicator size="small" color={WHITE} /> : 
+                <FileText size={14} color={WHITE} />
+              }
+              <Text style={styles.submitBtnText}>
+                {confirming ? 'Processing…' : 'Confirm & Invoice'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+});
+
+// ─── Main Screen ──────────────────────────────────────────────
+const OrderSuccess = ({ route }) => {
+  const navigation = useNavigation(); // ✅ Now works with import
   const dispatch = useDispatch();
-  const { data: customer, lookupState, addState, updateState, error } = useSelector(s => s.customer);
-  const user = useSelector(state => state.auth.user);
+  
+  const {
+    cartItems = [],
+    grandTotal = 0,
+    paymentMode: initialPaymentMode,
+    date,
+    batchSelections = {},
+    showBatchSelector = false,
+    priceType = 'retailerPrice',
+  } = route.params || {};
 
-  // Phone
+  const { lookupData: customer, lookupState, addLoading, addSuccess, updateLoading, updateSuccess } = 
+    useSelector(s => s.customer);
+  const user = useSelector(s => s.auth.user);
+
+  // ── State ──
+  const [referenceNo, setReferenceNo] = useState('');
   const [buyerPhone, setBuyerPhone] = useState('');
   const [phoneError, setPhoneError] = useState(false);
-
-  // Add Customer Form
-  const [addModalVisible, setAddModalVisible] = useState(false);
-  const [newName, setNewName] = useState('');
-  const [newAddress, setNewAddress] = useState('');
-  const [newCity, setNewCity] = useState('');
-  const [newState, setNewState] = useState('');
-
-  // ✅ Edit Customer Form
-  const [editModalVisible, setEditModalVisible] = useState(false);
-  const [editName, setEditName] = useState('');
-  const [editAddress, setEditAddress] = useState('');
-  const [editCity, setEditCity] = useState('');
-  const [editState, setEditState] = useState('');
-  const [editShopName, setEditShopName] = useState('');
-  const [editCustomerType, setEditCustomerType] = useState('customer');
-
-  // Shipping Address fields
+  const [paymentMode, setPaymentMode] = useState(initialPaymentMode || 'Cash');
+  const [orderType, setOrderType] = useState('');
+  const [salesperson, setSalesperson] = useState('');
+  const [discount, setDiscount] = useState('0');
+  const [courierCharge, setCourierCharge] = useState('0');
+  const [gstAmount, setGstAmount] = useState('0');
   const [sameAsBuyer, setSameAsBuyer] = useState(true);
   const [shipToName, setShipToName] = useState('');
   const [shipToPhone, setShipToPhone] = useState('');
   const [shipToAddress, setShipToAddress] = useState('');
   const [shipToCity, setShipToCity] = useState('');
   const [shipToState, setShipToState] = useState('');
-
-  // Other form
-  const [courierCharge, setCourierCharge] = useState('80');
-  const [selectedSP, setSelectedSP] = useState(null);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-
-  // 🆕 DISCOUNT FIELD
-  const [discount, setDiscount] = useState('0');
-
-  // Confirm Modal
-  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [addModal, setAddModal] = useState(false);
+  const [editModal, setEditModal] = useState(false);
+  const [confirmModal, setConfirmModal] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
 
-  const [selectedPaymentMode, setSelectedPaymentMode] = useState(
-    paymentMode ? { label: paymentMode } : null,
-  );
-  const [paymentDropdownOpen, setPaymentDropdownOpen] = useState(false);
-  const [customerType, setCustomerType] = useState('customer');
-  const [shopName, setShopName] = useState('');
+  // Picker sheets
+  const [pmSheet, setPmSheet] = useState(false);
+  const [otSheet, setOtSheet] = useState(false);
+  const [spSheet, setSpSheet] = useState(false);
 
-  // Animations
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(30)).current;
-  const shakeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
-  const fadeBg = useRef(new Animated.Value(0)).current;
-
+  // ── Effects ──
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
-      Animated.timing(slideAnim, { toValue: 0, duration: 500, useNativeDriver: true }),
-    ]).start();
-    return () => dispatch(resetCustomer());
+    if (!cartItems.length) {
+      navigation.goBack();
+    }
+    return () => {
+      dispatch(resetCustomer());
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -168,732 +396,1359 @@ const OrderSuccessScreen = ({ route, navigation }) => {
   }, [buyerPhone, dispatch]);
 
   useEffect(() => {
-    if (addState === 'success') {
-      setAddModalVisible(false);
-      setNewName('');
-      setNewAddress('');
-      setNewCity('');
-      setNewState('');
-      dispatch(clearAddState());
+    if (addSuccess) {
+      setAddModal(false);
+      dispatch(lookupCustomer(buyerPhone));
     }
-    if (addState === 'error' && error) {
-      Alert.alert('Error', error);
-      dispatch(clearAddState());
-    }
-  }, [addState, error, dispatch]);
+  }, [addSuccess, buyerPhone, dispatch]);
 
   useEffect(() => {
-    if (updateState === 'success') {
-      setEditModalVisible(false);
-      // Refresh customer data after successful update
+    if (updateSuccess) {
+      setEditModal(false);
       dispatch(lookupCustomer(buyerPhone));
-      
-      // ✅ Log the customer edit activity WITH customer identifier
-      dispatch(createActivityLog({
-        action: 'EDIT_CUSTOMER',
-        productId: null,
-        productName: null,
-        customerIdentifier: buyerPhone,   // ✅ store the phone number as identifier
-      }));
-      
-      dispatch(clearUpdateState());
-      Alert.alert('Success', 'Customer details updated successfully.');
+      Alert.alert('Success', 'Customer updated.');
     }
-    if (updateState === 'error' && error) {
-      Alert.alert('Error', error);
-      dispatch(clearUpdateState());
-    }
-  }, [updateState, error, dispatch, buyerPhone]);
+  }, [updateSuccess, buyerPhone, dispatch]);
 
-  const triggerShake = () => {
-    shakeAnim.setValue(0);
-    Animated.sequence([
-      Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: -10, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: 8, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: -8, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
-    ]).start();
-  };
+  // ── Calculations ──
+  const subtotal = cartItems.reduce((s, i) => s + (i.price || 0) * (i.qty || 0), 0);
+  const discountAmt = parseFloat(discount) || 0;
+  const courierAmt = parseFloat(courierCharge) || 0;
+  const gstAmt = parseFloat(gstAmount) || 0;
+  const grandTotalNet = Math.max(subtotal - discountAmt, 0) + courierAmt + gstAmt;
 
+  // ── Helpers ──
+  const getBatchAllocations = useCallback(
+    item => batchSelections[item.id]?.batchAllocations || item.batchAllocations || [],
+    [batchSelections]
+  );
+
+  // ── Validation ──
   const handleViewInvoice = () => {
+    if (!referenceNo.trim()) {
+      Alert.alert('Validation', 'Reference number is required.');
+      return;
+    }
+    if (!orderType) {
+      Alert.alert('Validation', 'Please select an order type.');
+      return;
+    }
     if (buyerPhone.length < 10) {
       setPhoneError(true);
-      triggerShake();
-      Alert.alert('Phone Required', 'Please enter a valid 10-digit phone number to continue.');
+      Alert.alert('Validation', 'Enter a valid 10-digit phone number.');
       return;
     }
     if (lookupState === 'loading') {
-      Alert.alert('Please Wait', 'Verifying customer details…');
+      Alert.alert('Please wait', 'Verifying customer details…');
       return;
     }
     if (lookupState === 'notfound') {
       setPhoneError(true);
-      triggerShake();
-      Alert.alert(
-        'Customer Not Found',
-        'No customer registered with this number.\nPlease add customer details first.',
-        [
-          { text: '+ Add Customer', onPress: () => setAddModalVisible(true) },
-          { text: 'Cancel', style: 'cancel' },
-        ],
-      );
+      Alert.alert('Customer not found', 'Would you like to add this customer?', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Add Customer', onPress: () => setAddModal(true) },
+      ]);
       return;
     }
     if (lookupState === 'error') {
-      setPhoneError(true);
-      Alert.alert('Connection Error', 'Could not reach server. Please check your connection and try again.');
+      Alert.alert('Error', 'Could not reach server. Check your connection.');
       return;
     }
-    if (lookupState === 'found') {
-      setPhoneError(false);
-      openConfirmModal();
+    if (lookupState === 'found' && customer) {
+      setConfirmModal(true);
     }
   };
 
-  const handleSaveNewCustomer = () => {
-    if (!newName.trim()) {
-      Alert.alert('Required', 'Customer name is required.');
-      return;
-    }
-    if (customerType === 'shop' && !shopName.trim()) {
-      Alert.alert('Required', 'Shop name is required.');
-      return;
-    }
-    dispatch(
-      addCustomer({
-        phone: buyerPhone,
-        name: newName.trim(),
-        address: newAddress.trim(),
-        city: newCity.trim(),
-        state: newState.trim(),
-        type: customerType,
-        shopName: shopName.trim(),
-      }),
-    );
-  };
-
-  const openConfirmModal = () => {
-    setConfirmVisible(true);
-    Animated.parallel([
-      Animated.timing(fadeBg, { toValue: 1, duration: 300, useNativeDriver: true }),
-      Animated.spring(scaleAnim, { toValue: 1, tension: 70, friction: 10, useNativeDriver: true }),
-    ]).start();
-  };
-
-  const closeConfirmModal = () => {
-    Animated.parallel([
-      Animated.timing(fadeBg, { toValue: 0, duration: 200, useNativeDriver: true }),
-      Animated.timing(scaleAnim, { toValue: 0.8, duration: 200, useNativeDriver: true }),
-    ]).start(() => setConfirmVisible(false));
-  };
-
+  // ── Create Invoice ──
   const goToInvoice = async () => {
     setIsConfirming(true);
-    closeConfirmModal();
-
+    setConfirmModal(false);
     try {
-      // Prepare items in the format expected by backend
-      const invoiceItems = cartItems.map(item => ({
-        productId: item.id || item.productId,
-        name: item.name,
-        qty: item.qty,
-        price: item.price,
-      }));
+      const finalShipName = sameAsBuyer ? customer?.name || '' : shipToName;
+      const finalShipPhone = sameAsBuyer ? buyerPhone : shipToPhone;
+      const finalShipAddress = sameAsBuyer ? customer?.address || '' : shipToAddress;
+      const finalShipCity = sameAsBuyer ? customer?.city || '' : shipToCity;
+      const finalShipState = sameAsBuyer ? customer?.state || '' : shipToState;
 
-      const subtotal = grandTotal;                           // without courier
-      const discountAmount = parseFloat(discount) || 0;     // 🆕 discount
-      const afterDiscount = Math.max(subtotal - discountAmount, 0);
-      const courier = parseFloat(courierCharge) || 0;
-      const totalWithCourier = afterDiscount + courier;
+      const invoiceItems = cartItems.map(item => {
+        const alloc = getBatchAllocations(item);
+        const hasValidBatches = alloc.length > 0 && 
+          alloc.some(a => a.batchNumber && a.batchNumber !== 'default');
+        const base = {
+          productId: item.id,
+          name: item.name,
+          qty: item.qty || 0,
+          price: item.price || 0,
+          useDefaultPrice: !hasValidBatches,
+        };
+        if (hasValidBatches) {
+          base.batchAllocations = alloc
+            .filter(a => a.batchNumber && a.batchNumber !== 'default')
+            .map(a => ({
+              batchNumber: a.batchNumber,
+              qty: a.qty || item.qty,
+              purchaseCost: a.purchaseCost || 0,
+              sellingPrice: a.sellingPrice || item.price,
+            }));
+        }
+        return base;
+      });
 
-      // Prepare shipping address (Consignee)
-      const finalShipToName = sameAsBuyer
-        ? (customer?.type === 'shop' ? customer.shopName : customer?.name)
-        : shipToName;
-      const finalShipToPhone = sameAsBuyer ? buyerPhone : shipToPhone;
-      const finalShipToAddress = sameAsBuyer ? (customer?.address || '') : shipToAddress;
-      const finalShipToCity = sameAsBuyer ? (customer?.city || '') : shipToCity;
-      const finalShipToState = sameAsBuyer ? (customer?.state || '') : shipToState;
-
-      // Full payload for invoice creation
       const payload = {
-        // Existing required fields
-        billerName: user?.name || "Unknown",
+        billerName: user?.name || 'Unknown',
         items: invoiceItems,
-        totalAmount: totalWithCourier,        // grand total including courier (after discount)
-        paymentMode: selectedPaymentMode?.label || paymentMode,
-        status: "completed",
-
-        // Customer (Bill To) details
+        totalAmount: grandTotalNet,
+        paymentMode: paymentMode || 'Cash',
+        status: 'completed',
         customerPhone: buyerPhone,
-        customerName: customer?.name,
-        customerType: customer?.type,
-        shopName: customer?.shopName,
-        customerAddress: customer?.address,
-        customerCity: customer?.city,
-        customerState: customer?.state,
-
-        // Consignee (Ship To)
-        sameAsBuyer: sameAsBuyer,
+        customerName: customer?.name || 'Guest',
+        customerType: customer?.type || 'customer',
+        shopName: customer?.shopName || '',
+        customerAddress: customer?.address || '',
+        customerCity: customer?.city || '',
+        customerState: customer?.state || '',
+        sameAsBuyer,
         shippingAddress: {
-          name: finalShipToName,
-          phone: finalShipToPhone,
-          address: finalShipToAddress,
-          city: finalShipToCity,
-          state: finalShipToState,
+          name: finalShipName,
+          phone: finalShipPhone,
+          address: finalShipAddress,
+          city: finalShipCity,
+          state: finalShipState,
         },
-
-        // Additional invoice metadata
-        subtotal: subtotal,                   // original items total
-        discount: discountAmount,             // 🆕 discount field
-        courierCharge: courier,
-        salesperson: selectedSP?.name || '',
+        subtotal,
+        discount: discountAmt,
+        courierCharge: courierAmt,
+        gstAmount: gstAmt,
+        salesperson: salesperson || '',
         referenceNo: referenceNo || '',
         invoiceDate: date || new Date().toISOString(),
+        orderType: orderType || '',
+        priceType: priceType || 'retailerPrice',
+        allowDefaultBatches: true,
+        hasDefaultBatches: invoiceItems.some(i => i.useDefaultPrice),
       };
 
-      // 1. Create invoice with full details
-      const invoiceRes = await API.post("/api/invoices", payload);
-      const invoiceNumber = invoiceRes.data.invoice.invoiceNumber; // already in format RC2025-2026/001
+      const res = await API.post('/api/invoices', payload);
+      const invoiceNumber = res.data.invoice.invoiceNumber;
+      await dispatch(fetchProducts());
 
-      // 2. Reduce stock
-      await dispatch(reduceStock(cartItems)).unwrap();
-
-      // 3. Navigate to InvoiceScreen with all data (including discount)
       navigation.navigate('InvoiceScreen', {
-        invoiceNumber: invoiceNumber,
+        invoiceNumber,
         items: cartItems,
-        total: grandTotal,                          // original subtotal (without discount)
-        paymentMode: selectedPaymentMode?.label || paymentMode,
-        date: date,
-        buyerName: customer?.type === 'shop'
-          ? `${customer.shopName} (${customer.name})`
-          : customer?.name,
-        buyerPhone: buyerPhone,
+        total: grandTotalNet,
+        paymentMode,
+        date,
+        buyerName: customer?.name || '—',
+        buyerPhone,
         buyerAddress: customer?.address || '',
         buyerCity: customer?.city || '',
         buyerState: customer?.state || '',
-        courierCharge: courier,
-        discount: discountAmount,                  // 🆕
-        salesperson: selectedSP?.name || '',
-        referenceNo: referenceNo,
-        shipToName: finalShipToName,
-        shipToPhone: finalShipToPhone,
-        shipToAddress: finalShipToAddress,
-        shipToCity: finalShipToCity,
-        shipToState: finalShipToState,
+        courierCharge: courierAmt,
+        discount: discountAmt,
+        gstAmount: gstAmt,
+        salesperson,
+        referenceNo,
+        shipToName: finalShipName,
+        shipToPhone: finalShipPhone,
+        shipToAddress: finalShipAddress,
+        shipToCity: finalShipCity,
+        shipToState: finalShipState,
+        customerType: customer?.type,
+        shopName: customer?.shopName,
+        orderType,
+        batchSelections,
+        showBatchSelector,
+        priceType,
       });
     } catch (err) {
-      console.error('Error creating invoice or reducing stock:', err);
-      Alert.alert(
-        'Error',
-        err.message || 'Failed to confirm order. Please try again.',
-        [{ text: 'OK', onPress: () => setIsConfirming(false) }]
-      );
+      let msg = 'Failed to confirm order. Please try again.';
+      if (err?.response?.data?.message) {
+        msg = err.response.data.code === 'INSUFFICIENT_STOCK'
+          ? `Insufficient stock: ${err.response.data.message}`
+          : err.response.data.message;
+      } else if (err?.message) {
+        msg = err.message;
+      }
+      Alert.alert('Error', msg);
+    } finally {
+      setIsConfirming(false);
     }
   };
 
-  // 🆕 Computed values for the UI
-  const discountAmount = parseFloat(discount) || 0;
-  const subtotal = grandTotal || 0;
-  const afterDiscount = Math.max(subtotal - discountAmount, 0);
-  const courier = parseFloat(courierCharge) || 0;
-  const grandTotalWithCourier = afterDiscount + courier;
-
-  const renderLookupResult = () => {
-    if (lookupState === 'loading') {
-      return (
-        <View style={styles.statusRow}>
-          <ActivityIndicator size="small" color="#16a34a" />
-          <Text style={styles.statusText}>Checking customer database…</Text>
-        </View>
-      );
-    }
-    if (lookupState === 'found') {
-      return (
-        <View style={styles.foundCard}>
-          <View style={styles.foundCardTop}>
-            <CheckCircle size={15} color="#16a34a" strokeWidth={2.5} />
-            <Text style={styles.foundLabel}> Customer Found</Text>
-            {/* ✅ Edit button instead of Change */}
-            <TouchableOpacity
-              style={styles.changeBtn}
-              onPress={() => {
-                // Pre-fill edit modal with current customer data
-                setEditName(customer?.name || '');
-                setEditAddress(customer?.address || '');
-                setEditCity(customer?.city || '');
-                setEditState(customer?.state || '');
-                setEditShopName(customer?.shopName || '');
-                setEditCustomerType(customer?.type || 'customer');
-                setEditModalVisible(true);
-              }}
-            >
-              <Text style={styles.changeBtnText}>Edit</Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.customerName}>
-            {customer?.type === 'shop' ? `${customer.shopName} (${customer.name})` : customer?.name}
-          </Text>
-          {customer?.address ? (
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
-              <MapPin size={12} color="#555" strokeWidth={2} />
-              <Text style={styles.customerSub}> {customer.address}</Text>
-            </View>
-          ) : null}
-          {customer?.city || customer?.state ? (
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
-              <Building2 size={12} color="#555" strokeWidth={2} />
-              <Text style={styles.customerSub}>
-                {'  '}{[customer.city, customer.state].filter(Boolean).join(', ')}
-              </Text>
-            </View>
-          ) : null}
-        </View>
-      );
-    }
-    if (lookupState === 'notfound') {
-      return (
-        <View style={styles.notFoundBox}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <AlertTriangle size={13} color="#dc2626" strokeWidth={2} />
-            <Text style={[styles.notFoundText, { marginLeft: 5 }]}>No customer found for this number.</Text>
-          </View>
-          <TouchableOpacity style={styles.addBtn} onPress={() => setAddModalVisible(true)}>
-            <UserPlus size={15} color="#fff" strokeWidth={2} />
-            <Text style={styles.addBtnText}> Add Customer Details</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
-    if (lookupState === 'error') {
-      return (
-        <View style={styles.notFoundBox}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <WifiOff size={13} color="#dc2626" strokeWidth={2} />
-            <Text style={[styles.notFoundText, { marginLeft: 5 }]}>Could not reach server. Check connection.</Text>
-          </View>
-          <TouchableOpacity style={[styles.addBtn, { backgroundColor: '#dc2626' }]} onPress={() => dispatch(lookupCustomer(buyerPhone))}>
-            <Text style={styles.addBtnText}> Retry</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
-    return null;
+  const confirmData = {
+    referenceNo,
+    orderType,
+    buyerName: customer?.type === 'shop' 
+      ? `${customer?.name} (${customer?.shopName})` 
+      : customer?.name || '—',
+    phone: buyerPhone,
+    address: customer?.address || '—',
+    city: customer?.city || '',
+    state: customer?.state || '',
+    salesperson,
+    paymentMode,
+    courier: courierAmt,
+    discount: discountAmt,
+    gst: gstAmt,
+    grandTotal: grandTotalNet,
   };
 
   return (
-    <>
-      <Header title="Order Confirm" />
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-          <LottieView source={require('../../assets/json/OrderSuccess.json')} autoPlay loop={false} style={styles.lottie} />
-          <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-            <View style={styles.formCard}>
-              <Text style={styles.formCardTitle}>Delivery & Invoice Details</Text>
+    <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+      {/* ── Header Component ── */}
+      <Header title="Order Confirm" showBackArrow={true} />
 
-              {/* Payment Mode Dropdown */}
-              <View style={styles.fieldGroup}>
-                <View style={styles.labelRow}>
-                  <CreditCard size={14} color="#16a34a" strokeWidth={2} />
-                  <Text style={styles.label}> Payment Mode</Text>
-                </View>
-                <TouchableOpacity style={styles.dropdown} onPress={() => setPaymentDropdownOpen(o => !o)} activeOpacity={0.8}>
-                  <Text style={selectedPaymentMode ? styles.dropdownSelected : styles.dropdownPlaceholder}>
-                    {selectedPaymentMode ? selectedPaymentMode.label.toUpperCase() : 'Select payment mode…'}
-                  </Text>
-                  <ChevronDown size={16} color="#888" style={{ transform: [{ rotate: paymentDropdownOpen ? '180deg' : '0deg' }] }} />
-                </TouchableOpacity>
-                {paymentDropdownOpen && (
-                  <View style={styles.dropdownList}>
-                    {PAYMENT_MODES.map(mode => (
-                      <TouchableOpacity key={mode.id} style={[styles.dropdownItem, selectedPaymentMode?.id === mode.id && styles.dropdownItemActive]} onPress={() => { setSelectedPaymentMode(mode); setPaymentDropdownOpen(false); }}>
-                        <Text style={[styles.dropdownItemText, selectedPaymentMode?.id === mode.id && styles.dropdownItemTextActive]}>{mode.label}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-              </View>
-
-              {/* 🆕 Subtotal (read-only) */}
-              <View style={styles.fieldGroup}>
-                <View style={styles.labelRow}>
-                  <IndianRupee size={14} color="#16a34a" strokeWidth={2} />
-                  <Text style={styles.label}> Subtotal</Text>
-                </View>
-                <View style={styles.readonlyField}>
-                  <Text style={[styles.readonlyText, styles.amountText]}>₹{subtotal.toLocaleString('en-IN')}</Text>
-                </View>
-              </View>
-
-              {/* 🆕 Discount */}
-              <View style={styles.fieldGroup}>
-                <View style={styles.labelRow}>
-                  <IndianRupee size={14} color="#16a34a" strokeWidth={2} />
-                  <Text style={styles.label}> Discount</Text>
-                </View>
-                <TextInput
-                  style={styles.input}
-                  placeholder="0"
-                  placeholderTextColor="#bbb"
-                  keyboardType="numeric"
-                  value={discount}
-                  onChangeText={setDiscount}
-                />
-              </View>
-
-              {/* Invoice Date */}
-              <View style={styles.fieldGroup}>
-                <View style={styles.labelRow}>
-                  <Calendar size={14} color="#16a34a" strokeWidth={2} />
-                  <Text style={styles.label}> Invoice Date</Text>
-                </View>
-                <View style={styles.readonlyField}>
-                  <Text style={styles.readonlyText}>{formatDate(date || new Date().toISOString())}</Text>
-                </View>
-              </View>
-
-              {/* Salesperson Dropdown */}
-              <View style={styles.fieldGroup}>
-                <View style={styles.labelRow}>
-                  <User size={14} color="#16a34a" strokeWidth={2} />
-                  <Text style={styles.label}> Salesperson</Text>
-                </View>
-                <TouchableOpacity style={styles.dropdown} onPress={() => setDropdownOpen(o => !o)} activeOpacity={0.8}>
-                  <Text style={selectedSP ? styles.dropdownSelected : styles.dropdownPlaceholder}>
-                    {selectedSP ? selectedSP.name : 'Select salesperson…'}
-                  </Text>
-                  <ChevronDown size={16} color="#888" style={{ transform: [{ rotate: dropdownOpen ? '180deg' : '0deg' }] }} />
-                </TouchableOpacity>
-                {dropdownOpen && (
-                  <View style={styles.dropdownList}>
-                    {SALESPERSONS.map(sp => (
-                      <TouchableOpacity key={sp.id} style={[styles.dropdownItem, selectedSP?.id === sp.id && styles.dropdownItemActive]} onPress={() => { setSelectedSP(sp); setDropdownOpen(false); }}>
-                        <Text style={[styles.dropdownItemText, selectedSP?.id === sp.id && styles.dropdownItemTextActive]}>{sp.name}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-              </View>
-
-              {/* Reference No */}
-              <View style={styles.fieldGroup}>
-                <View style={styles.labelRow}>
-                  <FileText size={14} color="#16a34a" strokeWidth={2} />
-                  <Text style={styles.label}> Reference No.</Text>
-                </View>
-                <TextInput style={styles.input} placeholder="e.g. PO-12345" placeholderTextColor="#bbb" value={referenceNo} onChangeText={setReferenceNo} />
-              </View>
-
-              {/* Phone Number + Lookup */}
-              <View style={styles.fieldGroup}>
-                <View style={styles.labelRow}>
-                  <Phone size={14} color={phoneError ? '#dc2626' : '#16a34a'} strokeWidth={2} />
-                  <Text style={[styles.label, phoneError && { color: '#dc2626' }]}>
-                    {'  Phone Number '}
-                    <Text style={{ color: '#dc2626' }}>*</Text>
-                  </Text>
-                </View>
-                <Animated.View style={{ transform: [{ translateX: shakeAnim }] }}>
-                  <TextInput
-                    style={[styles.input, phoneError && styles.inputError, lookupState === 'found' && styles.inputLocked]}
-                    placeholder="Enter 10-digit phone number"
-                    placeholderTextColor="#bbb"
-                    keyboardType="phone-pad"
-                    maxLength={10}
-                    value={buyerPhone}
-                    onChangeText={t => { setBuyerPhone(t); setPhoneError(false); }}
-                    editable={lookupState !== 'found'}
-                  />
-                </Animated.View>
-                {phoneError && buyerPhone.length < 10 && <Text style={styles.errorText}>Enter a valid 10-digit phone number</Text>}
-                {renderLookupResult()}
-              </View>
-
-              {/* Shipping Address Section */}
-              <View style={styles.fieldGroup}>
-                <View style={styles.labelRow}>
-                  <Truck size={14} color="#16a34a" strokeWidth={2} />
-                  <Text style={styles.label}> Shipping Address</Text>
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <Text style={{ fontSize: 12, color: '#555' }}>Same as buyer address</Text>
-                  <Switch value={sameAsBuyer} onValueChange={setSameAsBuyer} trackColor={{ false: '#ccc', true: '#16a34a' }} />
-                </View>
-                {!sameAsBuyer && (
-                  <>
-                    <TextInput style={styles.input} placeholder="Ship to Name" placeholderTextColor="#bbb" value={shipToName} onChangeText={setShipToName} />
-                    <TextInput style={styles.input} placeholder="Ship to Phone" placeholderTextColor="#bbb" keyboardType="phone-pad" value={shipToPhone} onChangeText={setShipToPhone} />
-                    <TextInput style={[styles.input, { height: 72, textAlignVertical: 'top' }]} placeholder="Ship to Address" placeholderTextColor="#bbb" multiline value={shipToAddress} onChangeText={setShipToAddress} />
-                    <View style={{ flexDirection: 'row', gap: 8 }}>
-                      <TextInput style={[styles.input, { flex: 1 }]} placeholder="City" placeholderTextColor="#bbb" value={shipToCity} onChangeText={setShipToCity} />
-                      <TextInput style={[styles.input, { flex: 1 }]} placeholder="State" placeholderTextColor="#bbb" value={shipToState} onChangeText={setShipToState} />
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* ── Batch Summary ── */}
+          {showBatchSelector && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Batch Allocations</Text>
+              {cartItems.map(item => {
+                const alloc = getBatchAllocations(item);
+                const hasValid = alloc.length > 0 && 
+                  alloc.some(a => a.batchNumber && a.batchNumber !== 'default');
+                return (
+                  <View key={item.id} style={styles.batchSummaryItem}>
+                    <Text style={styles.batchSummaryProduct} numberOfLines={1}>
+                      {item.name}
+                    </Text>
+                    <View style={styles.batchTagsContainer}>
+                      {hasValid ? (
+                        alloc
+                          .filter(a => a.batchNumber && a.batchNumber !== 'default')
+                          .map((a, i) => (
+                            <View key={i} style={styles.batchTag}>
+                              <Text style={styles.batchTagText}>
+                                {a.batchNumber}: {a.qty || item.qty} units
+                              </Text>
+                            </View>
+                          ))
+                      ) : (
+                        <View style={[styles.batchTag, styles.batchTagDefault]}>
+                          <Text style={[styles.batchTagText, styles.batchTagTextDefault]}>
+                            Default price (no batch)
+                          </Text>
+                        </View>
+                      )}
                     </View>
-                  </>
-                )}
-              </View>
-
-              {/* Courier Charge */}
-              <View style={styles.fieldGroup}>
-                <View style={styles.labelRow}>
-                  <Truck size={14} color="#16a34a" strokeWidth={2} />
-                  <Text style={styles.label}> Courier Charge (₹)</Text>
-                </View>
-                <TextInput style={styles.input} placeholder="e.g. 80" placeholderTextColor="#bbb" keyboardType="numeric" value={courierCharge} onChangeText={setCourierCharge} />
-              </View>
-
-              {/* 🆕 Grand Total Preview – with discount breakdown */}
-              <View style={styles.totalPreview}>
-                <View style={styles.summaryRow}>
-                  <Text style={styles.summaryLabel}>Subtotal</Text>
-                  <Text style={styles.summaryValue}>₹{subtotal.toLocaleString('en-IN')}</Text>
-                </View>
-                {discountAmount > 0 && (
-                  <View style={styles.summaryRow}>
-                    <Text style={styles.summaryLabel}>Discount</Text>
-                    <Text style={[styles.summaryValue, { color: '#16a34a' }]}>- ₹{discountAmount.toLocaleString('en-IN')}</Text>
                   </View>
-                )}
-                <View style={styles.summaryRow}>
-                  <Text style={styles.summaryLabel}>Courier Charge</Text>
-                  <Text style={styles.summaryValue}>₹{courier.toLocaleString('en-IN')}</Text>
-                </View>
-                <View style={styles.divider} />
-                <View style={styles.summaryRow}>
-                  <Text style={styles.summaryTotalLabel}>Grand Total</Text>
-                  <Text style={styles.summaryTotalValue}>₹{grandTotalWithCourier.toLocaleString('en-IN')}</Text>
-                </View>
-              </View>
+                );
+              })}
+            </View>
+          )}
+
+          {/* ── Form ── */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Delivery & Invoice Details</Text>
+
+            {/* Reference No */}
+            <Text style={styles.label}>Reference No. *</Text>
+            <TextInput
+              style={[styles.input, !referenceNo.trim() && styles.inputError]}
+              placeholder="e.g. PO-12345 (Required)"
+              placeholderTextColor="#aaa"
+              value={referenceNo}
+              onChangeText={setReferenceNo}
+            />
+            {!referenceNo.trim() && <Text style={styles.errorText}>Reference number is required</Text>}
+
+            {/* Order Type */}
+            <Text style={styles.label}>Order Type *</Text>
+            <TouchableOpacity
+              style={[styles.picker, !orderType && styles.pickerError]}
+              onPress={() => setOtSheet(true)}
+            >
+              <FileText size={14} color={GREY} />
+              <Text style={[styles.pickerText, !orderType && styles.pickerPlaceholder]}>
+                {orderType || 'Select order type…'}
+              </Text>
+              <ChevronDown size={14} color={GREY} />
+            </TouchableOpacity>
+            {!orderType && <Text style={styles.errorText}>Order type is required</Text>}
+
+            {/* Payment Mode */}
+            <Text style={styles.label}>Payment Mode</Text>
+            <TouchableOpacity style={styles.picker} onPress={() => setPmSheet(true)}>
+              <CreditCard size={14} color={GREY} />
+              <Text style={styles.pickerText}>{paymentMode}</Text>
+              <ChevronDown size={14} color={GREY} />
+            </TouchableOpacity>
+
+            {/* Subtotal */}
+            <Text style={styles.label}>Subtotal</Text>
+            <View style={styles.readonlyField}>
+              <Text style={styles.readonlyText}>₹{fmt(subtotal)}</Text>
             </View>
 
-            {/* Buttons */}
-            <TouchableOpacity
-              style={[styles.primaryBtn, isConfirming && { opacity: 0.6 }]}
-              onPress={handleViewInvoice}
-              disabled={isConfirming}
-            >
-              <FileText size={18} color="#fff" strokeWidth={2} style={{ marginRight: 8 }} />
-              <Text style={styles.primaryText}>View Invoice</Text>
+            {/* Discount */}
+            <Text style={styles.label}>Discount (₹)</Text>
+            <TextInput
+              style={styles.input}
+              keyboardType="numeric"
+              value={discount}
+              onChangeText={setDiscount}
+              placeholder="0"
+              placeholderTextColor="#aaa"
+            />
+
+            {/* Invoice Date */}
+            <Text style={styles.label}>Invoice Date</Text>
+            <View style={styles.readonlyField}>
+              <Calendar size={13} color={GREY} />
+              <Text style={styles.readonlyText}>{fmtDate(date || new Date().toISOString())}</Text>
+            </View>
+
+            {/* Salesperson */}
+            <Text style={styles.label}>Salesperson</Text>
+            <TouchableOpacity style={styles.picker} onPress={() => setSpSheet(true)}>
+              <User size={14} color={GREY} />
+              <Text style={[styles.pickerText, !salesperson && styles.pickerPlaceholder]}>
+                {salesperson || 'Select salesperson…'}
+              </Text>
+              <ChevronDown size={14} color={GREY} />
             </TouchableOpacity>
-          </Animated.View>
+
+            {/* Phone + Customer Lookup */}
+            <Text style={styles.label}>Phone Number *</Text>
+            <TextInput
+              style={[styles.input, phoneError && styles.inputError]}
+              placeholder="Enter 10-digit mobile number"
+              placeholderTextColor="#aaa"
+              keyboardType="phone-pad"
+              maxLength={10}
+              value={buyerPhone}
+              onChangeText={v => {
+                setBuyerPhone(v);
+                if (v.length === 10) setPhoneError(false);
+              }}
+            />
+            {phoneError && buyerPhone.length < 10 && (
+              <Text style={styles.errorText}>Enter a valid 10-digit phone number</Text>
+            )}
+
+            {/* Lookup states */}
+            {lookupState === 'loading' && (
+              <View style={styles.statusRow}>
+                <ActivityIndicator size="small" color={ACCENT} />
+                <Text style={styles.statusText}>Checking customer database…</Text>
+              </View>
+            )}
+            
+            {lookupState === 'found' && customer && (
+              <View style={styles.foundCard}>
+                <View style={styles.foundHeader}>
+                  <CheckCircle size={14} color={GREEN} />
+                  <Text style={styles.foundLabel}>Customer Found</Text>
+                  <TouchableOpacity style={styles.editBtn} onPress={() => setEditModal(true)}>
+                    <Text style={styles.editBtnText}>Edit</Text>
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.customerName}>
+                  {customer.type === 'shop' 
+                    ? `${customer.name} (${customer.shopName})` 
+                    : customer.name}
+                </Text>
+                {customer.address && (
+                  <View style={styles.customerAddressRow}>
+                    <MapPin size={13} color={GREY} />
+                    <Text style={styles.customerAddressText}>{customer.address}</Text>
+                  </View>
+                )}
+                {(customer.city || customer.state) && (
+                  <View style={styles.customerCityRow}>
+                    <Building2 size={13} color={GREY} />
+                    <Text style={styles.customerCityText}>
+                      {[customer.city, customer.state].filter(Boolean).join(', ')}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
+            
+            {lookupState === 'notfound' && (
+              <View style={styles.notFoundBox}>
+                <AlertTriangle size={13} color={ACCENT} />
+                <Text style={styles.notFoundText}>No customer found.</Text>
+                <TouchableOpacity style={styles.addBtn} onPress={() => setAddModal(true)}>
+                  <Text style={styles.addBtnText}>+ Add Customer</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            
+            {lookupState === 'error' && (
+              <View style={styles.notFoundBox}>
+                <WifiOff size={13} color={ACCENT} />
+                <Text style={styles.notFoundText}>Could not reach server.</Text>
+                <TouchableOpacity 
+                  style={[styles.addBtn, styles.retryBtn]} 
+                  onPress={() => dispatch(lookupCustomer(buyerPhone))}
+                >
+                  <Text style={styles.addBtnText}>Retry</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Shipping Address */}
+            <Text style={styles.label}>Shipping Address</Text>
+            <View style={styles.switchRow}>
+              <Text style={styles.switchLabel}>Same as buyer address</Text>
+              <TouchableOpacity
+                style={[styles.switchBtn, sameAsBuyer && styles.switchBtnActive]}
+                onPress={() => setSameAsBuyer(p => !p)}
+              >
+                <Text style={[styles.switchBtnText, sameAsBuyer && styles.switchBtnTextActive]}>
+                  {sameAsBuyer ? 'ON' : 'OFF'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            
+            {!sameAsBuyer && (
+              <View style={styles.shippingFields}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Ship to Name"
+                  placeholderTextColor="#aaa"
+                  value={shipToName}
+                  onChangeText={setShipToName}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Ship to Phone"
+                  placeholderTextColor="#aaa"
+                  keyboardType="phone-pad"
+                  value={shipToPhone}
+                  onChangeText={setShipToPhone}
+                />
+                <TextInput
+                  style={[styles.input, styles.textarea]}
+                  placeholder="Ship to Address"
+                  placeholderTextColor="#aaa"
+                  multiline
+                  value={shipToAddress}
+                  onChangeText={setShipToAddress}
+                />
+                <View style={styles.rowFields}>
+                  <TextInput
+                    style={[styles.input, styles.fieldHalf]}
+                    placeholder="City"
+                    placeholderTextColor="#aaa"
+                    value={shipToCity}
+                    onChangeText={setShipToCity}
+                  />
+                  <TextInput
+                    style={[styles.input, styles.fieldHalf]}
+                    placeholder="State"
+                    placeholderTextColor="#aaa"
+                    value={shipToState}
+                    onChangeText={setShipToState}
+                  />
+                </View>
+              </View>
+            )}
+
+            {/* GST */}
+            <Text style={styles.label}>GST (₹)</Text>
+            <TextInput
+              style={styles.input}
+              keyboardType="numeric"
+              value={gstAmount}
+              onChangeText={setGstAmount}
+              placeholder="0"
+              placeholderTextColor="#aaa"
+            />
+
+            {/* Courier */}
+            <Text style={styles.label}>Courier Charge (₹)</Text>
+            <TextInput
+              style={styles.input}
+              keyboardType="numeric"
+              value={courierCharge}
+              onChangeText={setCourierCharge}
+              placeholder="0"
+              placeholderTextColor="#aaa"
+            />
+
+            {/* Total preview */}
+            <View style={styles.totalPreview}>
+              {[
+                { label: 'Subtotal', value: `₹${fmt(subtotal)}` },
+                ...(discountAmt > 0 ? [{ label: 'Discount', value: `- ₹${fmt(discountAmt)}`, accent: true }] : []),
+                { label: 'Courier', value: `₹${fmt(courierAmt)}` },
+                ...(gstAmt > 0 ? [{ label: 'GST', value: `₹${fmt(gstAmt)}` }] : []),
+              ].map(row => (
+                <View key={row.label} style={styles.totalRow}>
+                  <Text style={styles.totalRowLabel}>{row.label}</Text>
+                  <Text style={[styles.totalRowValue, row.accent && styles.totalRowAccent]}>
+                    {row.value}
+                  </Text>
+                </View>
+              ))}
+              <View style={styles.totalDivider} />
+              <View style={styles.totalRow}>
+                <Text style={styles.totalGrandLabel}>Grand Total</Text>
+                <Text style={styles.totalGrandValue}>₹{fmt(grandTotalNet)}</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* ── View Invoice button ── */}
+          <TouchableOpacity
+            style={[
+              styles.primaryBtn,
+              (isConfirming || !referenceNo.trim() || !orderType) && styles.primaryBtnDisabled,
+            ]}
+            onPress={handleViewInvoice}
+            disabled={isConfirming || !referenceNo.trim() || !orderType}
+          >
+            <FileText size={16} color={WHITE} />
+            <Text style={styles.primaryBtnText}>View Invoice</Text>
+          </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Add Customer Modal */}
-      <Modal transparent visible={addModalVisible} animationType="slide" onRequestClose={() => setAddModalVisible(false)}>
-        <View style={styles.sheetOverlay}>
-          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-            <ScrollView keyboardShouldPersistTaps="handled">
-              <View style={styles.sheetCard}>
-                <View style={styles.sheetHeader}>
-                  <UserPlus size={18} color="#16a34a" strokeWidth={2} />
-                  <Text style={styles.sheetTitle}> Add New Customer</Text>
-                  <TouchableOpacity onPress={() => setAddModalVisible(false)}><X size={20} color="#888" strokeWidth={2} /></TouchableOpacity>
-                </View>
-                <View style={styles.phonePill}><Phone size={13} color="#16a34a" strokeWidth={2} /><Text style={styles.phonePillText}> {buyerPhone}</Text></View>
-                <View style={{ flexDirection: 'row', marginBottom: 10 }}>
-                  <TouchableOpacity onPress={() => setCustomerType('customer')}><Text style={{ color: customerType === 'customer' ? '#16a34a' : '#888', fontWeight: '600' }}>Customer</Text></TouchableOpacity>
-                  <TouchableOpacity onPress={() => setCustomerType('shop')}><Text style={{ marginLeft: 20, color: customerType === 'shop' ? '#16a34a' : '#888', fontWeight: '600' }}>Shop</Text></TouchableOpacity>
-                </View>
-                <TextInput style={styles.sheetInput} placeholder="Customer Name *" placeholderTextColor="#bbb" value={newName} onChangeText={setNewName} />
-                {customerType === 'shop' && <TextInput style={styles.sheetInput} placeholder="Shop Name *" placeholderTextColor="#bbb" value={shopName} onChangeText={setShopName} />}
-                <TextInput style={[styles.sheetInput, { height: 72, textAlignVertical: 'top' }]} placeholder="Delivery Address" placeholderTextColor="#bbb" multiline value={newAddress} onChangeText={setNewAddress} />
-                <View style={{ flexDirection: 'row', gap: 8 }}>
-                  <TextInput style={[styles.sheetInput, { flex: 1 }]} placeholder="City" placeholderTextColor="#bbb" value={newCity} onChangeText={setNewCity} />
-                  <TextInput style={[styles.sheetInput, { flex: 1 }]} placeholder="State" placeholderTextColor="#bbb" value={newState} onChangeText={setNewState} />
-                </View>
-                <TouchableOpacity style={[styles.saveBtn, addState === 'loading' && { opacity: 0.6 }]} onPress={handleSaveNewCustomer} disabled={addState === 'loading'}>
-                  {addState === 'loading' ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Save Customer</Text>}
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-          </KeyboardAvoidingView>
-        </View>
-      </Modal>
+      {/* ── Sheets ── */}
+      <PickerSheet
+        visible={pmSheet}
+        onClose={() => setPmSheet(false)}
+        title="Payment Mode"
+        items={PAYMENT_MODES}
+        selected={paymentMode}
+        onSelect={setPaymentMode}
+      />
+      <PickerSheet
+        visible={otSheet}
+        onClose={() => setOtSheet(false)}
+        title="Order Type"
+        items={ORDER_TYPES}
+        selected={orderType}
+        onSelect={setOrderType}
+      />
+      <PickerSheet
+        visible={spSheet}
+        onClose={() => setSpSheet(false)}
+        title="Salesperson"
+        items={SALESPERSONS}
+        selected={salesperson}
+        onSelect={setSalesperson}
+      />
 
-      {/* ✅ Edit Customer Modal */}
-      <Modal
-        transparent
-        visible={editModalVisible}
-        animationType="slide"
-        onRequestClose={() => setEditModalVisible(false)}
-      >
-        <View style={styles.sheetOverlay}>
-          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-            <ScrollView keyboardShouldPersistTaps="handled">
-              <View style={styles.sheetCard}>
-                <View style={styles.sheetHeader}>
-                  <UserPlus size={18} color="#16a34a" strokeWidth={2} />
-                  <Text style={styles.sheetTitle}> Edit Customer Details</Text>
-                  <TouchableOpacity onPress={() => setEditModalVisible(false)}>
-                    <X size={20} color="#888" strokeWidth={2} />
-                  </TouchableOpacity>
-                </View>
+      {/* ── Modals ── */}
+      <CustomerModal
+        visible={addModal}
+        onClose={() => setAddModal(false)}
+        onSave={data => dispatch(addCustomer({ phone: buyerPhone, ...data }))}
+        saving={addLoading}
+        title="Add New Customer"
+        phone={buyerPhone}
+      />
 
-                <View style={styles.phonePill}>
-                  <Phone size={13} color="#16a34a" strokeWidth={2} />
-                  <Text style={styles.phonePillText}> {buyerPhone}</Text>
-                </View>
+      <CustomerModal
+        visible={editModal}
+        onClose={() => setEditModal(false)}
+        onSave={data => dispatch(updateCustomer({ phone: buyerPhone, data }))}
+        saving={updateLoading}
+        title="Edit Customer"
+        phone={buyerPhone}
+        initial={customer}
+      />
 
-                <View style={{ flexDirection: 'row', marginBottom: 10 }}>
-                  <TouchableOpacity onPress={() => setEditCustomerType('customer')}>
-                    <Text style={{ color: editCustomerType === 'customer' ? '#16a34a' : '#888', fontWeight: '600' }}>
-                      Customer
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => setEditCustomerType('shop')}>
-                    <Text style={{ marginLeft: 20, color: editCustomerType === 'shop' ? '#16a34a' : '#888', fontWeight: '600' }}>
-                      Shop
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                <TextInput
-                  style={styles.sheetInput}
-                  placeholder="Customer Name *"
-                  placeholderTextColor="#bbb"
-                  value={editName}
-                  onChangeText={setEditName}
-                />
-                {editCustomerType === 'shop' && (
-                  <TextInput
-                    style={styles.sheetInput}
-                    placeholder="Shop Name *"
-                    placeholderTextColor="#bbb"
-                    value={editShopName}
-                    onChangeText={setEditShopName}
-                  />
-                )}
-                <TextInput
-                  style={[styles.sheetInput, { height: 72, textAlignVertical: 'top' }]}
-                  placeholder="Delivery Address"
-                  placeholderTextColor="#bbb"
-                  multiline
-                  value={editAddress}
-                  onChangeText={setEditAddress}
-                />
-                <View style={{ flexDirection: 'row', gap: 8 }}>
-                  <TextInput
-                    style={[styles.sheetInput, { flex: 1 }]}
-                    placeholder="City"
-                    placeholderTextColor="#bbb"
-                    value={editCity}
-                    onChangeText={setEditCity}
-                  />
-                  <TextInput
-                    style={[styles.sheetInput, { flex: 1 }]}
-                    placeholder="State"
-                    placeholderTextColor="#bbb"
-                    value={editState}
-                    onChangeText={setEditState}
-                  />
-                </View>
-
-                <TouchableOpacity
-                  style={[styles.saveBtn, updateState === 'loading' && { opacity: 0.6 }]}
-                  onPress={() => {
-                    if (!editName.trim()) {
-                      Alert.alert('Required', 'Customer name is required.');
-                      return;
-                    }
-                    if (editCustomerType === 'shop' && !editShopName.trim()) {
-                      Alert.alert('Required', 'Shop name is required.');
-                      return;
-                    }
-                    dispatch(updateCustomer({
-                      phone: buyerPhone,
-                      data: {
-                        name: editName.trim(),
-                        address: editAddress.trim(),
-                        city: editCity.trim(),
-                        state: editState.trim(),
-                        type: editCustomerType,
-                        shopName: editShopName.trim(),
-                      },
-                    }));
-                  }}
-                  disabled={updateState === 'loading'}
-                >
-                  {updateState === 'loading' ? (
-                    <ActivityIndicator color="#fff" />
-                  ) : (
-                    <Text style={styles.saveBtnText}>Save Changes</Text>
-                  )}
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-          </KeyboardAvoidingView>
-        </View>
-      </Modal>
-
-      {/* Confirm Modal */}
-      <Modal transparent visible={confirmVisible} animationType="none" onRequestClose={closeConfirmModal}>
-        <Animated.View style={[styles.backdrop, { opacity: fadeBg }]}>
-          <TouchableOpacity style={StyleSheet.absoluteFill} onPress={closeConfirmModal} />
-        </Animated.View>
-        <View style={styles.centeredWrapper} pointerEvents="box-none">
-          <Animated.View style={[styles.popup, { opacity: fadeBg, transform: [{ scale: scaleAnim }] }]}>
-            <TouchableOpacity style={styles.closeBtn} onPress={closeConfirmModal}><X size={18} color="#888" strokeWidth={2} /></TouchableOpacity>
-            <View style={styles.popupLottieWrapper}><LottieView source={require('../../assets/json/OrderSuccess.json')} autoPlay loop={false} style={styles.popupLottie} /></View>
-            <Text style={styles.popupTitle}>Ready to Generate Invoice?</Text>
-            <Text style={styles.popupSubtitle}>Please confirm the order details before proceeding.</Text>
-            <View style={styles.popupInfoBox}>
-              <Row label="Buyer" value={customer?.type === 'shop' ? `${customer.shopName} (${customer.name})` : customer?.name || '—'} />
-              <Divider />
-              <Row label="Phone" value={buyerPhone || '—'} />
-              <Divider />
-              <View style={styles.row}>
-                <Text style={styles.rowLabel}>Address</Text>
-                <Text style={[styles.rowValue, { flex: 1, textAlign: 'right', flexWrap: 'wrap' }]}>
-                  {customer?.address ? [customer.address, customer.city, customer.state].filter(Boolean).join(', ') : '—'}
-                </Text>
-              </View>
-              <Divider />
-              <Row label="Salesperson" value={selectedSP?.name || '—'} />
-              <Divider />
-              <Row label="Courier" value={`₹${courier}`} />
-              {discountAmount > 0 && (
-                <>
-                  <Divider />
-                  <Row label="Discount" value={`₹${discountAmount}`} />
-                </>
-              )}
-              <Divider />
-              <Row label="Grand Total" value={`₹${grandTotalWithCourier.toLocaleString('en-IN')}`} valueStyle={styles.amountText} />
-            </View>
-            <TouchableOpacity
-              style={[styles.primaryBtn, isConfirming && { opacity: 0.6 }]}
-              onPress={goToInvoice}
-              disabled={isConfirming}
-            >
-              {isConfirming ? (
-                <ActivityIndicator size="small" color="#fff" style={{ marginRight: 8 }} />
-              ) : (
-                <FileText size={18} color="#fff" strokeWidth={2} style={{ marginRight: 8 }} />
-              )}
-              <Text style={styles.primaryText}>{isConfirming ? 'Processing…' : 'Confirm & Generate Invoice'}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.outlineBtn}
-              onPress={closeConfirmModal}
-              disabled={isConfirming}
-            >
-              <Text style={styles.outlineText}>Go Back & Edit</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        </View>
-      </Modal>
-    </>
+      <ConfirmModal
+        visible={confirmModal}
+        onClose={() => setConfirmModal(false)}
+        onConfirm={goToInvoice}
+        confirming={isConfirming}
+        data={confirmData}
+      />
+    </SafeAreaView>
   );
 };
 
-const Row = ({ label, value, valueStyle }) => (
-  <View style={styles.row}>
-    <Text style={styles.rowLabel}>{label}</Text>
-    <Text style={[styles.rowValue, valueStyle]}>{value}</Text>
-  </View>
-);
-const Divider = () => <View style={styles.divider} />;
+export default OrderSuccess;
 
-export default OrderSuccessScreen;
+//---------------------- 31.08.2026 -----------------------------
+// // OrderSuccess.js — Full web parity with OrderSuccessPage.js
+// import React, { useState, useEffect, useCallback } from 'react';
+// import {
+//   View, Text, TextInput, TouchableOpacity, ScrollView, Modal,
+//   ActivityIndicator, Alert, KeyboardAvoidingView, Platform, StyleSheet,
+// } from 'react-native';
+// import { SafeAreaView } from 'react-native-safe-area-context';
+// import { useDispatch, useSelector } from 'react-redux';
+// import {
+//   FileText, ChevronDown, X, User, Truck, Calendar, Phone,
+//   UserPlus, CheckCircle, MapPin, Building2, AlertTriangle,
+//   WifiOff, CreditCard, Check,
+// } from 'lucide-react-native';
+// import Header from '../../components/Header';
+// import API from '../../services/API/api';
+// import {
+//   lookupCustomer,
+//   addCustomer,
+//   updateCustomer,
+//   resetCustomer,
+// } from '../../services/features/customer/customerSlice';
+// import { fetchProducts } from '../../services/features/products/productSlice';
+
+// // ─── Constants ────────────────────────────────────────────────
+// const ACCENT = '#D32F2F';
+// const WHITE  = '#FFFFFF';
+// const BG     = '#F5F5F5';
+// const GREY   = '#555';
+// const BORDER = '#E5E7EB';
+// const GREEN  = '#2E7D32';
+
+// const SALESPERSONS = [
+//   'SHANTHI', 'HARIVARTHINI', 'UMA MAM', 'SHARMILA', 'MOHANA AMBIGAI',
+//   'KALAIVANI', 'SUNDER SIR', 'PAVITHRA', 'SARANYA', 'VIJAYA LAKSHMI',
+//   'VENNILA', 'ASHWINI', 'PRIYADHARSHNI', 'GOMATHI', 'KAVIBHARATHI', 'DHANALAKSHMI',
+// ];
+
+// const PAYMENT_MODES = ['Cash', 'GPay', 'Credit Card', 'Debit Card', 'Office Use', 'Loan Amount'];
+// const ORDER_TYPES   = ['OEM', 'TOOLS'];
+
+// const fmtDate = iso => new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+// const fmt     = v   => Number(v || 0).toLocaleString('en-IN');
+
+// // ─── Picker Sheet ─────────────────────────────────────────────
+// const PickerSheet = ({ visible, onClose, title, items, selected, onSelect }) => (
+//   <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+//     <View style={s.overlay}>
+//       <View style={s.sheet}>
+//         <View style={s.sheetHeader}>
+//           <Text style={s.sheetTitle}>{title}</Text>
+//           <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+//             <X size={20} color={GREY} />
+//           </TouchableOpacity>
+//         </View>
+//         <ScrollView>
+//           {items.map(item => (
+//             <TouchableOpacity
+//               key={item}
+//               style={[s.sheetRow, selected === item && { backgroundColor: '#FFF3F3' }]}
+//               onPress={() => { onSelect(item); onClose(); }}>
+//               <Text style={[s.sheetRowText, selected === item && { color: ACCENT, fontWeight: '700' }]}>
+//                 {item}
+//               </Text>
+//               {selected === item && <CheckCircle size={15} color={ACCENT} />}
+//             </TouchableOpacity>
+//           ))}
+//         </ScrollView>
+//       </View>
+//     </View>
+//   </Modal>
+// );
+
+// // ─── Add / Edit Customer Modal ────────────────────────────────
+// const CustomerModal = ({ visible, onClose, onSave, saving, title, phone, initial }) => {
+//   const [name,    setName]    = useState('');
+//   const [address, setAddress] = useState('');
+//   const [city,    setCity]    = useState('');
+//   const [state,   setState]   = useState('');
+//   const [shop,    setShop]    = useState('');
+//   const [type,    setType]    = useState('customer');
+
+//   useEffect(() => {
+//     if (visible && initial) {
+//       setName(initial.name || '');
+//       setAddress(initial.address || '');
+//       setCity(initial.city || '');
+//       setState(initial.state || '');
+//       setShop(initial.shopName || '');
+//       setType(initial.type || 'customer');
+//     } else if (visible) {
+//       setName(''); setAddress(''); setCity(''); setState(''); setShop(''); setType('customer');
+//     }
+//   }, [visible, initial]);
+
+//   const handleSave = () => {
+//     if (!name.trim()) { Alert.alert('Validation', 'Customer name is required.'); return; }
+//     if (type === 'shop' && !shop.trim()) { Alert.alert('Validation', 'Shop name is required.'); return; }
+//     onSave({ name: name.trim(), address: address.trim(), city: city.trim(), state: state.trim(), shopName: shop.trim(), type });
+//   };
+
+//   return (
+//     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+//       <View style={s.overlay}>
+//         <View style={[s.sheet, { maxHeight: '88%' }]}>
+//           <View style={s.sheetHeader}>
+//             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+//               <UserPlus size={18} color={ACCENT} />
+//               <Text style={s.sheetTitle}>{title}</Text>
+//             </View>
+//             <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+//               <X size={20} color={GREY} />
+//             </TouchableOpacity>
+//           </View>
+//           <ScrollView style={{ paddingHorizontal: 20 }} keyboardShouldPersistTaps="handled">
+//             {/* Phone pill */}
+//             <View style={s.phonePill}>
+//               <Phone size={12} color={GREY} />
+//               <Text style={{ fontSize: 13, color: GREY, fontWeight: '600' }}>{phone}</Text>
+//             </View>
+//             {/* Type toggle */}
+//             <View style={s.typeRow}>
+//               {['customer', 'shop'].map(t => (
+//                 <TouchableOpacity
+//                   key={t}
+//                   style={[s.typeBtn, type === t && s.typeBtnActive]}
+//                   onPress={() => setType(t)}>
+//                   <Text style={[s.typeBtnText, type === t && s.typeBtnTextActive]}>
+//                     {t === 'customer' ? 'Customer' : 'Shop'}
+//                   </Text>
+//                 </TouchableOpacity>
+//               ))}
+//             </View>
+//             {[
+//               { label: 'Name *',    key: 'name',    value: name,    set: setName    },
+//               ...(type === 'shop' ? [{ label: 'Shop Name *', key: 'shop', value: shop, set: setShop }] : []),
+//             ].map(f => (
+//               <View key={f.key}>
+//                 <Text style={s.label}>{f.label}</Text>
+//                 <TextInput style={s.input} value={f.value} onChangeText={f.set} placeholder={f.label} placeholderTextColor="#aaa" />
+//               </View>
+//             ))}
+//             <Text style={s.label}>Delivery Address</Text>
+//             <TextInput
+//               style={[s.input, { minHeight: 68, textAlignVertical: 'top' }]}
+//               value={address} onChangeText={setAddress}
+//               placeholder="Street, landmark, area…" placeholderTextColor="#aaa" multiline />
+//             <View style={{ flexDirection: 'row', gap: 10 }}>
+//               <View style={{ flex: 1 }}>
+//                 <Text style={s.label}>City</Text>
+//                 <TextInput style={s.input} value={city} onChangeText={setCity} placeholder="City" placeholderTextColor="#aaa" />
+//               </View>
+//               <View style={{ flex: 1 }}>
+//                 <Text style={s.label}>State</Text>
+//                 <TextInput style={s.input} value={state} onChangeText={setState} placeholder="State" placeholderTextColor="#aaa" />
+//               </View>
+//             </View>
+//           </ScrollView>
+//           <View style={s.modalFooter}>
+//             <TouchableOpacity style={s.cancelBtn} onPress={onClose}>
+//               <Text style={s.cancelBtnText}>Cancel</Text>
+//             </TouchableOpacity>
+//             <TouchableOpacity style={s.submitBtn} onPress={handleSave} disabled={saving}>
+//               {saving ? <ActivityIndicator size="small" color={WHITE} /> : <CheckCircle size={14} color={WHITE} />}
+//               <Text style={s.submitBtnText}>{saving ? 'Saving…' : 'Save'}</Text>
+//             </TouchableOpacity>
+//           </View>
+//         </View>
+//       </View>
+//     </Modal>
+//   );
+// };
+
+// // ─── Confirm Modal ────────────────────────────────────────────
+// const ConfirmModal = ({ visible, onClose, onConfirm, confirming, data }) => {
+//   if (!data) return null;
+//   return (
+//     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
+//       <View style={s.overlay}>
+//         <View style={[s.sheet, { maxHeight: '88%' }]}>
+//           <View style={s.sheetHeader}>
+//             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+//               <Check size={18} color={GREEN} />
+//               <Text style={s.sheetTitle}>Ready to Generate Invoice?</Text>
+//             </View>
+//             <TouchableOpacity onPress={onClose}><X size={20} color={GREY} /></TouchableOpacity>
+//           </View>
+//           <ScrollView style={{ paddingHorizontal: 20, paddingTop: 12 }}>
+//             <Text style={{ fontSize: 13, color: GREY, marginBottom: 12 }}>Please confirm the order details before proceeding.</Text>
+//             {[
+//               { label: 'Reference No',  value: data.referenceNo },
+//               { label: 'Order Type',    value: data.orderType   },
+//               { label: 'Buyer',         value: data.buyerName   },
+//               { label: 'Phone',         value: data.phone       },
+//               { label: 'Address',       value: data.address || '—' },
+//               { label: 'City / State',  value: [data.city, data.state].filter(Boolean).join(', ') || '—' },
+//               { label: 'Salesperson',   value: data.salesperson || '—' },
+//               { label: 'Payment Mode',  value: data.paymentMode || '—' },
+//               { label: 'Courier',       value: `₹${data.courier}` },
+//               ...(data.discount > 0 ? [{ label: 'Discount', value: `₹${data.discount}` }] : []),
+//               ...(data.gst > 0       ? [{ label: 'GST',      value: `₹${data.gst}` }] : []),
+//               { label: 'Grand Total',   value: `₹${fmt(data.grandTotal)}` },
+//             ].map(row => (
+//               <View key={row.label} style={s.confirmRow}>
+//                 <Text style={s.confirmLabel}>{row.label}</Text>
+//                 <Text style={[s.confirmValue, row.label === 'Grand Total' && { color: ACCENT, fontSize: 15, fontWeight: '800' }]}>
+//                   {row.value}
+//                 </Text>
+//               </View>
+//             ))}
+//           </ScrollView>
+//           <View style={s.modalFooter}>
+//             <TouchableOpacity style={s.cancelBtn} onPress={onClose}>
+//               <Text style={s.cancelBtnText}>Go Back</Text>
+//             </TouchableOpacity>
+//             <TouchableOpacity style={s.submitBtn} onPress={onConfirm} disabled={confirming}>
+//               {confirming
+//                 ? <ActivityIndicator size="small" color={WHITE} />
+//                 : <FileText size={14} color={WHITE} />}
+//               <Text style={s.submitBtnText}>{confirming ? 'Processing…' : 'Confirm & Invoice'}</Text>
+//             </TouchableOpacity>
+//           </View>
+//         </View>
+//       </View>
+//     </Modal>
+//   );
+// };
+
+// // ─── Main Screen ──────────────────────────────────────────────
+// const OrderSuccess = ({ navigation, route }) => {
+//   const dispatch = useDispatch();
+//   const {
+//     cartItems = [],
+//     grandTotal = 0,
+//     paymentMode: initialPaymentMode,
+//     date,
+//     batchSelections = {},
+//     showBatchSelector = false,
+//     priceType = 'retailerPrice',
+//   } = route.params || {};
+
+//   const { lookupData: customer, lookupState, addLoading, addSuccess, updateLoading, updateSuccess, error: custError } = useSelector(s => s.customer);
+//   const user = useSelector(s => s.auth.user);
+
+//   // ── State
+//   const [referenceNo,     setReferenceNo]     = useState('');
+//   const [buyerPhone,      setBuyerPhone]       = useState('');
+//   const [phoneError,      setPhoneError]       = useState(false);
+//   const [paymentMode,     setPaymentMode]      = useState(initialPaymentMode || 'Cash');
+//   const [orderType,       setOrderType]        = useState('');
+//   const [salesperson,     setSalesperson]      = useState('');
+//   const [discount,        setDiscount]         = useState('0');
+//   const [courierCharge,   setCourierCharge]    = useState('0');
+//   const [gstAmount,       setGstAmount]        = useState('0');
+//   const [sameAsBuyer,     setSameAsBuyer]      = useState(true);
+//   const [shipToName,      setShipToName]       = useState('');
+//   const [shipToPhone,     setShipToPhone]      = useState('');
+//   const [shipToAddress,   setShipToAddress]    = useState('');
+//   const [shipToCity,      setShipToCity]       = useState('');
+//   const [shipToState,     setShipToState]      = useState('');
+//   const [addModal,        setAddModal]         = useState(false);
+//   const [editModal,       setEditModal]        = useState(false);
+//   const [confirmModal,    setConfirmModal]     = useState(false);
+//   const [isConfirming,    setIsConfirming]     = useState(false);
+
+//   // Picker sheets
+//   const [pmSheet,  setPmSheet]  = useState(false);
+//   const [otSheet,  setOtSheet]  = useState(false);
+//   const [spSheet,  setSpSheet]  = useState(false);
+
+//   useEffect(() => {
+//     if (!cartItems.length) navigation.goBack();
+//     return () => { dispatch(resetCustomer()); };
+//   }, []);
+
+//   useEffect(() => {
+//     if (buyerPhone.length === 10) {
+//       setPhoneError(false);
+//       dispatch(lookupCustomer(buyerPhone));
+//     } else {
+//       dispatch(resetCustomer());
+//     }
+//   }, [buyerPhone, dispatch]);
+
+//   useEffect(() => {
+//     if (addSuccess) {
+//       setAddModal(false);
+//       dispatch(lookupCustomer(buyerPhone));
+//     }
+//   }, [addSuccess, buyerPhone, dispatch]);
+
+//   useEffect(() => {
+//     if (updateSuccess) {
+//       setEditModal(false);
+//       dispatch(lookupCustomer(buyerPhone));
+//       Alert.alert('Success', 'Customer updated.');
+//     }
+//   }, [updateSuccess, buyerPhone, dispatch]);
+
+//   // ── Totals
+//   const subtotal      = cartItems.reduce((s, i) => s + (i.price || 0) * (i.qty || 0), 0);
+//   const discountAmt   = parseFloat(discount)      || 0;
+//   const courierAmt    = parseFloat(courierCharge) || 0;
+//   const gstAmt        = parseFloat(gstAmount)     || 0;
+//   const grandTotalNet = Math.max(subtotal - discountAmt, 0) + courierAmt + gstAmt;
+
+//   // ── Batch allocations helper
+//   const getBatchAllocations = useCallback((item) => {
+//     let alloc = batchSelections[item.id]?.batchAllocations || item.batchAllocations || [];
+//     return alloc;
+//   }, [batchSelections]);
+
+//   // ── Validate before showing confirm
+//   const handleViewInvoice = () => {
+//     if (!referenceNo.trim()) { Alert.alert('Validation', 'Reference number is required.'); return; }
+//     if (!orderType)          { Alert.alert('Validation', 'Please select an order type.');  return; }
+//     if (buyerPhone.length < 10) { setPhoneError(true); Alert.alert('Validation', 'Enter a valid 10-digit phone number.'); return; }
+//     if (lookupState === 'loading') { Alert.alert('Please wait', 'Verifying customer details…'); return; }
+//     if (lookupState === 'notfound') {
+//       setPhoneError(true);
+//       Alert.alert('Customer not found', 'Would you like to add this customer?', [
+//         { text: 'Cancel', style: 'cancel' },
+//         { text: 'Add Customer', onPress: () => setAddModal(true) },
+//       ]);
+//       return;
+//     }
+//     if (lookupState === 'error') { Alert.alert('Error', 'Could not reach server. Check your connection.'); return; }
+//     if (lookupState === 'found' && customer) { setConfirmModal(true); }
+//   };
+
+//   // ── Create invoice
+//   const goToInvoice = async () => {
+//     setIsConfirming(true);
+//     setConfirmModal(false);
+//     try {
+//       const finalShipName    = sameAsBuyer ? customer?.name    || '' : shipToName;
+//       const finalShipPhone   = sameAsBuyer ? buyerPhone              : shipToPhone;
+//       const finalShipAddress = sameAsBuyer ? customer?.address || '' : shipToAddress;
+//       const finalShipCity    = sameAsBuyer ? customer?.city    || '' : shipToCity;
+//       const finalShipState   = sameAsBuyer ? customer?.state   || '' : shipToState;
+
+//       const invoiceItems = cartItems.map(item => {
+//         const alloc = getBatchAllocations(item);
+//         const hasValidBatches = alloc.length > 0 && alloc.some(a => a.batchNumber && a.batchNumber !== 'default');
+//         const base = {
+//           productId: item.id, name: item.name,
+//           qty: item.qty || 0, price: item.price || 0,
+//           useDefaultPrice: !hasValidBatches,
+//         };
+//         if (hasValidBatches) {
+//           base.batchAllocations = alloc
+//             .filter(a => a.batchNumber && a.batchNumber !== 'default')
+//             .map(a => ({ batchNumber: a.batchNumber, qty: a.qty || item.qty, purchaseCost: a.purchaseCost || 0, sellingPrice: a.sellingPrice || item.price }));
+//         }
+//         return base;
+//       });
+
+//       const payload = {
+//         billerName:      user?.name || 'Unknown',
+//         items:           invoiceItems,
+//         totalAmount:     grandTotalNet,
+//         paymentMode:     paymentMode || 'Cash',
+//         status:          'completed',
+//         customerPhone:   buyerPhone,
+//         customerName:    customer?.name    || 'Guest',
+//         customerType:    customer?.type    || 'customer',
+//         shopName:        customer?.shopName || '',
+//         customerAddress: customer?.address || '',
+//         customerCity:    customer?.city    || '',
+//         customerState:   customer?.state   || '',
+//         sameAsBuyer,
+//         shippingAddress: { name: finalShipName, phone: finalShipPhone, address: finalShipAddress, city: finalShipCity, state: finalShipState },
+//         subtotal,
+//         discount: discountAmt,
+//         courierCharge: courierAmt,
+//         gstAmount: gstAmt,
+//         salesperson: salesperson || '',
+//         referenceNo:   referenceNo || '',
+//         invoiceDate:   date || new Date().toISOString(),
+//         orderType:     orderType || '',
+//         priceType:     priceType || 'retailerPrice',
+//         allowDefaultBatches: true,
+//         hasDefaultBatches: invoiceItems.some(i => i.useDefaultPrice),
+//       };
+
+//       const res = await API.post('/api/invoices', payload);
+//       const invoiceNumber = res.data.invoice.invoiceNumber;
+//       await dispatch(fetchProducts());
+
+//       navigation.navigate('InvoiceScreen', {
+//         invoiceNumber,
+//         items: cartItems,
+//         total: grandTotalNet,
+//         paymentMode,
+//         date,
+//         buyerName:    customer?.name    || '—',
+//         buyerPhone,
+//         buyerAddress: customer?.address || '',
+//         buyerCity:    customer?.city    || '',
+//         buyerState:   customer?.state   || '',
+//         courierCharge: courierAmt,
+//         discount:      discountAmt,
+//         gstAmount:     gstAmt,
+//         salesperson,
+//         referenceNo,
+//         shipToName:    finalShipName,
+//         shipToPhone:   finalShipPhone,
+//         shipToAddress: finalShipAddress,
+//         shipToCity:    finalShipCity,
+//         shipToState:   finalShipState,
+//         customerType:  customer?.type,
+//         shopName:      customer?.shopName,
+//         orderType,
+//         batchSelections,
+//         showBatchSelector,
+//         priceType,
+//       });
+//     } catch (err) {
+//       let msg = 'Failed to confirm order. Please try again.';
+//       if (err?.response?.data?.message) {
+//         msg = err.response.data.code === 'INSUFFICIENT_STOCK'
+//           ? `Insufficient stock: ${err.response.data.message}`
+//           : err.response.data.message;
+//       } else if (err?.message) {
+//         msg = err.message;
+//       }
+//       Alert.alert('Error', msg);
+//     } finally {
+//       setIsConfirming(false);
+//     }
+//   };
+
+//   const confirmData = {
+//     referenceNo, orderType,
+//     buyerName: customer?.type === 'shop' ? `${customer?.name} (${customer?.shopName})` : (customer?.name || '—'),
+//     phone: buyerPhone,
+//     address: customer?.address || '—',
+//     city: customer?.city || '',
+//     state: customer?.state || '',
+//     salesperson, paymentMode,
+//     courier: courierAmt, discount: discountAmt, gst: gstAmt,
+//     grandTotal: grandTotalNet,
+//   };
+
+//   return (
+//     <SafeAreaView style={{ flex: 1, backgroundColor: BG }} edges={['bottom']}>
+//       <Header title="Order Confirm" />
+//       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+//         <ScrollView contentContainerStyle={{ padding: 14, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
+
+//           {/* ── Batch Summary ── */}
+//           {showBatchSelector && (
+//             <View style={s.section}>
+//               <Text style={s.sectionTitle}>Batch Allocations</Text>
+//               {cartItems.map(item => {
+//                 const alloc = getBatchAllocations(item);
+//                 const hasValid = alloc.length > 0 && alloc.some(a => a.batchNumber && a.batchNumber !== 'default');
+//                 return (
+//                   <View key={item.id} style={s.batchSummaryItem}>
+//                     <Text style={s.batchSummaryProduct} numberOfLines={1}>{item.name}</Text>
+//                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 4 }}>
+//                       {hasValid
+//                         ? alloc.filter(a => a.batchNumber && a.batchNumber !== 'default').map((a, i) => (
+//                           <View key={i} style={s.batchTag}>
+//                             <Text style={s.batchTagText}>{a.batchNumber}: {a.qty || item.qty} units</Text>
+//                           </View>
+//                         ))
+//                         : <View style={[s.batchTag, { backgroundColor: '#F5F5F5' }]}>
+//                             <Text style={[s.batchTagText, { color: GREY }]}>Default price (no batch)</Text>
+//                           </View>
+//                       }
+//                     </View>
+//                   </View>
+//                 );
+//               })}
+//             </View>
+//           )}
+
+//           {/* ── Form ── */}
+//           <View style={s.section}>
+//             <Text style={s.sectionTitle}>Delivery & Invoice Details</Text>
+
+//             {/* Reference No */}
+//             <Text style={s.label}>Reference No. *</Text>
+//             <TextInput
+//               style={[s.input, !referenceNo.trim() && { borderColor: ACCENT }]}
+//               placeholder="e.g. PO-12345 (Required)"
+//               placeholderTextColor="#aaa"
+//               value={referenceNo}
+//               onChangeText={setReferenceNo}
+//             />
+//             {!referenceNo.trim() && <Text style={s.errorText}>Reference number is required</Text>}
+
+//             {/* Order Type */}
+//             <Text style={s.label}>Order Type *</Text>
+//             <TouchableOpacity style={[s.picker, !orderType && { borderColor: ACCENT }]} onPress={() => setOtSheet(true)}>
+//               <FileText size={14} color={GREY} />
+//               <Text style={[s.pickerText, !orderType && { color: '#aaa' }]}>{orderType || 'Select order type…'}</Text>
+//               <ChevronDown size={14} color={GREY} />
+//             </TouchableOpacity>
+//             {!orderType && <Text style={s.errorText}>Order type is required</Text>}
+
+//             {/* Payment Mode */}
+//             <Text style={s.label}>Payment Mode</Text>
+//             <TouchableOpacity style={s.picker} onPress={() => setPmSheet(true)}>
+//               <CreditCard size={14} color={GREY} />
+//               <Text style={s.pickerText}>{paymentMode}</Text>
+//               <ChevronDown size={14} color={GREY} />
+//             </TouchableOpacity>
+
+//             {/* Subtotal (readonly) */}
+//             <Text style={s.label}>Subtotal</Text>
+//             <View style={s.readonlyField}>
+//               <Text style={s.readonlyText}>₹{fmt(subtotal)}</Text>
+//             </View>
+
+//             {/* Discount */}
+//             <Text style={s.label}>Discount (₹)</Text>
+//             <TextInput style={s.input} keyboardType="numeric" value={discount} onChangeText={setDiscount} placeholder="0" placeholderTextColor="#aaa" />
+
+//             {/* Invoice Date (readonly) */}
+//             <Text style={s.label}>Invoice Date</Text>
+//             <View style={s.readonlyField}>
+//               <Calendar size={13} color={GREY} />
+//               <Text style={s.readonlyText}>{fmtDate(date || new Date().toISOString())}</Text>
+//             </View>
+
+//             {/* Salesperson */}
+//             <Text style={s.label}>Salesperson</Text>
+//             <TouchableOpacity style={s.picker} onPress={() => setSpSheet(true)}>
+//               <User size={14} color={GREY} />
+//               <Text style={[s.pickerText, !salesperson && { color: '#aaa' }]}>{salesperson || 'Select salesperson…'}</Text>
+//               <ChevronDown size={14} color={GREY} />
+//             </TouchableOpacity>
+
+//             {/* Phone + Customer Lookup */}
+//             <Text style={s.label}>Phone Number *</Text>
+//             <TextInput
+//               style={[s.input, phoneError && { borderColor: ACCENT }]}
+//               placeholder="Enter 10-digit mobile number"
+//               placeholderTextColor="#aaa"
+//               keyboardType="phone-pad"
+//               maxLength={10}
+//               value={buyerPhone}
+//               onChangeText={v => { setBuyerPhone(v); if (v.length === 10) setPhoneError(false); }}
+//             />
+//             {phoneError && buyerPhone.length < 10 && (
+//               <Text style={s.errorText}>Enter a valid 10-digit phone number</Text>
+//             )}
+
+//             {/* Lookup states */}
+//             {lookupState === 'loading' && (
+//               <View style={s.statusRow}>
+//                 <ActivityIndicator size="small" color={ACCENT} />
+//                 <Text style={{ color: GREY, fontSize: 12 }}>Checking customer database…</Text>
+//               </View>
+//             )}
+//             {lookupState === 'found' && customer && (
+//               <View style={s.foundCard}>
+//                 <View style={s.foundHeader}>
+//                   <CheckCircle size={14} color={GREEN} />
+//                   <Text style={{ fontSize: 13, color: GREEN, fontWeight: '700', flex: 1 }}>Customer Found</Text>
+//                   <TouchableOpacity style={s.editBtn} onPress={() => setEditModal(true)}>
+//                     <Text style={s.editBtnText}>Edit</Text>
+//                   </TouchableOpacity>
+//                 </View>
+//                 <Text style={s.customerName}>
+//                   {customer.type === 'shop' ? `${customer.name} (${customer.shopName})` : customer.name}
+//                 </Text>
+//                 {customer.address ? (
+//                   <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 5, marginTop: 3 }}>
+//                     <MapPin size={13} color={GREY} />
+//                     <Text style={{ fontSize: 12, color: GREY, flex: 1 }}>{customer.address}</Text>
+//                   </View>
+//                 ) : null}
+//                 {(customer.city || customer.state) ? (
+//                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 2 }}>
+//                     <Building2 size={13} color={GREY} />
+//                     <Text style={{ fontSize: 12, color: GREY }}>{[customer.city, customer.state].filter(Boolean).join(', ')}</Text>
+//                   </View>
+//                 ) : null}
+//               </View>
+//             )}
+//             {lookupState === 'notfound' && (
+//               <View style={s.notFoundBox}>
+//                 <AlertTriangle size={13} color={ACCENT} />
+//                 <Text style={{ fontSize: 12, color: GREY, flex: 1 }}>No customer found.</Text>
+//                 <TouchableOpacity style={s.addBtn} onPress={() => setAddModal(true)}>
+//                   <Text style={s.addBtnText}>+ Add Customer</Text>
+//                 </TouchableOpacity>
+//               </View>
+//             )}
+//             {lookupState === 'error' && (
+//               <View style={s.notFoundBox}>
+//                 <WifiOff size={13} color={ACCENT} />
+//                 <Text style={{ fontSize: 12, color: GREY, flex: 1 }}>Could not reach server.</Text>
+//                 <TouchableOpacity style={s.addBtn} onPress={() => dispatch(lookupCustomer(buyerPhone))}>
+//                   <Text style={s.addBtnText}>Retry</Text>
+//                 </TouchableOpacity>
+//               </View>
+//             )}
+
+//             {/* Shipping Address */}
+//             <Text style={s.label}>Shipping Address</Text>
+//             <View style={s.switchRow}>
+//               <Text style={{ fontSize: 13, color: GREY }}>Same as buyer address</Text>
+//               <TouchableOpacity
+//                 style={[s.switchBtn, sameAsBuyer && s.switchBtnActive]}
+//                 onPress={() => setSameAsBuyer(p => !p)}>
+//                 <Text style={[s.switchBtnText, sameAsBuyer && { color: WHITE }]}>
+//                   {sameAsBuyer ? 'ON' : 'OFF'}
+//                 </Text>
+//               </TouchableOpacity>
+//             </View>
+//             {!sameAsBuyer && (
+//               <>
+//                 {[
+//                   { label: 'Ship to Name',  value: shipToName,    set: setShipToName    },
+//                   { label: 'Ship to Phone', value: shipToPhone,   set: setShipToPhone,  keyboard: 'phone-pad' },
+//                 ].map(f => (
+//                   <TextInput key={f.label} style={[s.input, { marginTop: 6 }]} placeholder={f.label} placeholderTextColor="#aaa" keyboardType={f.keyboard || 'default'} value={f.value} onChangeText={f.set} />
+//                 ))}
+//                 <TextInput
+//                   style={[s.input, { minHeight: 60, textAlignVertical: 'top', marginTop: 6 }]}
+//                   placeholder="Ship to Address" placeholderTextColor="#aaa" multiline
+//                   value={shipToAddress} onChangeText={setShipToAddress} />
+//                 <View style={{ flexDirection: 'row', gap: 10, marginTop: 6 }}>
+//                   <TextInput style={[s.input, { flex: 1 }]} placeholder="City" placeholderTextColor="#aaa" value={shipToCity} onChangeText={setShipToCity} />
+//                   <TextInput style={[s.input, { flex: 1 }]} placeholder="State" placeholderTextColor="#aaa" value={shipToState} onChangeText={setShipToState} />
+//                 </View>
+//               </>
+//             )}
+
+//             {/* GST */}
+//             <Text style={s.label}>GST (₹)</Text>
+//             <TextInput style={s.input} keyboardType="numeric" value={gstAmount} onChangeText={setGstAmount} placeholder="0" placeholderTextColor="#aaa" />
+
+//             {/* Courier */}
+//             <Text style={s.label}>Courier Charge (₹)</Text>
+//             <TextInput style={s.input} keyboardType="numeric" value={courierCharge} onChangeText={setCourierCharge} placeholder="0" placeholderTextColor="#aaa" />
+
+//             {/* Total preview */}
+//             <View style={s.totalPreview}>
+//               {[
+//                 { label: 'Subtotal',  value: `₹${fmt(subtotal)}` },
+//                 ...(discountAmt > 0 ? [{ label: 'Discount', value: `- ₹${fmt(discountAmt)}`, accent: true }] : []),
+//                 { label: 'Courier',  value: `₹${fmt(courierAmt)}` },
+//                 ...(gstAmt > 0      ? [{ label: 'GST',      value: `₹${fmt(gstAmt)}` }] : []),
+//               ].map(row => (
+//                 <View key={row.label} style={s.totalRow}>
+//                   <Text style={s.totalRowLabel}>{row.label}</Text>
+//                   <Text style={[s.totalRowValue, row.accent && { color: GREEN }]}>{row.value}</Text>
+//                 </View>
+//               ))}
+//               <View style={[s.totalRow, { borderTopWidth: 1, borderTopColor: BORDER, marginTop: 6, paddingTop: 8 }]}>
+//                 <Text style={[s.totalRowLabel, { fontWeight: '800', fontSize: 14 }]}>Grand Total</Text>
+//                 <Text style={[s.totalRowValue, { color: ACCENT, fontSize: 16, fontWeight: '800' }]}>₹{fmt(grandTotalNet)}</Text>
+//               </View>
+//             </View>
+//           </View>
+
+//           {/* ── View Invoice button ── */}
+//           <TouchableOpacity
+//             style={[s.primaryBtn, (isConfirming || !referenceNo.trim() || !orderType) && { opacity: 0.5 }]}
+//             onPress={handleViewInvoice}
+//             disabled={isConfirming || !referenceNo.trim() || !orderType}>
+//             <FileText size={16} color={WHITE} />
+//             <Text style={s.primaryBtnText}>View Invoice</Text>
+//           </TouchableOpacity>
+//         </ScrollView>
+//       </KeyboardAvoidingView>
+
+//       {/* ── Sheets ── */}
+//       <PickerSheet visible={pmSheet} onClose={() => setPmSheet(false)} title="Payment Mode"  items={PAYMENT_MODES} selected={paymentMode}  onSelect={setPaymentMode}  />
+//       <PickerSheet visible={otSheet} onClose={() => setOtSheet(false)} title="Order Type"    items={ORDER_TYPES}   selected={orderType}    onSelect={setOrderType}    />
+//       <PickerSheet visible={spSheet} onClose={() => setSpSheet(false)} title="Salesperson"   items={SALESPERSONS}  selected={salesperson}   onSelect={setSalesperson}   />
+
+//       {/* ── Add Customer ── */}
+//       <CustomerModal
+//         visible={addModal}
+//         onClose={() => setAddModal(false)}
+//         onSave={data => dispatch(addCustomer({ phone: buyerPhone, ...data }))}
+//         saving={addLoading}
+//         title="Add New Customer"
+//         phone={buyerPhone}
+//       />
+
+//       {/* ── Edit Customer ── */}
+//       <CustomerModal
+//         visible={editModal}
+//         onClose={() => setEditModal(false)}
+//         onSave={data => dispatch(updateCustomer({ phone: buyerPhone, data }))}
+//         saving={updateLoading}
+//         title="Edit Customer"
+//         phone={buyerPhone}
+//         initial={customer}
+//       />
+
+//       {/* ── Confirm modal ── */}
+//       <ConfirmModal
+//         visible={confirmModal}
+//         onClose={() => setConfirmModal(false)}
+//         onConfirm={goToInvoice}
+//         confirming={isConfirming}
+//         data={confirmData}
+//       />
+//     </SafeAreaView>
+//   );
+// };
+
+// // ─── Styles ───────────────────────────────────────────────────
+// const s = StyleSheet.create({
+//   section: { backgroundColor: WHITE, borderRadius: 14, padding: 16, marginBottom: 14, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.07, shadowRadius: 4 },
+//   sectionTitle: { fontSize: 13, fontWeight: '800', color: '#212121', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 0.5 },
+//   label: { fontSize: 11, fontWeight: '700', color: GREY, marginBottom: 5, marginTop: 12, textTransform: 'uppercase', letterSpacing: 0.5 },
+//   input: { backgroundColor: '#F9F9F9', borderWidth: 1, borderColor: BORDER, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 11, fontSize: 14, color: '#212121' },
+//   picker: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F9F9F9', borderWidth: 1, borderColor: BORDER, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, gap: 8 },
+//   pickerText: { flex: 1, fontSize: 14, color: '#212121' },
+//   readonlyField: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F0F0F0', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, gap: 8 },
+//   readonlyText: { fontSize: 14, color: GREY, fontWeight: '600' },
+//   errorText: { fontSize: 11, color: ACCENT, marginTop: 3 },
+//   statusRow: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 10, backgroundColor: '#F9F9F9', borderRadius: 8, marginTop: 6 },
+
+//   foundCard: { backgroundColor: '#E8F5E9', borderRadius: 10, padding: 12, marginTop: 8, borderWidth: 1, borderColor: '#A5D6A7' },
+//   foundHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
+//   editBtn: { borderWidth: 1, borderColor: ACCENT, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
+//   editBtnText: { fontSize: 12, color: ACCENT, fontWeight: '700' },
+//   customerName: { fontSize: 14, fontWeight: '700', color: '#212121' },
+
+//   notFoundBox: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#FFF3E0', borderRadius: 8, padding: 10, marginTop: 6 },
+//   addBtn: { backgroundColor: ACCENT, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5 },
+//   addBtnText: { fontSize: 12, color: WHITE, fontWeight: '700' },
+
+//   switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 },
+//   switchBtn: { borderWidth: 1, borderColor: BORDER, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 7 },
+//   switchBtnActive: { backgroundColor: ACCENT, borderColor: ACCENT },
+//   switchBtnText: { fontSize: 13, fontWeight: '700', color: GREY },
+
+//   totalPreview: { backgroundColor: '#F9F9F9', borderRadius: 10, padding: 14, marginTop: 14 },
+//   totalRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 },
+//   totalRowLabel: { fontSize: 13, color: GREY },
+//   totalRowValue: { fontSize: 13, color: '#212121', fontWeight: '600' },
+
+//   primaryBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: ACCENT, borderRadius: 14, paddingVertical: 15, gap: 8, elevation: 3, shadowColor: ACCENT, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.35, shadowRadius: 6 },
+//   primaryBtnText: { color: WHITE, fontSize: 15, fontWeight: '800' },
+
+//   // Batch summary
+//   batchSummaryItem: { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
+//   batchSummaryProduct: { fontSize: 13, fontWeight: '700', color: '#212121' },
+//   batchTag: { backgroundColor: '#E3F2FD', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
+//   batchTagText: { fontSize: 11, color: '#1565C0', fontWeight: '600' },
+
+//   // Sheet
+//   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+//   sheet: { backgroundColor: WHITE, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '80%', borderTopWidth: 3, borderTopColor: ACCENT },
+//   sheetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
+//   sheetTitle: { fontSize: 16, fontWeight: '800', color: '#212121' },
+//   sheetRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#F8F8F8' },
+//   sheetRowText: { flex: 1, fontSize: 14, color: '#212121' },
+
+//   // Confirm
+//   confirmRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: '#F8F8F8' },
+//   confirmLabel: { fontSize: 12, color: GREY, fontWeight: '600' },
+//   confirmValue: { fontSize: 13, color: '#212121', fontWeight: '600', textAlign: 'right', flex: 1, marginLeft: 12 },
+
+//   // Customer Modal
+//   phonePill: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#F9F9F9', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 7, alignSelf: 'flex-start', marginTop: 10 },
+//   typeRow: { flexDirection: 'row', gap: 10, marginTop: 12 },
+//   typeBtn: { flex: 1, borderWidth: 1, borderColor: BORDER, borderRadius: 10, paddingVertical: 10, alignItems: 'center' },
+//   typeBtnActive: { backgroundColor: ACCENT, borderColor: ACCENT },
+//   typeBtnText: { fontSize: 14, color: GREY, fontWeight: '600' },
+//   typeBtnTextActive: { color: WHITE, fontWeight: '700' },
+//   modalFooter: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, padding: 16, borderTopWidth: 1, borderTopColor: '#F0F0F0' },
+//   cancelBtn: { borderWidth: 1, borderColor: BORDER, borderRadius: 10, paddingHorizontal: 20, paddingVertical: 11 },
+//   cancelBtnText: { color: GREY, fontSize: 14, fontWeight: '600' },
+//   submitBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: ACCENT, borderRadius: 10, paddingHorizontal: 20, paddingVertical: 11, gap: 6, elevation: 2 },
+//   submitBtnText: { color: WHITE, fontSize: 14, fontWeight: '700' },
+// });
+
+// export default OrderSuccess;

@@ -1,7 +1,184 @@
+// import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+// import API from '../../API/api';
+
+// // CREATE
+// export const createFSE = createAsyncThunk(
+//   'fse/create',
+//   async (data, { rejectWithValue }) => {
+//     try {
+//       const res = await API.post('/api/fse', data, {
+//         headers: {
+//           'Content-Type': 'multipart/form-data',
+//         },
+//       });
+//       return res.data;
+//     } catch (err) {
+//       // ✅ FIX: propagate error message so UI can display it
+//       return rejectWithValue(err.response?.data?.message || 'Failed to create FSE');
+//     }
+//   }
+// );
+
+// // GET ALL
+// export const getFSEs = createAsyncThunk(
+//   'fse/getAll',
+//   async (_, { rejectWithValue }) => {
+//     try {
+//       const res = await API.get('/api/fse');
+//       return res.data;
+//     } catch (err) {
+//       return rejectWithValue(err.response?.data?.message || 'Failed to fetch FSEs');
+//     }
+//   }
+// );
+
+// // DELETE
+// export const deleteFSE = createAsyncThunk(
+//   'fse/delete',
+//   async (id, { rejectWithValue }) => {
+//     try {
+//       await API.delete(`/api/fse/${id}`);
+//       return id;
+//     } catch (err) {
+//       return rejectWithValue(err.response?.data?.message || 'Failed to delete FSE');
+//     }
+//   }
+// );
+
+// // UPDATE (for reject)
+// export const updateFSE = createAsyncThunk(
+//   'fse/update',
+//   async ({ id, data }, { rejectWithValue }) => {
+//     try {
+//       const res = await API.put(`/api/fse/${id}`, data);
+//       return res.data;
+//     } catch (err) {
+//       return rejectWithValue(err.response?.data?.message || 'Failed to update FSE');
+//     }
+//   }
+// );
+
+// // APPROVE (Distributor only)
+// export const approveFSE = createAsyncThunk(
+//   'fse/approve',
+//   async (id, { rejectWithValue }) => {
+//     try {
+//       const res = await API.patch(`/api/fse/approve/${id}`);
+//       return res.data;
+//     } catch (err) {
+//       return rejectWithValue(err.response?.data?.message || 'Failed to approve FSE');
+//     }
+//   }
+// );
+
+// const fseSlice = createSlice({
+//   name: 'fse',
+//   initialState: {
+//     list: [],
+//     loading: false, // ✅ FIX: added loading state for UI spinners
+//     error: null,    // ✅ FIX: added error state for UI error display
+//   },
+//   reducers: {
+//     // ✅ FIX: added manual error clear so UI can dismiss error banners
+//     clearError(state) {
+//       state.error = null;
+//     },
+//   },
+//   extraReducers: builder => {
+//     builder
+
+//       // ─── GET ALL ──────────────────────────────────────────────────────────
+//       .addCase(getFSEs.pending, (state) => {
+//         state.loading = true;
+//         state.error = null;
+//       })
+//       .addCase(getFSEs.fulfilled, (state, action) => {
+//         state.loading = false;
+//         state.list = action.payload;
+//       })
+//       .addCase(getFSEs.rejected, (state, action) => {
+//         state.loading = false;
+//         state.error = action.payload;
+//       })
+
+//       // ─── CREATE ───────────────────────────────────────────────────────────
+//       .addCase(createFSE.pending, (state) => {
+//         state.loading = true;
+//         state.error = null;
+//       })
+//       .addCase(createFSE.fulfilled, (state, action) => {
+//         state.loading = false;
+//         state.list.push(action.payload);
+//       })
+//       .addCase(createFSE.rejected, (state, action) => {
+//         state.loading = false;
+//         state.error = action.payload;
+//       })
+
+//       // ─── DELETE ───────────────────────────────────────────────────────────
+//       .addCase(deleteFSE.pending, (state) => {
+//         state.loading = true;
+//         state.error = null;
+//       })
+//       .addCase(deleteFSE.fulfilled, (state, action) => {
+//         state.loading = false;
+//         state.list = state.list.filter(f => f._id !== action.payload);
+//       })
+//       .addCase(deleteFSE.rejected, (state, action) => {
+//         state.loading = false;
+//         state.error = action.payload;
+//       })
+
+//       // ─── UPDATE ───────────────────────────────────────────────────────────
+//       .addCase(updateFSE.pending, (state) => {
+//         state.loading = true;
+//         state.error = null;
+//       })
+//       .addCase(updateFSE.fulfilled, (state, action) => {
+//         state.loading = false;
+//         const index = state.list.findIndex(f => f._id === action.payload._id);
+//         if (index !== -1) state.list[index] = action.payload;
+//       })
+//       .addCase(updateFSE.rejected, (state, action) => {
+//         state.loading = false;
+//         state.error = action.payload;
+//       })
+
+//       // ─── APPROVE ──────────────────────────────────────────────────────────
+//       .addCase(approveFSE.pending, (state) => {
+//         state.loading = true;
+//         state.error = null;
+//       })
+//       .addCase(approveFSE.fulfilled, (state, action) => {
+//         state.loading = false;
+//         const index = state.list.findIndex(f => f._id === action.payload._id);
+//         if (index !== -1) state.list[index] = action.payload;
+//       })
+//       .addCase(approveFSE.rejected, (state, action) => {
+//         state.loading = false;
+//         state.error = action.payload;
+//       });
+//   },
+// });
+
+// export const { clearError } = fseSlice.actions;
+// export default fseSlice.reducer;
+
+//--------------------------------------
+
+// fseSlice.js - COMPLETE FIXED VERSION
+
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import API from '../../API/api';
 
-// CREATE
+// ─── INITIAL STATE ─────────────────────────────────────────────────────────
+const initialState = {
+  list: [],
+  loading: false,
+  error: null,
+};
+
+// ─── CREATE FSE ───────────────────────────────────────────────────────────
 export const createFSE = createAsyncThunk(
   'fse/create',
   async (data, { rejectWithValue }) => {
@@ -13,13 +190,12 @@ export const createFSE = createAsyncThunk(
       });
       return res.data;
     } catch (err) {
-      // ✅ FIX: propagate error message so UI can display it
       return rejectWithValue(err.response?.data?.message || 'Failed to create FSE');
     }
   }
 );
 
-// GET ALL
+// ─── GET ALL FSE ──────────────────────────────────────────────────────────
 export const getFSEs = createAsyncThunk(
   'fse/getAll',
   async (_, { rejectWithValue }) => {
@@ -32,7 +208,7 @@ export const getFSEs = createAsyncThunk(
   }
 );
 
-// DELETE
+// ─── DELETE FSE ────────────────────────────────────────────────────────────
 export const deleteFSE = createAsyncThunk(
   'fse/delete',
   async (id, { rejectWithValue }) => {
@@ -45,7 +221,7 @@ export const deleteFSE = createAsyncThunk(
   }
 );
 
-// UPDATE (for reject)
+// ─── UPDATE FSE ────────────────────────────────────────────────────────────
 export const updateFSE = createAsyncThunk(
   'fse/update',
   async ({ id, data }, { rejectWithValue }) => {
@@ -58,7 +234,7 @@ export const updateFSE = createAsyncThunk(
   }
 );
 
-// APPROVE (Distributor only)
+// ─── APPROVE FSE ──────────────────────────────────────────────────────────
 export const approveFSE = createAsyncThunk(
   'fse/approve',
   async (id, { rejectWithValue }) => {
@@ -71,51 +247,53 @@ export const approveFSE = createAsyncThunk(
   }
 );
 
+// ─── SLICE ─────────────────────────────────────────────────────────────────
 const fseSlice = createSlice({
-  name: 'fse',
-  initialState: {
-    list: [],
-    loading: false, // ✅ FIX: added loading state for UI spinners
-    error: null,    // ✅ FIX: added error state for UI error display
-  },
+  name: 'fse',  // ✅ This name must match what you use in useSelector
+  initialState,
   reducers: {
-    // ✅ FIX: added manual error clear so UI can dismiss error banners
-    clearError(state) {
+    clearError: (state) => {
+      state.error = null;
+    },
+    clearFSEList: (state) => {
+      state.list = [];
+      state.loading = false;
       state.error = null;
     },
   },
-  extraReducers: builder => {
+  extraReducers: (builder) => {
     builder
-
-      // ─── GET ALL ──────────────────────────────────────────────────────────
+      // ─── GET ALL ──────────────────────────────────────────────────────
       .addCase(getFSEs.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(getFSEs.fulfilled, (state, action) => {
         state.loading = false;
-        state.list = action.payload;
+        state.list = action.payload || [];
+        state.error = null;
       })
       .addCase(getFSEs.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload || 'Failed to fetch FSEs';
       })
 
-      // ─── CREATE ───────────────────────────────────────────────────────────
+      // ─── CREATE ──────────────────────────────────────────────────────
       .addCase(createFSE.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(createFSE.fulfilled, (state, action) => {
         state.loading = false;
-        state.list.push(action.payload);
+        state.list = [action.payload, ...state.list];
+        state.error = null;
       })
       .addCase(createFSE.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload || 'Failed to create FSE';
       })
 
-      // ─── DELETE ───────────────────────────────────────────────────────────
+      // ─── DELETE ──────────────────────────────────────────────────────
       .addCase(deleteFSE.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -123,13 +301,14 @@ const fseSlice = createSlice({
       .addCase(deleteFSE.fulfilled, (state, action) => {
         state.loading = false;
         state.list = state.list.filter(f => f._id !== action.payload);
+        state.error = null;
       })
       .addCase(deleteFSE.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload || 'Failed to delete FSE';
       })
 
-      // ─── UPDATE ───────────────────────────────────────────────────────────
+      // ─── UPDATE ──────────────────────────────────────────────────────
       .addCase(updateFSE.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -137,14 +316,17 @@ const fseSlice = createSlice({
       .addCase(updateFSE.fulfilled, (state, action) => {
         state.loading = false;
         const index = state.list.findIndex(f => f._id === action.payload._id);
-        if (index !== -1) state.list[index] = action.payload;
+        if (index !== -1) {
+          state.list[index] = action.payload;
+        }
+        state.error = null;
       })
       .addCase(updateFSE.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload || 'Failed to update FSE';
       })
 
-      // ─── APPROVE ──────────────────────────────────────────────────────────
+      // ─── APPROVE ─────────────────────────────────────────────────────
       .addCase(approveFSE.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -152,14 +334,20 @@ const fseSlice = createSlice({
       .addCase(approveFSE.fulfilled, (state, action) => {
         state.loading = false;
         const index = state.list.findIndex(f => f._id === action.payload._id);
-        if (index !== -1) state.list[index] = action.payload;
+        if (index !== -1) {
+          state.list[index] = action.payload;
+        }
+        state.error = null;
       })
       .addCase(approveFSE.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload || 'Failed to approve FSE';
       });
   },
 });
 
-export const { clearError } = fseSlice.actions;
-export default fseSlice.reducer;
+// ─── EXPORT ACTIONS ──────────────────────────────────────────────────────
+export const { clearError, clearFSEList } = fseSlice.actions;
+
+// ─── EXPORT REDUCER ──────────────────────────────────────────────────────
+export default fseSlice.reducer;  // ✅ This MUST be the default export
